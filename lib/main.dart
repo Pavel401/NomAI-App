@@ -1,12 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:turfit/app/models/Auth/user_repo.dart';
 import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
 import 'package:turfit/app/modules/Auth/views/welcome_screen.dart';
-import 'package:turfit/app/modules/DashBoard/view/home/home_screen.dart';
-import 'package:turfit/app/repository/user_repository/lib/user_repository.dart';
-import 'package:turfit/app/simple_bloc_observer.dart';
+import 'package:turfit/app/modules/DashBoard/view/home_screen.dart';
+import 'package:turfit/app/repo/firebase_user_repo.dart';
+import 'package:turfit/app/utility/simple_bloc_observer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,9 +35,9 @@ class MyAppView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Firebase Auth',
-        home: BlocBuilder<AuthenticationBloc, AuthenticationState>(
-            builder: (context, state) {
+      title: 'Firebase Auth',
+      home: BlocBuilder<AuthenticationBloc, AuthenticationState>(
+        builder: (context, state) {
           if (state.status == AuthenticationStatus.authenticated) {
             return BlocProvider(
               create: (context) => SignInBloc(
@@ -47,6 +48,8 @@ class MyAppView extends StatelessWidget {
           } else {
             return const WelcomeScreen();
           }
-        }));
+        },
+      ),
+    );
   }
 }
