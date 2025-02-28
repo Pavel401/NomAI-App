@@ -1,0 +1,2 @@
+/Users/mabud/Desktop/WorkSpace/gymx/android/app/.cxx/Debug/1t4c3d2p/x86_64/CMakeFiles/edit_cache.dir
+/Users/mabud/Desktop/WorkSpace/gymx/android/app/.cxx/Debug/1t4c3d2p/x86_64/CMakeFiles/rebuild_cache.dir

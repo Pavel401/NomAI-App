@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1053914152119",
+    "project_id": "nutrix-c7090",
+    "storage_bucket": "nutrix-c7090.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053914152119:android:b76edb4ebf4c893155a132",
+        "android_client_info": {
+          "package_name": "com.example.gymx"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUsjbdHUIRHtwWKLlWzTFGmU3XVYcTYNw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
