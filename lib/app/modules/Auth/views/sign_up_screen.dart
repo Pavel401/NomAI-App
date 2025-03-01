@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:turfit/app/models/Auth/user.dart';
 import 'package:turfit/app/modules/Auth/blocs/sign_up_bloc/sign_up_bloc.dart';
-import 'package:turfit/app/repository/user_repository/lib/user_repository.dart';
 
-import '../components/my_text_field.dart';
+import '../../../components/my_text_field.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -228,7 +228,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: TextButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              MyUser myUser = MyUser.empty;
+                              MyUser myUser = MyUser.empty();
                               myUser = myUser.copyWith(
                                 email: emailController.text,
                                 name: nameController.text,
