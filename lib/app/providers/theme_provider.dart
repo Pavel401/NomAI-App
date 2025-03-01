@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:turfit/app/constants/colors.dart';
 
@@ -52,17 +53,16 @@ class ThemeProvider extends ChangeNotifier {
     useMaterial3: true,
     textTheme: textTheme,
     colorScheme: const ColorScheme.light(
-      primary: HealthXColors.primaryLight,
-      secondary: HealthXColors.secondaryLight,
-      onPrimary: HealthXColors.onPrimaryLight,
-      surface: HealthXColors.surfaceLight,
-      // background: HealthXColors.surfaceLight,
-      onSurface: HealthXColors.onSurfaceLight,
-      outline: HealthXColors.outlineLight,
+      primary: MealAIColors.lightPrimary,
+      secondary: MealAIColors.lightSecondary,
+      onPrimary: MealAIColors.lightOnPrimary,
+      surface: MealAIColors.lightSurface,
+      onSurface: MealAIColors.lightOnSurface,
+      outline: MealAIColors.lightSecondaryVariant,
     ),
-    scaffoldBackgroundColor: HealthXColors.surfaceLight,
+    scaffoldBackgroundColor: MealAIColors.lightSurface,
     appBarTheme: const AppBarTheme(
-      backgroundColor: HealthXColors.surfaceLight,
+      backgroundColor: MealAIColors.lightSurface,
     ),
     inputDecorationTheme: InputDecorationTheme(
       hintStyle: textTheme.bodyLarge,
@@ -73,45 +73,44 @@ class ThemeProvider extends ChangeNotifier {
         backgroundColor: WidgetStateProperty.resolveWith<Color>(
           (Set<WidgetState> states) {
             if (states.contains(WidgetState.disabled)) {
-              return HealthXColors
-                  .outlineLight; // Custom background color for disabled state
+              return MealAIColors
+                  .lightSecondaryVariant; // Custom background color for disabled state
             }
-            return HealthXColors.primaryLight;
+            return MealAIColors.lightPrimary;
           },
         ),
         foregroundColor: WidgetStateProperty.resolveWith<Color>(
           (Set<WidgetState> states) {
             if (states.contains(WidgetState.disabled)) {
-              return HealthXColors
-                  .surfaceLight; // Custom text color for disabled state
+              return MealAIColors
+                  .lightSurface; // Custom text color for disabled state
             }
-            return HealthXColors.surfaceLight;
+            return MealAIColors.lightSurface;
           },
         ),
       ),
     ),
     listTileTheme: ListTileThemeData(
         titleTextStyle: textTheme.bodyLarge!.copyWith(
-          color: HealthXColors.onPrimaryLight,
+          color: MealAIColors.lightOnPrimary,
         ),
-        iconColor: HealthXColors.onPrimaryLight),
+        iconColor: MealAIColors.lightOnPrimary),
   );
 
   ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     textTheme: textTheme,
     colorScheme: const ColorScheme.dark(
-      primary: HealthXColors.primaryDark,
-      secondary: HealthXColors.secondaryDark,
-      onPrimary: HealthXColors.onPrimaryDark,
-      surface: HealthXColors.surfaceDark,
-      // background: HealthXColors.surfaceDark,
-      onSurface: HealthXColors.onSurfaceDark,
-      outline: HealthXColors.outlineDark,
+      primary: MealAIColors.darkPrimary,
+      secondary: MealAIColors.darkSecondary,
+      onPrimary: MealAIColors.darkOnPrimary,
+      surface: MealAIColors.darkSurface,
+      onSurface: MealAIColors.darkOnSurface,
+      outline: MealAIColors.darkSecondaryVariant,
     ),
-    scaffoldBackgroundColor: HealthXColors.surfaceDark,
+    scaffoldBackgroundColor: MealAIColors.darkSurface,
     appBarTheme: const AppBarTheme(
-      backgroundColor: HealthXColors.surfaceDark,
+      backgroundColor: MealAIColors.darkSurface,
     ),
     inputDecorationTheme: InputDecorationTheme(
       hintStyle: textTheme.bodyLarge,
@@ -122,119 +121,103 @@ class ThemeProvider extends ChangeNotifier {
         backgroundColor: WidgetStateProperty.resolveWith<Color>(
           (Set<WidgetState> states) {
             if (states.contains(WidgetState.disabled)) {
-              return HealthXColors
-                  .outlineDark; // Custom background color for disabled state
+              return MealAIColors
+                  .darkSecondaryVariant; // Custom background color for disabled state
             }
-            return HealthXColors.primaryDark;
+            return MealAIColors.darkPrimary;
           },
         ),
         foregroundColor: WidgetStateProperty.resolveWith<Color>(
           (Set<WidgetState> states) {
             if (states.contains(WidgetState.disabled)) {
-              return HealthXColors
-                  .surfaceDark; // Custom text color for disabled state
+              return MealAIColors
+                  .darkSurface; // Custom text color for disabled state
             }
-            return HealthXColors.surfaceDark;
+            return MealAIColors.darkSurface;
           },
         ),
       ),
     ),
     listTileTheme: ListTileThemeData(
         titleTextStyle: textTheme.bodyLarge!.copyWith(
-          color: HealthXColors.onPrimaryDark,
+          color: MealAIColors.darkOnPrimary,
         ),
-        iconColor: HealthXColors.onPrimaryDark),
+        iconColor: MealAIColors.darkOnPrimary),
   );
 }
 
-// TextTheme
-const TextTheme textTheme = TextTheme(
-  displayLarge: TextStyle(
-    fontFamily: 'Roboto',
+final TextTheme textTheme = TextTheme(
+  displayLarge: GoogleFonts.poppins(
     fontSize: 57,
     fontWeight: FontWeight.normal,
     letterSpacing: -0.25,
   ),
-  displayMedium: TextStyle(
-    fontFamily: 'Roboto',
+  displayMedium: GoogleFonts.poppins(
     fontSize: 45,
     fontWeight: FontWeight.normal,
     letterSpacing: 0,
   ),
-  displaySmall: TextStyle(
-    fontFamily: 'Roboto',
+  displaySmall: GoogleFonts.poppins(
     fontSize: 36,
     fontWeight: FontWeight.normal,
     letterSpacing: 0,
   ),
-  headlineLarge: TextStyle(
-    fontFamily: 'Roboto',
+  headlineLarge: GoogleFonts.poppins(
     fontSize: 32,
     fontWeight: FontWeight.normal,
     letterSpacing: 0,
   ),
-  headlineMedium: TextStyle(
-    fontFamily: 'Roboto',
+  headlineMedium: GoogleFonts.poppins(
     fontSize: 28,
     fontWeight: FontWeight.normal,
     letterSpacing: 0,
   ),
-  headlineSmall: TextStyle(
-    fontFamily: 'Roboto',
+  headlineSmall: GoogleFonts.poppins(
     fontSize: 24,
     fontWeight: FontWeight.normal,
     letterSpacing: 0,
   ),
-  titleLarge: TextStyle(
-    fontFamily: 'Roboto',
+  titleLarge: GoogleFonts.poppins(
     fontSize: 22,
     fontWeight: FontWeight.w500,
     letterSpacing: 0,
   ),
-  titleMedium: TextStyle(
-    fontFamily: 'Roboto',
+  titleMedium: GoogleFonts.poppins(
     fontSize: 16,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.15,
   ),
-  titleSmall: TextStyle(
-    fontFamily: 'Roboto',
+  titleSmall: GoogleFonts.poppins(
     fontSize: 14,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.1,
   ),
-  labelLarge: TextStyle(
-    fontFamily: 'Roboto',
+  labelLarge: GoogleFonts.poppins(
     fontSize: 14,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.1,
   ),
-  labelMedium: TextStyle(
-    fontFamily: 'Roboto',
+  labelMedium: GoogleFonts.poppins(
     fontSize: 12,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.5,
   ),
-  labelSmall: TextStyle(
-    fontFamily: 'Roboto',
+  labelSmall: GoogleFonts.poppins(
     fontSize: 11,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.4,
   ),
-  bodyLarge: TextStyle(
-    fontFamily: 'Roboto',
+  bodyLarge: GoogleFonts.poppins(
     fontSize: 16,
     fontWeight: FontWeight.normal,
     letterSpacing: 0.5,
   ),
-  bodyMedium: TextStyle(
-    fontFamily: 'Roboto',
+  bodyMedium: GoogleFonts.poppins(
     fontSize: 14,
     fontWeight: FontWeight.normal,
     letterSpacing: 0.25,
   ),
-  bodySmall: TextStyle(
-    fontFamily: 'Roboto',
+  bodySmall: GoogleFonts.poppins(
     fontSize: 12,
     fontWeight: FontWeight.normal,
     letterSpacing: 0.4,
