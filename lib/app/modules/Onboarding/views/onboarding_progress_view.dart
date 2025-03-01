@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:turfit/app/components/buttons.dart';
 import 'package:turfit/app/components/height_picker.dart';
 import 'package:turfit/app/components/tiles.dart';
+import 'package:turfit/app/components/weight_picker.dart';
 import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/models/Auth/user.dart';
 import 'package:turfit/app/models/Onboarding/onboarding_model.dart';
@@ -93,6 +94,22 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               HeightPicker(
+                onChange: (p0) {
+                  print(p0);
+                },
+              )
+            ],
+          );
+        },
+      ),
+      OnboardingModel(
+        title: "Weight",
+        description: "This will help us create a personalized plan for you.",
+        widgetBuilder: (context) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              WeightPicker(
                 onChange: (p0) {
                   print(p0);
                 },
