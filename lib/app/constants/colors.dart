@@ -1,33 +1,73 @@
 import 'package:flutter/material.dart';
 
-class HealthXColors {
-  static const primaryLight = Color(0xFF406835);
-  static const secondaryLight = Color(0xFF54634D);
-  static const tertiaryLight = Color(0xFFD7E1CF);
-  static const onPrimaryLight = Color(0xFFFFFFFF);
-  static const surfaceLight = Color(0xFFF8FBF0);
-  static const onSurfaceLight = Color(0xFF2C3527);
-  static const outlineLight = Color(0xFF73796E);
-  //Custom light theme colors
-  static const searchBarLight = Color(0xFFE6E9DF);
-  static const errorLight = Color(0xFFB00020);
+class MealAIColors {
+  // Dark Theme Colors
+  static const Color darkPrimary = Color(0xFF000000); // #000000
+  static const Color lightPrimaryVariant = Color(0xFFB0BEC5); // #B0BEC5
+  static const Color darkPrimaryVariant = Color(0xFF383838); // #383838
+  static const Color darkSecondary = Color(0xFF434343); // #434343
+  static const Color darkSecondaryVariant = Color(0xFF757575); // #757575
+  static const Color darkSuccess = Color(0xFF00C853); // #00C853
+  static const Color darkSuccessVariant = Color(0xFF66BB6A); // #66BB6A
+  static const Color darkInfo = Color(0xFF2979FF); // #2979FF
+  static const Color darkInfoVariant = Color(0xFF80D8FF); // #80D8FF
+  static const Color darkWarning = Color(0xFFFFB300); // #FFB300
+  static const Color darkWarningVariant = Color(0xFFFFCC80); // #FFCC80
+  static const Color darkError = Color(0xFFD32F2F); // #D32F2F
+  static const Color darkErrorVariant = Color(0xFFEF9A9A); // #EF9A9A
+  static const Color darkSurface = Color(0xFF121212); // #121212
+  static const Color darkBackground = Color(0xFF1E1E1E); // #1E1E1E
+  static const Color darkOnPrimary = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color darkOnSecondary = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color darkOnSuccess = Color(0xFF000000); // #000000
+  static const Color darkOnInfo = Color(0xFF000000); // #000000
+  static const Color darkOnWarning = Color(0xFF000000); // #000000
+  static const Color darkOnError = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color darkOnSurface = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color darkOnBackground = Color(0xFFFFFFFF); // #FFFFFF
 
-  static const primaryDark = Color(0xFFA6D395);
-  static const secondaryDark = Color(0xFFBBCBB1);
-  static const tertiaryDark = Color(0xFF2C3626);
-  static const onPrimaryDark = Color(0xFF12380B);
-  static const surfaceDark = Color(0xFF11140F);
-  static const onSurfaceDark = Color(0xFFE1E4DA);
-  static const outlineDark = Color(0xFF8D9387);
-  //Custom dark theme colors
-  static const searchBarDark = Color(0xFF272B25);
-  static const errorDark = Color(0xFFCF6679);
+  static const Color lightPrimary = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color lightSecondary = Color(0xFF000000); // #000000
+  static const Color lightSecondaryVariant = Color(0xFF757575); // #757575
+  static const Color lightSuccess = Color(0xFF4CAF50); // #4CAF50
+  static const Color lightSuccessVariant = Color(0xFF81C784); // #81C784
+  static const Color lightInfo = Color(0xFF0288D1); // #0288D1
+  static const Color lightInfoVariant = Color(0xFF40C4FF); // #40C4FF
+  static const Color lightWarning = Color(0xFFFFB300); // #FFB300
+  static const Color lightWarningVariant = Color(0xFFFFCC80); // #FFCC80
+  static const Color lightError = Color(0xFFD32F2F); // #D32F2F
+  static const Color lightErrorVariant = Color(0xFFEF9A9A); // #EF9A9A
+  static const Color lightSurface = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color lightBackground = Color(0xFFF5F5F5); // #F5F5F5
+  static const Color lightOnPrimary = Color(0xFF000000); // #000000
+  static const Color lightOnSecondary = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color lightOnSuccess = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color lightOnInfo = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color lightOnWarning = Color(0xFF000000); // #000000
+  static const Color lightOnError = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color lightOnSurface = Color(0xFF000000); // #000000
+  static const Color lightOnBackground = Color(0xFF000000); // #000000
 
-  static Color hexToColor(String hexColor) {
-    hexColor = hexColor.toUpperCase().replaceAll("#", "");
-    if (hexColor.length == 6) {
-      hexColor = "FF$hexColor"; // Adds the opacity if not provided.
+  ///Static colors
+
+  static Color lightGreyTile = "#F9F8FD".toColor();
+  static const Color selectedTile = Color(0xFF212121);
+  static const Color switchWhiteColor = Color(0xFFFFFFFF);
+  static const Color switchBlackColor = Color(0xFF000000);
+
+  static const Color whiteText = Color(0xFFFFFFFF);
+  static const Color blackText = Color(0xFF000000);
+
+  static const Color stepperColor = Color(0xFFE0E0E0);
+  static const Color stepperActiveColor = Color(0xFF4CAF50);
+}
+
+extension HexColorExtension on String {
+  Color toColor() {
+    String hex = replaceAll("#", "").toUpperCase();
+    if (hex.length == 6) {
+      hex = "FF$hex"; // Add full opacity if not specified
     }
-    return Color(int.parse(hexColor, radix: 16));
+    return Color(int.parse("0x$hex"));
   }
 }
