@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:turfit/app/repository/user_repository/lib/user_repository.dart';
+import 'package:turfit/app/models/Auth/user_repo.dart';
 
 part 'sign_in_event.dart';
 part 'sign_in_state.dart';
