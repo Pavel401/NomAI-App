@@ -53,10 +53,10 @@ class _WeightPickerState extends State<WeightPicker> {
                 activeTrackColor: MealAIColors.switchBlackColor,
                 inactiveTrackColor: MealAIColors.lightPrimary,
                 activeColor: MealAIColors.switchWhiteColor,
-                value: _selectedUnit == WeightUnit.KG,
+                value: _selectedUnit == WeightUnit.LB,
                 onChanged: (value) {
                   setState(() {
-                    _selectedUnit = value ? WeightUnit.KG : WeightUnit.LB;
+                    _selectedUnit = value ? WeightUnit.LB : WeightUnit.KG;
                   });
                   _updateWeight();
                 }),

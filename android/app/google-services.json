@@ -12,7 +12,20 @@
           "package_name": "com.example.gymx"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1053914152119-in66s13flhahugeor82g7c6efojdr5ro.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.gymx",
+            "certificate_hash": "3dbed5a9fee86e205413443f86adfc375df3c7b9"
+          }
+        },
+        {
+          "client_id": "1053914152119-cf806t3e5iso4s6lq7808qkkqfsb8m8f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAUsjbdHUIRHtwWKLlWzTFGmU3XVYcTYNw"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1053914152119-cf806t3e5iso4s6lq7808qkkqfsb8m8f.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1053914152119-7vbnefaspn67d2mbtfmhs7ul98gdclt4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.gymx"
+              }
+            }
+          ]
         }
       }
     }

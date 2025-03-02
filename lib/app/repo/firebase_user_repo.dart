@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:turfit/app/models/Auth/user.dart';
 import 'package:turfit/app/models/Auth/user_repo.dart';
 
@@ -46,6 +47,24 @@ class FirebaseUserRepo implements UserRepository {
   Future<void> setUserData(MyUser myUser) async {
     try {
       await usersCollection.doc(myUser.userId).set(myUser.toEntity());
+    } catch (e) {
+      log(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser != null) {
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        await _firebaseAuth.signInWithCredential(credential);
+      }
     } catch (e) {
       log(e.toString());
       rethrow;
