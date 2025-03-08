@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/models/Auth/user.dart';
 import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
-import 'package:turfit/app/modules/DashBoard/view/home_screen.dart';
+import 'package:turfit/app/modules/DashBoard/view/dashboard.dart';
 
 class SignInScreen extends StatefulWidget {
   final UserBasicInfo? user;

@@ -59,7 +59,8 @@ class MealAIColors {
   static const Color blackText = Color(0xFF000000);
 
   static const Color stepperColor = Color(0xFFE0E0E0);
-  static const Color stepperActiveColor = Color(0xFF4CAF50);
+
+  static const Color greyLight = Color.fromRGBO(235, 235, 235, 1);
 }
 
 extension HexColorExtension on String {
