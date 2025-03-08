@@ -228,7 +228,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: TextButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              MyUser myUser = MyUser.empty();
+                              UserModel myUser = UserModel.empty();
                               myUser = myUser.copyWith(
                                 email: emailController.text,
                                 name: nameController.text,

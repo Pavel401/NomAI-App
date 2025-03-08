@@ -12,5 +12,3 @@ class AuthenticationUserChanged extends AuthenticationEvent {
 
   const AuthenticationUserChanged(this.user);
 }
-
-class GoogleSignInRequested extends AuthenticationEvent {}
