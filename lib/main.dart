@@ -20,6 +20,9 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        // BlocProvider<SignInBloc>(
+        //   create: (context) => SignInBloc(userRepository: FirebaseUserRepo()),
+        // ),
       ],
       child: MyApp(FirebaseUserRepo()),
     ),
@@ -59,7 +62,17 @@ class MyAppView extends StatelessWidget {
                 create: (context) => SignInBloc(
                     userRepository:
                         context.read<AuthenticationBloc>().userRepository),
-                child: const HomeScreen(),
+                child: BlocListener<SignInBloc, SignInState>(
+                  listener: (context, signInState) {
+                    if (signInState is SignInSuccess) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => HomeScreen()),
+                      );
+                    }
+                  },
+                  child: const HomeScreen(),
+                ),
               );
             } else {
               return const OnboardingHome();

@@ -9,8 +9,9 @@ enum WeightUnit {
 
 class WeightPicker extends StatefulWidget {
   final Function(String) onChange;
+  final String? initialWeight;
 
-  const WeightPicker({super.key, required this.onChange});
+  const WeightPicker({super.key, required this.onChange, this.initialWeight});
 
   @override
   _WeightPickerState createState() => _WeightPickerState();
@@ -20,6 +21,20 @@ class _WeightPickerState extends State<WeightPicker> {
   WeightUnit _selectedUnit = WeightUnit.KG;
   int _selectedKg = 70;
   int _selectedLbs = 155;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialWeight != null) {
+      if (widget.initialWeight!.contains("kg")) {
+        _selectedKg = int.parse(widget.initialWeight!.replaceAll(" kg", ""));
+        _selectedUnit = WeightUnit.KG;
+      } else {
+        _selectedLbs = int.parse(widget.initialWeight!.replaceAll(" lb", ""));
+        _selectedUnit = WeightUnit.LB;
+      }
+    }
+  }
 
   void _updateWeight() {
     String weight =
@@ -75,7 +90,6 @@ class _WeightPickerState extends State<WeightPicker> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Grey container highlighting the current selection
         Container(
           height: 40,
           width: 25.w,
@@ -84,7 +98,6 @@ class _WeightPickerState extends State<WeightPicker> {
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-        // Picker widget
         _buildKgPicker(),
       ],
     );
@@ -94,7 +107,6 @@ class _WeightPickerState extends State<WeightPicker> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Grey container highlighting the current selection
         Container(
           height: 40,
           width: 25.w,
@@ -103,7 +115,6 @@ class _WeightPickerState extends State<WeightPicker> {
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-        // Picker widget
         _buildLbsPicker(),
       ],
     );
@@ -113,6 +124,7 @@ class _WeightPickerState extends State<WeightPicker> {
     return SizedBox(
       height: 150,
       child: ListWheelScrollView.useDelegate(
+        controller: FixedExtentScrollController(initialItem: _selectedKg - 30),
         diameterRatio: 1.5,
         itemExtent: 40,
         physics: FixedExtentScrollPhysics(),
@@ -124,17 +136,8 @@ class _WeightPickerState extends State<WeightPicker> {
         },
         childDelegate: ListWheelChildBuilderDelegate(
           builder: (context, index) => Center(
-            child: Text(
-              "${30 + index} kg",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: index == _selectedKg - 30
-                    ? FontWeight.bold
-                    : FontWeight.normal,
-              ),
-            ),
+            child: Text("${30 + index} kg"),
           ),
-          // Weight range from 30kg to 300kg
           childCount: 271,
         ),
       ),
@@ -145,6 +148,7 @@ class _WeightPickerState extends State<WeightPicker> {
     return SizedBox(
       height: 150,
       child: ListWheelScrollView.useDelegate(
+        controller: FixedExtentScrollController(initialItem: _selectedLbs - 66),
         diameterRatio: 1.5,
         itemExtent: 40,
         physics: FixedExtentScrollPhysics(),
@@ -156,17 +160,8 @@ class _WeightPickerState extends State<WeightPicker> {
         },
         childDelegate: ListWheelChildBuilderDelegate(
           builder: (context, index) => Center(
-            child: Text(
-              "${66 + index} lb",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: index == _selectedLbs - 66
-                    ? FontWeight.bold
-                    : FontWeight.normal,
-              ),
-            ),
+            child: Text("${66 + index} lb"),
           ),
-          // Weight range from 66lb to 661lb (equivalent to ~30kg-300kg)
           childCount: 596,
         ),
       ),

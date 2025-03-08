@@ -1,6 +1,10 @@
+import 'dart:math';
+
+import 'package:confetti/confetti.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:linear_progress_bar/linear_progress_bar.dart';
 import 'package:sizer/sizer.dart';
 import 'package:turfit/app/components/buttons.dart';
 import 'package:turfit/app/components/height_picker.dart';
@@ -11,6 +15,8 @@ import 'package:turfit/app/constants/constants.dart';
 import 'package:turfit/app/models/Auth/user.dart';
 import 'package:turfit/app/models/Onboarding/onboarding_model.dart';
 import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
+import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
+import 'package:turfit/app/modules/Auth/views/sign_in_screen.dart';
 
 class OnboardingQuestionaries extends StatefulWidget {
   const OnboardingQuestionaries({super.key});
@@ -23,33 +29,52 @@ class OnboardingQuestionaries extends StatefulWidget {
 class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
   final PageController _pageController = PageController();
   Gender _selectedGender = Gender.none;
-  final int _totalPages = 24; // Total number of steps
+  final int _totalPages = 23; // Total number of steps
   int _currentPage = 0;
 
-  // Define selection variables at the class level
-  String selectedHaveYouTriedApps = "";
-  String selectedWorkoutOption = "";
-  String selectedGoal = "";
-  String selectedPace = "";
-  String selectedObstacle = "";
-  String selectedDiet = "";
-  String selectedMealTiming = "";
-  List<String> selectedMeals = [];
-  String selectedAllergy = "";
-  String selectedEatOut = "";
-  String selectedHomeCooked = "";
-  String selectedActivityLevel = "";
-  String selectedSleepPattern = "";
-  TimeOfDay? firstMealOfDay;
-  TimeOfDay? secondMealOfDay;
-  TimeOfDay? thirdMealOfDay;
-  DateTime selectedDate = DateTime(2000, 1, 1);
-  String selectedDietKnowledge = "";
-  String selectedBodySatisfaction = "";
-  String selectedMacronutrientKnowledge = "";
-  String? currentWeight;
-  String? desiredWeight;
-  String? currentHeight;
+  DateTime selectedDate = DateTime(1990, 1, 1);
+  String? currentHeight = "165 cm";
+  String? currentWeight = "60 kg";
+  String? desiredWeight = "55 kg";
+  String selectedHaveYouTriedApps = "Yes";
+  String selectedWorkoutOption = "3-5";
+  String selectedGoal = "Lose Weight";
+  String selectedPace = "Moderate";
+  String selectedObstacle = "Motivation";
+  String selectedDietKnowledge = "A little - I know some basics";
+  List<String> selectedMeals = [
+    "I have sweet tooth",
+    "I don't drink enough water"
+  ];
+  String selectedBodySatisfaction = "Neutral";
+  String selectedDiet = "Vegetarian";
+  String selectedMealTiming = "Regular";
+  TimeOfDay? firstMealOfDay = TimeOfDay(hour: 8, minute: 0);
+  TimeOfDay? secondMealOfDay = TimeOfDay(hour: 12, minute: 0);
+  TimeOfDay? thirdMealOfDay = TimeOfDay(hour: 18, minute: 0);
+  String selectedMacronutrientKnowledge = "A little - I know some basics";
+  String selectedAllergy = "None";
+  String selectedEatOut = "Sometimes";
+  String selectedHomeCooked = "Yes";
+  String selectedActivityLevel = "Moderately Active";
+  String selectedSleepPattern = "6-8 hours";
+
+  // Confetti controller
+  late ConfettiController _controllerCenter;
+
+  @override
+  void initState() {
+    super.initState();
+    _controllerCenter =
+        ConfettiController(duration: const Duration(seconds: 1));
+  }
+
+  @override
+  void dispose() {
+    _controllerCenter.dispose();
+    super.dispose();
+  }
+
   void _onNext() {
     if (_isCurrentPageValid()) {
       if (_currentPage < _totalPages - 1) {
@@ -59,6 +84,61 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
         setState(() {
           _currentPage++;
         });
+      } else {
+        // Trigger confetti animation on the last page
+
+        UserBasicInfo info = UserBasicInfo(
+          selectedGender: _selectedGender,
+          selectedDate: selectedDate,
+          currentHeight: currentHeight,
+          currentWeight: currentWeight,
+          desiredWeight: desiredWeight,
+          selectedHaveYouTriedApps: selectedHaveYouTriedApps,
+          selectedWorkoutOption: selectedWorkoutOption,
+          selectedGoal: selectedGoal,
+          selectedPace: selectedPace,
+          selectedObstacle: selectedObstacle,
+          selectedDietKnowledge: selectedDietKnowledge,
+          selectedMeals: selectedMeals,
+          selectedBodySatisfaction: selectedBodySatisfaction,
+          selectedDiet: selectedDiet,
+          selectedMealTiming: selectedMealTiming,
+          firstMealOfDay: firstMealOfDay,
+          secondMealOfDay: secondMealOfDay,
+          thirdMealOfDay: thirdMealOfDay,
+          selectedMacronutrientKnowledge: selectedMacronutrientKnowledge,
+          selectedAllergy: selectedAllergy,
+          selectedEatOut: selectedEatOut,
+          selectedHomeCooked: selectedHomeCooked,
+          selectedActivityLevel: selectedActivityLevel,
+          selectedSleepPattern: selectedSleepPattern,
+        );
+
+        final myUser = UserModel(
+            userId: "",
+            userInfo: info,
+            email: "",
+            name: "",
+            photoUrl: "",
+            phoneNumber: "",
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now());
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BlocProvider<SignInBloc>(
+              create: (context) => SignInBloc(
+                  userRepository:
+                      context.read<AuthenticationBloc>().userRepository),
+              child: SignInScreen(
+                user: info,
+              ),
+            ),
+          ),
+        );
+
+        // _controllerCenter.play();
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -84,9 +164,9 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
       case 1:
         return selectedDate != DateTime(2000, 1, 1);
       case 2:
-        return currentHeight != null;
+        return currentHeight != null && currentHeight!.isNotEmpty;
       case 3:
-        return currentWeight != null;
+        return currentWeight != null && currentWeight!.isNotEmpty;
       case 4:
         return true; // Fun facts page, no validation needed
       case 5:
@@ -95,37 +175,36 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
         return selectedWorkoutOption.isNotEmpty;
       case 7:
         return selectedGoal.isNotEmpty;
+
       case 8:
-        return desiredWeight != null;
-      case 9:
         return selectedPace.isNotEmpty;
-      case 10:
+      case 9:
         return selectedObstacle.isNotEmpty;
-      case 11:
+      case 10:
         return selectedDietKnowledge.isNotEmpty;
-      case 12:
+      case 11:
         return selectedMeals.isNotEmpty;
-      case 13:
+      case 12:
         return selectedBodySatisfaction.isNotEmpty;
-      case 14:
+      case 13:
         return selectedDiet.isNotEmpty;
-      case 15:
+      case 14:
         return firstMealOfDay != null &&
             secondMealOfDay != null &&
             thirdMealOfDay != null;
-      case 16:
+      case 15:
         return selectedMacronutrientKnowledge.isNotEmpty;
-      case 17:
+      case 16:
         return true; // Track what you eat page, no validation needed
-      case 18:
+      case 17:
         return selectedAllergy.isNotEmpty;
-      case 19:
+      case 18:
         return selectedEatOut.isNotEmpty;
-      case 20:
+      case 29:
         return selectedHomeCooked.isNotEmpty;
-      case 21:
+      case 20:
         return selectedActivityLevel.isNotEmpty;
-      case 22:
+      case 21:
         return selectedSleepPattern.isNotEmpty;
       default:
         return true;
@@ -201,10 +280,12 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               HeightPicker(
+                initialHeight: currentHeight,
                 onChange: (height) {
                   setState(() {
                     currentHeight = height;
                   });
+                  print(currentHeight);
                 },
               )
             ],
@@ -219,6 +300,7 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               WeightPicker(
+                initialWeight: currentWeight,
                 onChange: (weight) {
                   setState(() {
                     currentWeight = weight;
@@ -363,24 +445,6 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
                   ),
                 ),
               ),
-            ],
-          );
-        },
-      ),
-      OnboardingModel(
-        title: "Choose your desired weight",
-        description: "Set a target weight goal.",
-        widgetBuilder: (context) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              WeightPicker(
-                onChange: (weight) {
-                  setState(() {
-                    desiredWeight = weight;
-                  });
-                },
-              )
             ],
           );
         },
@@ -836,29 +900,24 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
         },
       ),
       OnboardingModel(
-        title: "Sign Up with Google",
-        description: "Create an account to save your progress",
+        title: "Congratulations!",
+        description: "You have completed the onboarding process.",
         widgetBuilder: (context) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                onPressed: () {
-                  context
-                      .read<AuthenticationBloc>()
-                      .add(GoogleSignInRequested());
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Image.asset(
-                    //   'assets/google_logo.png', // Add your Google logo asset
-                    //   height: 24,
-                    // ),
-                    SizedBox(width: 8),
-                    Text("Sign Up with Google"),
-                  ],
-                ),
+              ConfettiWidget(
+                confettiController: _controllerCenter,
+                blastDirectionality: BlastDirectionality.explosive,
+                shouldLoop: false,
+                colors: const [
+                  Colors.green,
+                  Colors.blue,
+                  Colors.pink,
+                  Colors.orange,
+                  Colors.purple
+                ],
+                createParticlePath: drawStar,
               ),
             ],
           );
@@ -867,49 +926,91 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
     ];
   }
 
+  void _populateWithDemoData() {
+    setState(() {
+      _selectedGender = Gender.female;
+      selectedDate = DateTime(1990, 1, 1);
+      currentHeight = "165 cm";
+      currentWeight = "60 kg";
+      desiredWeight = "55 kg";
+      selectedHaveYouTriedApps = "Yes";
+      selectedWorkoutOption = "3-5";
+      selectedGoal = "Lose Weight";
+      selectedPace = "Moderate";
+      selectedObstacle = "Motivation";
+      selectedDietKnowledge = "A little - I know some basics";
+      selectedMeals = ["I have sweet tooth", "I don't drink enough water"];
+      selectedBodySatisfaction = "Neutral";
+      selectedDiet = "Vegetarian";
+      selectedMealTiming = "Regular";
+      firstMealOfDay = TimeOfDay(hour: 8, minute: 0);
+      secondMealOfDay = TimeOfDay(hour: 12, minute: 0);
+      thirdMealOfDay = TimeOfDay(hour: 18, minute: 0);
+      selectedMacronutrientKnowledge = "A little - I know some basics";
+      selectedAllergy = "None";
+      selectedEatOut = "Sometimes";
+      selectedHomeCooked = "Yes";
+      selectedActivityLevel = "Moderately Active";
+      selectedSleepPattern = "6-8 hours";
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     List<OnboardingModel> onboardingModels = getOnboardingModels();
-
+    // print("TOTAL PAGES: ${onboardingModels.length}");
     return Scaffold(
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
           child: Column(
             children: [
-              /// **Progress Indicator (Single Continuous Line)**
-              Stack(
+              Row(
                 children: [
-                  /// Background Track
-                  Container(
-                    width: double.infinity,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: MealAIColors.stepperColor,
-                      borderRadius: BorderRadius.circular(3),
+                  // Back Button (Now it will work)
+                  GestureDetector(
+                    onTap: () {
+                      if (_currentPage == 0) {
+                        Navigator.of(context)
+                            .pop(); // Close the onboarding if on first page
+                      } else {
+                        _pageController.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(2.w),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: MealAIColors.stepperColor,
+                      ),
+                      child: Center(
+                        child: Icon(
+                          Icons.arrow_back,
+                          size: 20,
+                          color: MealAIColors.blackText,
+                        ),
+                      ),
                     ),
                   ),
+                  SizedBox(width: 2.w),
 
-                  /// Progress Bar (Filling)
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      return AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        width: (constraints.maxWidth / (_totalPages - 1)) *
-                            _currentPage,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: MealAIColors.selectedTile,
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                      );
-                    },
+                  Expanded(
+                    child: LinearProgressBar(
+                      maxSteps: _totalPages,
+                      progressType: LinearProgressBar.progressTypeLinear,
+                      currentStep: _currentPage,
+                      progressColor: MealAIColors.blackText,
+                      backgroundColor: MealAIColors.stepperColor,
+                      minHeight: 0.5.h,
+                    ),
                   ),
                 ],
               ),
-              SizedBox(height: 4.h),
-
-              /// **Title & Description**
+              const SizedBox(height: 24),
+              // Onboarding Text
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -929,30 +1030,59 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
                 ],
               ),
               const SizedBox(height: 40),
-
-              /// **PageView for Onboarding Steps**
+              // PageView
               Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  //   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: onboardingModels.length,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentPage = index;
-                    });
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return PageView.builder(
+                      controller: _pageController,
+                      itemCount: onboardingModels.length,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                      },
+                      itemBuilder: (context, index) =>
+                          onboardingModels[index].widgetBuilder(context),
+                    );
                   },
-                  itemBuilder: (context, index) =>
-                      onboardingModels[index].widgetBuilder(context),
                 ),
               ),
-
-              /// **Next Button**
               const SizedBox(height: 20),
-              PrimaryButton(tile: "Next", onPressed: _onNext),
+              // Next Button
+              PrimaryButton(
+                tile:
+                    _currentPage == _totalPages - 1 ? "Go to Sign Up" : "Next",
+                onPressed: _onNext,
+              ),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+Path drawStar(Size size) {
+  // Method to create a star path
+  double degToRad(double deg) => deg * (3.1415926535897932 / 180.0);
+
+  const numberOfPoints = 5;
+  final halfWidth = size.width / 2;
+  final externalRadius = halfWidth;
+  final internalRadius = halfWidth / 2.5;
+  final degreesPerStep = degToRad(360 / numberOfPoints);
+  final halfDegreesPerStep = degreesPerStep / 2;
+  final path = Path();
+  final fullAngle = degToRad(360);
+  path.moveTo(size.width, halfWidth);
+
+  for (double step = 0; step < fullAngle; step += degreesPerStep) {
+    path.lineTo(halfWidth + externalRadius * cos(step),
+        halfWidth + externalRadius * sin(step));
+    path.lineTo(halfWidth + internalRadius * cos(step + halfDegreesPerStep),
+        halfWidth + internalRadius * sin(step + halfDegreesPerStep));
+  }
+  path.close();
+  return path;
 }
