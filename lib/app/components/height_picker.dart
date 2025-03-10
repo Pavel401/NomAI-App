@@ -52,6 +52,7 @@ class _HeightPickerState extends State<HeightPicker> {
     String height = _selectedUnit == HeightUnit.CM
         ? "$_selectedCm cm"
         : "$_selectedFeet' $_selectedInches\"";
+
     widget.onChange(height);
   }
 
@@ -272,4 +273,33 @@ class _HeightPickerState extends State<HeightPicker> {
       ),
     );
   }
+}
+
+double convertHeightToCm(String height) {
+  // Check if the height is in feet and inches (like 6' 0")
+  if (height.contains("'")) {
+    try {
+      List<String> parts = height.split("' ");
+      int feet = int.parse(parts[0].trim());
+      int inches = int.parse(parts[1].replaceAll('"', '').trim());
+
+      // Convert feet and inches to cm (accurate to 2 decimal places)
+      double heightInCm = ((feet * 12) + inches) * 2.54;
+      return double.parse(heightInCm.toStringAsFixed(2));
+    } catch (e) {
+      throw Exception("Invalid height format in feet and inches.");
+    }
+  }
+
+  // Check if the height is in cm (like 183 cm)
+  if (height.contains("cm")) {
+    try {
+      double heightInCm = double.parse(height.replaceAll(" cm", "").trim());
+      return double.parse(heightInCm.toStringAsFixed(2));
+    } catch (e) {
+      throw Exception("Invalid height format in cm.");
+    }
+  }
+
+  throw Exception("Unknown height format.");
 }
