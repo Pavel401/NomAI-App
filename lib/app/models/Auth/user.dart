@@ -375,9 +375,9 @@ class UserBasicInfo {
   final int age;
   final WeeklyPace selectedPace;
   final DateTime birthDate;
-  final String? currentHeight;
-  final String? currentWeight;
-  final String? desiredWeight;
+  final double? currentHeight;
+  final double? currentWeight;
+  final double? desiredWeight;
   final String selectedHaveYouTriedApps;
   final String selectedWorkoutOption;
   final HealthMode selectedGoal;
