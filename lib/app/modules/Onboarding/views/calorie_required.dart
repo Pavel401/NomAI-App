@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:turfit/app/models/Auth/user.dart';
-import 'package:turfit/app/utility/unit_converter.dart';
 import 'package:turfit/app/utility/user_utility.dart';
 
 class DailyCalorieRequired extends StatefulWidget {
@@ -74,22 +73,18 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
     // Extract user info from UserBasicInfo object
     final user = widget.userBasicInfo;
 
-    // double height = double.parse(user.currentHeight!);
+    double height = user.currentHeight!;
 
-    // double weight = double.parse(user.currentWeight!);
+    double weight = user.currentWeight!;
 
-    double heightInCm = UnitConverter.convertHeightToCm(user.currentHeight!);
-    double currentWeightInKg =
-        UnitConverter.convertWeightToKg(user.currentWeight!);
-
-    double targetWeight = UnitConverter.convertWeightToKg(user.desiredWeight!);
+    double targetWeight = user.desiredWeight!;
 
     // Calculate nutrition using our utility class
     _userMacros = UserUtility.calculateUserNutrition(
       user.selectedGender,
       user.birthDate,
-      heightInCm,
-      currentWeightInKg,
+      height,
+      weight,
       user.selectedPace,
       targetWeight,
       user.selectedGoal,
