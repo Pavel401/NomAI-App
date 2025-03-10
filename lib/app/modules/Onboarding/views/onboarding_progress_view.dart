@@ -86,6 +86,20 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
         // Trigger confetti animation on the last page
         int age = UserUtility.calculateAge(birthday);
 
+        print("The height is $currentHeight");
+        print("The weight is $currentWeight");
+        print("The desired weight is $desiredWeight");
+
+        double heightInCm = convertHeightToCm(currentHeight!);
+
+        double weightInKg = convertWeightToKg(currentWeight!);
+
+        double desiredWeightInKg = convertWeightToKg(desiredWeight!);
+
+        print("The height in cm is $heightInCm");
+        print("The weight in kg is $weightInKg");
+        print("The desired weight in kg is $desiredWeightInKg");
+
         UserBasicInfo info = UserBasicInfo(
           selectedGender: _selectedGender,
           // dailyCarbs: 0,
@@ -95,9 +109,9 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
           userMacros: UserMacros(calories: 0, protein: 0, carbs: 0, fat: 0),
           birthDate: birthday,
           age: age,
-          currentHeight: currentHeight,
-          currentWeight: currentWeight,
-          desiredWeight: desiredWeight,
+          currentHeight: heightInCm,
+          currentWeight: weightInKg,
+          desiredWeight: desiredWeightInKg,
           selectedHaveYouTriedApps: selectedHaveYouTriedApps,
           selectedWorkoutOption: selectedWorkoutOption,
           selectedGoal: selectedGoal,
