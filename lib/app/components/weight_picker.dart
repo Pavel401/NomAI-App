@@ -175,3 +175,30 @@ class _WeightPickerState extends State<WeightPicker> {
     );
   }
 }
+
+double convertWeightToKg(String weight) {
+  // Check if the weight is in pounds (like 155 lb)
+  if (weight.contains("lb")) {
+    try {
+      double lbs = double.parse(weight.replaceAll(" lb", "").trim());
+
+      // Convert lbs to kg (1 lb = 0.453592 kg)
+      double weightInKg = lbs * 0.453592;
+      return double.parse(weightInKg.toStringAsFixed(2));
+    } catch (e) {
+      throw Exception("Invalid weight format in pounds.");
+    }
+  }
+
+  // Check if the weight is already in kg (like 70 kg)
+  if (weight.contains("kg")) {
+    try {
+      double kg = double.parse(weight.replaceAll(" kg", "").trim());
+      return double.parse(kg.toStringAsFixed(2));
+    } catch (e) {
+      throw Exception("Invalid weight format in kilograms.");
+    }
+  }
+
+  throw Exception("Unknown weight format.");
+}
