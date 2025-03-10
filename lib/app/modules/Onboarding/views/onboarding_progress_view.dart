@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:linear_progress_bar/linear_progress_bar.dart';
 import 'package:sizer/sizer.dart';
 import 'package:turfit/app/components/buttons.dart';
@@ -14,9 +13,8 @@ import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/constants/constants.dart';
 import 'package:turfit/app/models/Auth/user.dart';
 import 'package:turfit/app/models/Onboarding/onboarding_model.dart';
-import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
-import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
-import 'package:turfit/app/modules/Auth/views/sign_in_screen.dart';
+import 'package:turfit/app/modules/Onboarding/views/calorie_required.dart';
+import 'package:turfit/app/utility/user_utility.dart';
 
 class OnboardingQuestionaries extends StatefulWidget {
   const OnboardingQuestionaries({super.key});
@@ -29,35 +27,35 @@ class OnboardingQuestionaries extends StatefulWidget {
 class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
   final PageController _pageController = PageController();
   Gender _selectedGender = Gender.none;
-  final int _totalPages = 23; // Total number of steps
+  final int _totalPages = 22; // Total number of steps
   int _currentPage = 0;
 
-  DateTime selectedDate = DateTime(1990, 1, 1);
-  String? currentHeight = "165 cm";
-  String? currentWeight = "60 kg";
-  String? desiredWeight = "55 kg";
-  String selectedHaveYouTriedApps = "Yes";
-  String selectedWorkoutOption = "3-5";
-  String selectedGoal = "Lose Weight";
-  String selectedPace = "Moderate";
-  String selectedObstacle = "Motivation";
-  String selectedDietKnowledge = "A little - I know some basics";
+  DateTime birthday = DateTime(1990, 1, 1);
+  WeeklyPace selectedPace = WeeklyPace.none;
+  String? currentHeight = "";
+  String? currentWeight = "";
+  String? desiredWeight = "";
+  String selectedHaveYouTriedApps = "";
+  String selectedWorkoutOption = "";
+  HealthMode selectedGoal = HealthMode.none;
+  String selectedObstacle = "";
+  String selectedDietKnowledge = "";
   List<String> selectedMeals = [
-    "I have sweet tooth",
-    "I don't drink enough water"
+    "",
+    "",
   ];
-  String selectedBodySatisfaction = "Neutral";
-  String selectedDiet = "Vegetarian";
-  String selectedMealTiming = "Regular";
+  String selectedBodySatisfaction = "";
+  String selectedDiet = "";
+  String selectedMealTiming = "";
   TimeOfDay? firstMealOfDay = TimeOfDay(hour: 8, minute: 0);
   TimeOfDay? secondMealOfDay = TimeOfDay(hour: 12, minute: 0);
   TimeOfDay? thirdMealOfDay = TimeOfDay(hour: 18, minute: 0);
-  String selectedMacronutrientKnowledge = "A little - I know some basics";
-  String selectedAllergy = "None";
-  String selectedEatOut = "Sometimes";
-  String selectedHomeCooked = "Yes";
-  String selectedActivityLevel = "Moderately Active";
-  String selectedSleepPattern = "6-8 hours";
+  String selectedMacronutrientKnowledge = "";
+  String selectedAllergy = "";
+  String selectedEatOut = "";
+  String selectedHomeCooked = "";
+  ActivityLevel selectedActivityLevel = ActivityLevel.none;
+  String selectedSleepPattern = "";
 
   // Confetti controller
   late ConfettiController _controllerCenter;
@@ -86,10 +84,17 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
         });
       } else {
         // Trigger confetti animation on the last page
+        int age = UserUtility.calculateAge(birthday);
 
         UserBasicInfo info = UserBasicInfo(
           selectedGender: _selectedGender,
-          selectedDate: selectedDate,
+          // dailyCarbs: 0,
+          // dailyFat: 0,
+          // dailyProtein: 0,
+
+          userMacros: UserMacros(calories: 0, protein: 0, carbs: 0, fat: 0),
+          birthDate: birthday,
+          age: age,
           currentHeight: currentHeight,
           currentWeight: currentWeight,
           desiredWeight: desiredWeight,
@@ -97,6 +102,7 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
           selectedWorkoutOption: selectedWorkoutOption,
           selectedGoal: selectedGoal,
           selectedPace: selectedPace,
+          // dailyCalories: 0,
           selectedObstacle: selectedObstacle,
           selectedDietKnowledge: selectedDietKnowledge,
           selectedMeals: selectedMeals,
@@ -124,19 +130,27 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
             createdAt: DateTime.now(),
             updatedAt: DateTime.now());
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BlocProvider<SignInBloc>(
-              create: (context) => SignInBloc(
-                  userRepository:
-                      context.read<AuthenticationBloc>().userRepository),
-              child: SignInScreen(
-                user: info,
-              ),
-            ),
-          ),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => BlocProvider<SignInBloc>(
+        //       create: (context) => SignInBloc(
+        //           userRepository:
+        //               context.read<AuthenticationBloc>().userRepository),
+        //       child: SignInScreen(
+        //         user: info,
+        //       ),
+        //     ),
+        //   ),
+        // );
+
+        Navigator.push(context, MaterialPageRoute(
+          builder: (context) {
+            return DailyCalorieRequired(
+              userBasicInfo: info,
+            );
+          },
+        ));
 
         // _controllerCenter.play();
       }
@@ -162,7 +176,7 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
       case 0:
         return _selectedGender != Gender.none;
       case 1:
-        return selectedDate != DateTime(2000, 1, 1);
+        return birthday != DateTime(2000, 1, 1);
       case 2:
         return currentHeight != null && currentHeight!.isNotEmpty;
       case 3:
@@ -174,38 +188,52 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
       case 6:
         return selectedWorkoutOption.isNotEmpty;
       case 7:
-        return selectedGoal.isNotEmpty;
+        return selectedGoal != HealthMode.none;
 
       case 8:
-        return selectedPace.isNotEmpty;
+        return desiredWeight != null && desiredWeight!.isNotEmpty;
+
       case 9:
-        return selectedObstacle.isNotEmpty;
+        return selectedPace != WeeklyPace.none;
+
       case 10:
-        return selectedDietKnowledge.isNotEmpty;
+        return selectedObstacle.isNotEmpty;
+
       case 11:
-        return selectedMeals.isNotEmpty;
+        return selectedDietKnowledge.isNotEmpty;
+
       case 12:
-        return selectedBodySatisfaction.isNotEmpty;
+        return selectedMeals.isNotEmpty;
+
       case 13:
-        return selectedDiet.isNotEmpty;
+        return selectedBodySatisfaction.isNotEmpty;
+
       case 14:
+        return selectedDiet.isNotEmpty;
+
+      case 15:
         return firstMealOfDay != null &&
             secondMealOfDay != null &&
             thirdMealOfDay != null;
-      case 15:
-        return selectedMacronutrientKnowledge.isNotEmpty;
+
       case 16:
-        return true; // Track what you eat page, no validation needed
+        return selectedMacronutrientKnowledge.isNotEmpty;
+
       case 17:
-        return selectedAllergy.isNotEmpty;
+        return true; // Track what you eat page, no validation needed
+
       case 18:
+        return selectedAllergy.isNotEmpty;
+
+      case 19:
         return selectedEatOut.isNotEmpty;
-      case 29:
-        return selectedHomeCooked.isNotEmpty;
+
       case 20:
-        return selectedActivityLevel.isNotEmpty;
+        return selectedHomeCooked.isNotEmpty;
+
       case 21:
-        return selectedSleepPattern.isNotEmpty;
+        return selectedActivityLevel != ActivityLevel.none;
+
       default:
         return true;
     }
@@ -215,7 +243,7 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
     return [
       OnboardingModel(
         title: "Choose Your Gender",
-        description: "This will help us provide the best recommendations.",
+        description: "",
         widgetBuilder: (context) {
           List<Gender> genders = [Gender.male, Gender.female, Gender.other];
           return Column(
@@ -241,7 +269,7 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
       ),
       OnboardingModel(
         title: "When is your birthday?",
-        description: "This will help us create a personalized plan for you.",
+        description: "",
         widgetBuilder: (context) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -260,10 +288,10 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
                 height: 25.h,
                 child: CupertinoDatePicker(
                   mode: CupertinoDatePickerMode.date,
-                  initialDateTime: selectedDate,
+                  initialDateTime: birthday,
                   onDateTimeChanged: (DateTime newDate) {
                     setState(() {
-                      selectedDate = newDate;
+                      birthday = newDate;
                     });
                   },
                 ),
@@ -427,7 +455,11 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
         title: "What is your goal?",
         description: "Choose your primary fitness goal.",
         widgetBuilder: (context) {
-          List<String> goals = ["Gain Weight", "Maintain", "Lose Weight"];
+          List<HealthMode> goals = [
+            HealthMode.weightLoss,
+            HealthMode.maintainWeight,
+            HealthMode.muscleGain,
+          ];
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -435,7 +467,7 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
                 (goal) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: PrimaryTile(
-                    title: goal,
+                    title: goal.toSimpleText(),
                     isSelected: selectedGoal == goal,
                     onTap: () {
                       setState(() {
@@ -450,27 +482,77 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
         },
       ),
       OnboardingModel(
-        title: "How fast do you want to reach your goal?",
-        description: "Select your preferred pace.",
+        title: "What is your desired weight ?",
+        description: "We will use this to create your personalized plan.",
         widgetBuilder: (context) {
-          List<String> paces = ["Slow", "Moderate", "Fast"];
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ...paces.map(
-                (pace) => Padding(
+              WeightPicker(
+                initialWeight: desiredWeight,
+                onChange: (weight) {
+                  setState(() {
+                    desiredWeight = weight;
+                  });
+                },
+              )
+            ],
+          );
+        },
+      ),
+      OnboardingModel(
+        title: "How fast do you want to reach your goal?",
+        description: "Select your preferred pace.",
+        widgetBuilder: (context) {
+          Map<WeeklyPace, Map<String, String>> paces = {
+            WeeklyPace.slow: {
+              "title": "Slow - 0.1 kg/week",
+              "description":
+                  "I'm in no rush. I want to take it slow and steady."
+            },
+            WeeklyPace.moderate: {
+              "title": "Moderate - 0.5 kg/week",
+              "description": "I want to see results, but I'm not in a hurry."
+            },
+            WeeklyPace.fast: {
+              "title": "Fast - 1 kg/week",
+              "description":
+                  "Accelerated results requiring dedicated lifestyle modifications."
+            },
+          };
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ...paces.entries.map(
+                (entry) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: PrimaryTile(
-                    title: pace,
-                    isSelected: selectedPace == pace,
+                  child: SecondaryTile(
+                    title: entry.value["title"]!,
+                    description: entry.value["description"]!,
+                    isSelected: selectedPace == entry.key,
                     onTap: () {
                       setState(() {
-                        selectedPace = pace;
+                        selectedPace = entry.key;
                       });
                     },
                   ),
                 ),
               ),
+
+              // ...paces.map(
+              //   (pace) => Padding(
+              //     padding: const EdgeInsets.symmetric(vertical: 8.0),
+              //     child: PrimaryTile(
+              //       title: pace,
+              //       isSelected: selectedPace == pace,
+              //       onTap: () {
+              //         setState(() {
+              //           selectedPace = pace;
+              //         });
+              //       },
+              //     ),
+              //   ),
+              // ),
             ],
           );
         },
@@ -842,11 +924,11 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
         title: "What is your activity level?",
         description: "Select your daily activity level.",
         widgetBuilder: (context) {
-          List<String> activityLevels = [
-            "Sedentary",
-            "Lightly Active",
-            "Moderately Active",
-            "Very Active"
+          List<ActivityLevel> activityLevels = [
+            ActivityLevel.sedentary,
+            ActivityLevel.lightlyActive,
+            ActivityLevel.moderatelyActive,
+            ActivityLevel.veryActive
           ];
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -855,7 +937,7 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
                 (level) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: PrimaryTile(
-                    title: level,
+                    title: level.toSimpleText(),
                     isSelected: selectedActivityLevel == level,
                     onTap: () {
                       setState(() {
@@ -899,60 +981,8 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
           );
         },
       ),
-      OnboardingModel(
-        title: "Congratulations!",
-        description: "You have completed the onboarding process.",
-        widgetBuilder: (context) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ConfettiWidget(
-                confettiController: _controllerCenter,
-                blastDirectionality: BlastDirectionality.explosive,
-                shouldLoop: false,
-                colors: const [
-                  Colors.green,
-                  Colors.blue,
-                  Colors.pink,
-                  Colors.orange,
-                  Colors.purple
-                ],
-                createParticlePath: drawStar,
-              ),
-            ],
-          );
-        },
-      ),
+      //
     ];
-  }
-
-  void _populateWithDemoData() {
-    setState(() {
-      _selectedGender = Gender.female;
-      selectedDate = DateTime(1990, 1, 1);
-      currentHeight = "165 cm";
-      currentWeight = "60 kg";
-      desiredWeight = "55 kg";
-      selectedHaveYouTriedApps = "Yes";
-      selectedWorkoutOption = "3-5";
-      selectedGoal = "Lose Weight";
-      selectedPace = "Moderate";
-      selectedObstacle = "Motivation";
-      selectedDietKnowledge = "A little - I know some basics";
-      selectedMeals = ["I have sweet tooth", "I don't drink enough water"];
-      selectedBodySatisfaction = "Neutral";
-      selectedDiet = "Vegetarian";
-      selectedMealTiming = "Regular";
-      firstMealOfDay = TimeOfDay(hour: 8, minute: 0);
-      secondMealOfDay = TimeOfDay(hour: 12, minute: 0);
-      thirdMealOfDay = TimeOfDay(hour: 18, minute: 0);
-      selectedMacronutrientKnowledge = "A little - I know some basics";
-      selectedAllergy = "None";
-      selectedEatOut = "Sometimes";
-      selectedHomeCooked = "Yes";
-      selectedActivityLevel = "Moderately Active";
-      selectedSleepPattern = "6-8 hours";
-    });
   }
 
   @override

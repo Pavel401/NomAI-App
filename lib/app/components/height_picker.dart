@@ -22,19 +22,28 @@ class _HeightPickerState extends State<HeightPicker> {
   int _selectedCm = 170;
   int _selectedFeet = 5;
   int _selectedInches = 7;
-
   @override
   void initState() {
     super.initState();
     if (widget.initialHeight != null) {
-      if (widget.initialHeight!.contains("cm")) {
-        _selectedCm = int.parse(widget.initialHeight!.replaceAll(" cm", ""));
-        _selectedUnit = HeightUnit.CM;
-      } else {
-        List<String> parts = widget.initialHeight!.split("' ");
-        _selectedFeet = int.parse(parts[0]);
-        _selectedInches = int.parse(parts[1].replaceAll("\"", ""));
-        _selectedUnit = HeightUnit.FEET;
+      try {
+        if (widget.initialHeight!.contains("cm")) {
+          _selectedCm =
+              int.parse(widget.initialHeight!.replaceAll(" cm", "").trim());
+          _selectedUnit = HeightUnit.CM;
+        } else {
+          List<String> parts = widget.initialHeight!.split("' ");
+          if (parts.length == 2) {
+            _selectedFeet = int.parse(parts[0].trim());
+            _selectedInches = int.parse(parts[1].replaceAll("\"", "").trim());
+          }
+          _selectedUnit = HeightUnit.FEET;
+        }
+      } catch (e) {
+        // Fallback to default height
+        _selectedCm = 170;
+        _selectedFeet = 5;
+        _selectedInches = 7;
       }
     }
   }

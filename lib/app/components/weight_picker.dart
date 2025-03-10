@@ -21,17 +21,24 @@ class _WeightPickerState extends State<WeightPicker> {
   WeightUnit _selectedUnit = WeightUnit.KG;
   int _selectedKg = 70;
   int _selectedLbs = 155;
-
   @override
   void initState() {
     super.initState();
     if (widget.initialWeight != null) {
-      if (widget.initialWeight!.contains("kg")) {
-        _selectedKg = int.parse(widget.initialWeight!.replaceAll(" kg", ""));
-        _selectedUnit = WeightUnit.KG;
-      } else {
-        _selectedLbs = int.parse(widget.initialWeight!.replaceAll(" lb", ""));
-        _selectedUnit = WeightUnit.LB;
+      try {
+        if (widget.initialWeight!.contains("kg")) {
+          _selectedKg =
+              int.parse(widget.initialWeight!.replaceAll(" kg", "").trim());
+          _selectedUnit = WeightUnit.KG;
+        } else if (widget.initialWeight!.contains("lb")) {
+          _selectedLbs =
+              int.parse(widget.initialWeight!.replaceAll(" lb", "").trim());
+          _selectedUnit = WeightUnit.LB;
+        }
+      } catch (e) {
+        // Fallback to default values
+        _selectedKg = 70;
+        _selectedLbs = 155;
       }
     }
   }

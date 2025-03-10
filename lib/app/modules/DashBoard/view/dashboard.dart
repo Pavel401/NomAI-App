@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:turfit/app/constants/colors.dart';
+import 'package:turfit/app/modules/Home/views/home_view.dart';
+import 'package:turfit/app/modules/Scanner/views/scan_view.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,6 +31,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+    ));
+
     return Scaffold(
       backgroundColor: MealAIColors.lightBackground,
       extendBody: true,
@@ -56,6 +64,9 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: () {
             /// Move to QR Scan Page (index 1)
             // _onItemTapped(1);
+
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => MealAiCamera()));
           },
           child: Padding(
             padding: const EdgeInsets.all(8),
@@ -167,8 +178,8 @@ class _HomeScreenState extends State<HomeScreen> {
       /// ----------------------
       body: IndexedStack(
         index: _selectedIndex,
-        children: const [
-          Center(child: Text('🏠 Home Screen')),
+        children: [
+          HomeView(),
           Center(child: Text('📷 QR Scan Screen')),
           Center(child: Text('📊 Analytics Screen')),
         ],

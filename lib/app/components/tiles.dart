@@ -53,6 +53,70 @@ class PrimaryTile extends StatelessWidget {
   }
 }
 
+class SecondaryTile extends StatelessWidget {
+  final String title;
+  final String description;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const SecondaryTile({
+    super.key,
+    required this.title,
+    required this.description,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 100),
+        margin: EdgeInsets.only(bottom: 2.w),
+        padding: EdgeInsets.all(4.w),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? MealAIColors.selectedTile
+              : MealAIColors.lightGreyTile,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: isSelected
+                              ? MealAIColors.whiteText
+                              : MealAIColors.blackText,
+                        ),
+                  ),
+                  SizedBox(height: 1.w),
+                  Text(
+                    description,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: isSelected
+                              ? MealAIColors.whiteText.withOpacity(0.8)
+                              : MealAIColors.blackText.withOpacity(0.7),
+                        ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class PrimaryIconTile extends StatelessWidget {
   final String title;
   final bool isSelected;

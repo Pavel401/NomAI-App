@@ -7,8 +7,10 @@ import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication
 import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
 import 'package:turfit/app/modules/DashBoard/view/dashboard.dart';
 import 'package:turfit/app/modules/Onboarding/views/onboarding_home.dart';
+import 'package:turfit/app/modules/Scanner/bloc/bloc/ai_scan_bloc.dart';
 import 'package:turfit/app/providers/theme_provider.dart';
 import 'package:turfit/app/repo/firebase_user_repo.dart';
+import 'package:turfit/app/repo/meal_ai_repo.dart';
 import 'package:turfit/app/utility/simple_bloc_observer.dart';
 
 // Pre-initialize repository for faster startup
@@ -25,6 +27,8 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        BlocProvider<AiScanBloc>(
+            create: (context) => AiScanBloc(AiRepository())),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         // Pre-create the AuthenticationBloc at app startup
         BlocProvider<AuthenticationBloc>(
@@ -56,10 +60,10 @@ class MyAppView extends StatelessWidget {
         return MaterialApp(
           title: 'Firebase Auth',
           debugShowCheckedModeBanner: false, // Remove banner for performance
-          theme: themeProvider.lightTheme,
-          darkTheme: themeProvider.darkTheme,
-          themeMode:
-              themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+          // theme: themeProvider.lightTheme,
+          // darkTheme: themeProvider.darkTheme,
+          // themeMode:
+          //     themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
           home: BlocBuilder<AuthenticationBloc, AuthenticationState>(
             // Add buildWhen to only rebuild when authentication status changes
             buildWhen: (previous, current) => previous.status != current.status,
