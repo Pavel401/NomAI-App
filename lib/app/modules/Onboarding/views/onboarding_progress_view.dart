@@ -86,9 +86,9 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
         // Trigger confetti animation on the last page
         int age = UserUtility.calculateAge(birthday);
 
-        print("The height is $currentHeight");
-        print("The weight is $currentWeight");
-        print("The desired weight is $desiredWeight");
+        // print("The height is $currentHeight");
+        // print("The weight is $currentWeight");
+        // print("The desired weight is $desiredWeight");
 
         double heightInCm = convertHeightToCm(currentHeight!);
 
@@ -96,9 +96,9 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
 
         double desiredWeightInKg = convertWeightToKg(desiredWeight!);
 
-        print("The height in cm is $heightInCm");
-        print("The weight in kg is $weightInKg");
-        print("The desired weight in kg is $desiredWeightInKg");
+        // print("The height in cm is $heightInCm");
+        // print("The weight in kg is $weightInKg");
+        // print("The desired weight in kg is $desiredWeightInKg");
 
         UserBasicInfo info = UserBasicInfo(
           selectedGender: _selectedGender,

@@ -124,61 +124,75 @@ class UserUtility {
     return adjustedCalories < minCalories ? minCalories : adjustedCalories;
   }
 
-  /// Calculate macronutrient distribution based on the user's goal and body weight.
-  /// Uses weight-based protein calculation for more accurate results.
   static UserMacros calculateMacros(
       double calories, HealthMode goal, double bodyWeight) {
-    double proteinRatio, carbsRatio, fatRatio;
-    double proteinPerKg = 0;
+    double proteinPerKg;
+    double fatPercentage;
+    double minCarbsPerKg;
+    double maxCarbsPerKg;
 
-    // Set protein based on body weight and goal
+    // Set dynamic macronutrient targets based on goal
     switch (goal) {
       case HealthMode.weightLoss:
-        proteinPerKg = 2.0; // Higher protein during caloric deficit
-        fatRatio = 0.3;
+        proteinPerKg = 1.0;
+        fatPercentage = 0.25;
+        minCarbsPerKg = 1.5;
+        maxCarbsPerKg = 2.0;
         break;
       case HealthMode.muscleGain:
-        proteinPerKg = 1.8; // High protein for muscle synthesis
-        fatRatio = 0.25;
+        proteinPerKg = 1.2;
+        fatPercentage = 0.25;
+        minCarbsPerKg = 3.0;
+        maxCarbsPerKg = 4.0;
         break;
       case HealthMode.maintainWeight:
-        proteinPerKg = 1.6; // Moderate protein for maintenance
-        fatRatio = 0.25;
+        proteinPerKg = 1.0;
+        fatPercentage = 0.25;
+        minCarbsPerKg = 2.0;
+        maxCarbsPerKg = 3.0;
         break;
       default:
-        proteinPerKg = 1.6;
-        fatRatio = 0.25;
+        proteinPerKg = 1.0;
+        fatPercentage = 0.25;
+        minCarbsPerKg = 2.0;
+        maxCarbsPerKg = 3.0;
     }
 
-    // Calculate protein grams from bodyWeight
+    // Calculate Protein Intake
     int proteinGrams = (bodyWeight * proteinPerKg).round();
-
-    // Calculate protein calories and ratio
     double proteinCalories = proteinGrams * 4;
-    proteinRatio = proteinCalories / calories;
 
-    // Calculate remaining calories for carbs and fat
-    double remainingCalories = calories - proteinCalories;
-
-    // Calculate fat grams and calories
-    double fatCalories = calories * fatRatio;
+    // Calculate Fat Intake
+    double fatCalories = calories * fatPercentage;
     int fatGrams = (fatCalories / 9).round();
 
-    // Ensure minimum fat intake (0.5g per kg)
+    // Ensure minimum fat intake (0.5g per kg body weight)
     int minFatGrams = (bodyWeight * 0.5).round();
     if (fatGrams < minFatGrams) {
       fatGrams = minFatGrams;
       fatCalories = fatGrams * 9;
     }
 
-    // Remaining calories go to carbs
-    double carbCalories = calories - proteinCalories - fatCalories;
-    int carbGrams = (carbCalories / 4).round();
+    // Calculate remaining calories for carbs
+    double remainingCalories = calories - (proteinCalories + fatCalories);
+    int carbGrams = (remainingCalories / 4).round();
 
-    // Calculate water intake (35ml per kg)
-    int waterIntake = (bodyWeight * 35).round();
+    // Ensure minimum and maximum carb intake
+    int minCarbGrams = (bodyWeight * minCarbsPerKg).round();
+    int maxCarbGrams = (bodyWeight * maxCarbsPerKg).round();
 
-    // Calculate fiber recommendation (14g per 1000 calories, with limits)
+    // Adjust carbs based on goal and available calories
+    if (carbGrams < minCarbGrams) {
+      carbGrams = minCarbGrams;
+    } else if (carbGrams > maxCarbGrams) {
+      carbGrams = maxCarbGrams;
+    }
+
+    // Calculate water intake (40ml/kg during muscle gain, 35ml/kg otherwise)
+    int waterIntake =
+        (bodyWeight * (goal == HealthMode.muscleGain ? 40 : 35)).round();
+
+    // Calculate fiber recommendation (14g per 1000 calories)
     int fiberRecommendation = (calories / 1000 * 14).round();
     if (fiberRecommendation < 25) fiberRecommendation = 25;
     if (fiberRecommendation > 40) fiberRecommendation = 40;
@@ -203,12 +217,30 @@ class UserUtility {
       double targetWeight,
       HealthMode healthMode,
       ActivityLevel activityLevel) {
+    print("The weight is $weight");
+    print("The height is $height");
+    print("The target weight is $targetWeight");
+    print("The weekly pace is $weeklyPace");
+    print("The health mode is $healthMode");
+    print("The activity level is $activityLevel");
+
     int age = calculateAge(birthDate);
 
+    print("The age is $age");
+
     double bmr = calculateBMR(gender, weight, height, age);
+
+    print("-------------------------");
+    print("The BMR is $bmr");
+
     double tdee = calculateTDEE(bmr, activityLevel);
+    print("The TDEE is $tdee");
     double adjustedCalories = adjustCaloriesForGoal(
         tdee, healthMode, weeklyPace, gender, weight, targetWeight);
+
+    print("The adjusted calories is $adjustedCalories");
+
+    print("-------------------------");
 
     return calculateMacros(adjustedCalories, healthMode, weight);
   }
