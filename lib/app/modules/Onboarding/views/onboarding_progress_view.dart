@@ -253,6 +253,45 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
     }
   }
 
+  void _populateDemoData() {
+    setState(() {
+      // Set default values for all variables
+      _selectedGender = Gender.male;
+      birthday = DateTime(2002, 5, 5);
+      currentHeight = "180 cm";
+      currentWeight = "108 kg";
+      desiredWeight = "80 kg";
+      selectedHaveYouTriedApps = "Yes";
+      selectedWorkoutOption = "3-5";
+      selectedGoal = HealthMode.weightLoss;
+      selectedPace = WeeklyPace.moderate;
+      selectedObstacle = "Lack of time";
+      selectedDietKnowledge =
+          "Yes - I understand the importance of a balanced diet";
+      selectedMeals = ["I have sweet tooth", "I like junk food"];
+      selectedBodySatisfaction = "Neutral";
+      selectedDiet = "Vegan";
+      selectedMealTiming = "Regular";
+      firstMealOfDay = TimeOfDay(hour: 8, minute: 0);
+      secondMealOfDay = TimeOfDay(hour: 12, minute: 0);
+      thirdMealOfDay = TimeOfDay(hour: 18, minute: 0);
+      selectedMacronutrientKnowledge = "Yes - I know the macronutrient values";
+      selectedAllergy = "None";
+      selectedEatOut = "Rarely";
+      selectedHomeCooked = "Yes";
+      selectedActivityLevel = ActivityLevel.moderatelyActive;
+      selectedSleepPattern = "6-8 hours";
+
+      // Move to the last page
+      _currentPage = _totalPages - 1;
+      _pageController.jumpToPage(_currentPage);
+
+      if (_currentPage == _totalPages - 1) {
+        _onNext();
+      }
+    });
+  }
+
   List<OnboardingModel> getOnboardingModels() {
     return [
       OnboardingModel(
@@ -1097,7 +1136,9 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
               PrimaryButton(
                 tile:
                     _currentPage == _totalPages - 1 ? "Go to Sign Up" : "Next",
-                onPressed: _onNext,
+                onPressed: () {
+                  _populateDemoData();
+                },
               ),
             ],
           ),

@@ -5,6 +5,7 @@ import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/models/Auth/user.dart';
 import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
 import 'package:turfit/app/modules/DashBoard/view/dashboard.dart';
+import 'package:turfit/app/repo/firebase_user_repo.dart';
 
 class SignInScreen extends StatefulWidget {
   final UserBasicInfo? user;
@@ -32,9 +33,16 @@ class _SignInScreenState extends State<SignInScreen> {
           setState(() {
             signInRequired = false;
           });
+          final FirebaseUserRepo _userRepository = FirebaseUserRepo();
 
-          Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => HomeScreen()));
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                    create: (context) => SignInBloc(
+                      userRepository: _userRepository,
+                    ),
+                    // Remove the BlocListener which is causing an extra rendering cycle
+                    child: const HomeScreen(),
+                  )));
         } else if (state is SignInProcess) {
           setState(() {
             signInRequired = true;

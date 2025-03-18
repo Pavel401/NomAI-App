@@ -1,7 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:turfit/app/models/Auth/user.dart';
+import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
+import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
+import 'package:turfit/app/modules/Auth/views/sign_in_screen.dart';
 import 'package:turfit/app/utility/user_utility.dart';
 
 class DailyCalorieRequired extends StatefulWidget {
@@ -302,6 +306,21 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
               child: ElevatedButton(
                 onPressed: () {
                   // Navigate to the next screen or save the plan
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BlocProvider<SignInBloc>(
+                        create: (context) => SignInBloc(
+                            userRepository: context
+                                .read<AuthenticationBloc>()
+                                .userRepository),
+                        child: SignInScreen(
+                          user: widget.userBasicInfo,
+                        ),
+                      ),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
