@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/models/Auth/user.dart';
 import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
@@ -11,7 +12,7 @@ import 'package:turfit/app/utility/user_utility.dart';
 class DailyCalorieRequired extends StatefulWidget {
   final UserBasicInfo userBasicInfo;
 
-  DailyCalorieRequired({
+  const DailyCalorieRequired({
     super.key,
     required this.userBasicInfo,
   });
@@ -33,7 +34,6 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
   void initState() {
     super.initState();
 
-    // Set up animation controller for fade-in effect
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -42,7 +42,6 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
         CurvedAnimation(parent: _animationController, curve: Curves.easeIn));
 
-    // Start calculation and progress simulation
     _startCalculation();
   }
 
@@ -54,7 +53,6 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
   }
 
   void _startCalculation() {
-    // Simulate progress for 5 seconds
     _timer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
       setState(() {
         if (_progress < 1.0) {
@@ -62,28 +60,20 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
         } else {
           _timer.cancel();
           _isCalculating = false;
-          // Start fade-in animation for results
           _animationController.forward();
         }
       });
     });
 
-    // Actually calculate the nutrition (this will be fast in reality,
-    // but we'll still show the progress bar for UX purposes)
     _calculateNutrition();
   }
 
   void _calculateNutrition() {
-    // Extract user info from UserBasicInfo object
     final user = widget.userBasicInfo;
-
     double height = user.currentHeight!;
-
     double weight = user.currentWeight!;
-
     double targetWeight = user.desiredWeight!;
 
-    // Calculate nutrition using our utility class
     _userMacros = UserUtility.calculateUserNutrition(
       user.selectedGender,
       user.birthDate,
@@ -99,6 +89,7 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: MealAIColors.switchWhiteColor,
       body: SafeArea(
         child: _isCalculating ? _buildCalculatingView() : _buildResultsView(),
       ),
@@ -110,12 +101,12 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text(
-            "We're creating your personalized plan",
+          Text(
+            "Creating your plan",
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: MealAIColors.blackText,
             ),
             textAlign: TextAlign.center,
           ),
@@ -126,28 +117,28 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
               children: [
                 LinearProgressIndicator(
                   value: _progress,
-                  backgroundColor: Colors.grey[200],
+                  backgroundColor: MealAIColors.greyLight,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).primaryColor,
+                    MealAIColors.selectedTile,
                   ),
-                  minHeight: 10,
-                  borderRadius: BorderRadius.circular(10),
+                  minHeight: 4,
+                  borderRadius: BorderRadius.circular(2),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   "${(_progress * 100).toInt()}%",
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Theme.of(context).primaryColor,
+                    color: MealAIColors.blackText,
                   ),
                 ),
                 const SizedBox(height: 30),
                 Text(
                   _getProgressMessage(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: Colors.black54,
+                    color: MealAIColors.blackText.withOpacity(0.6),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -161,11 +152,11 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
 
   String _getProgressMessage() {
     if (_progress < 0.3) {
-      return "Analyzing your body metrics...";
+      return "Analyzing your metrics...";
     } else if (_progress < 0.6) {
-      return "Calculating your nutritional needs...";
+      return "Calculating nutritional needs...";
     } else if (_progress < 0.9) {
-      return "Finalizing your personalized plan...";
+      return "Finalizing your plan...";
     } else {
       return "Almost ready!";
     }
@@ -182,26 +173,20 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
-            Center(
-              child: Text(
-                "Your Personalized Nutrition Plan",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
-                ),
-                textAlign: TextAlign.center,
+            Text(
+              "Your Nutrition Plan",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: MealAIColors.blackText,
               ),
             ),
             const SizedBox(height: 10),
-            Center(
-              child: Text(
-                _getHealthModeText(),
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black54,
-                ),
-                textAlign: TextAlign.center,
+            Text(
+              _getHealthModeText(),
+              style: TextStyle(
+                fontSize: 16,
+                color: MealAIColors.blackText.withOpacity(0.6),
               ),
             ),
             const SizedBox(height: 40),
@@ -211,21 +196,17 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
               title: "Daily Calories",
               value: "${macros.calories}",
               unit: "kcal",
-              icon: Icons.local_fire_department,
-              color: Colors.deepOrange,
-              description:
-                  "Your daily calorie target based on your goals and activity level",
             ),
 
             const SizedBox(height: 30),
 
             // Macronutrient breakdown
-            const Text(
-              "Macronutrient Breakdown",
+            Text(
+              "Macronutrients",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: MealAIColors.blackText,
               ),
             ),
             const SizedBox(height: 20),
@@ -236,27 +217,24 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
                     "Protein",
                     macros.protein,
                     "g",
-                    Colors.red.shade400,
                     _calculatePercentage(macros.protein * 4, macros.calories),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 15),
                 Expanded(
                   child: _buildMacroCard(
                     "Carbs",
                     macros.carbs,
                     "g",
-                    Colors.blue.shade400,
                     _calculatePercentage(macros.carbs * 4, macros.calories),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 15),
                 Expanded(
                   child: _buildMacroCard(
                     "Fat",
                     macros.fat,
                     "g",
-                    Colors.amber.shade400,
                     _calculatePercentage(macros.fat * 9, macros.calories),
                   ),
                 ),
@@ -266,12 +244,12 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
             const SizedBox(height: 30),
 
             // Additional recommendations
-            const Text(
-              "Additional Recommendations",
+            Text(
+              "Recommendations",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: MealAIColors.blackText,
               ),
             ),
             const SizedBox(height: 20),
@@ -279,11 +257,9 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
               children: [
                 Expanded(
                   child: _buildRecommendationCard(
-                    "Water Intake",
+                    "Water",
                     macros.water,
                     "ml",
-                    Icons.water_drop,
-                    Colors.blue,
                   ),
                 ),
                 const SizedBox(width: 15),
@@ -292,8 +268,6 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
                     "Fiber",
                     macros.fiber,
                     "g",
-                    Icons.grass,
-                    Colors.green,
                   ),
                 ),
               ],
@@ -305,8 +279,6 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Navigate to the next screen or save the plan
-
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -323,19 +295,20 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
+                  backgroundColor: MealAIColors.selectedTile,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(10),
                   ),
+                  elevation: 0,
                 ),
-                child: const Text(
+                child: Text(
                   "Get Started",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: MealAIColors.whiteText,
                   ),
                 ),
               ),
@@ -356,7 +329,7 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
       case HealthMode.maintainWeight:
         return "Weight Maintenance Plan";
       default:
-        return "Personalized Nutrition Plan";
+        return "Personalized Plan";
     }
   }
 
@@ -368,33 +341,19 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
     required String title,
     required String value,
     required String unit,
-    required IconData icon,
-    required Color color,
-    required String description,
   }) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color.withOpacity(0.8), color.withOpacity(0.6)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: MealAIColors.selectedTile,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
           Icon(
-            icon,
-            size: 50,
-            color: Colors.white,
+            Icons.local_fire_department,
+            size: 40,
+            color: MealAIColors.whiteText,
           ),
           const SizedBox(width: 20),
           Expanded(
@@ -403,10 +362,10 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                    color: MealAIColors.whiteText,
                   ),
                 ),
                 Row(
@@ -415,29 +374,21 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
                   children: [
                     Text(
                       value,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: MealAIColors.whiteText,
                       ),
                     ),
                     const SizedBox(width: 5),
                     Text(
                       unit,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
-                        color: Colors.white70,
+                        color: MealAIColors.whiteText.withOpacity(0.7),
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white70,
-                  ),
                 ),
               ],
             ),
@@ -451,21 +402,13 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
     String title,
     int value,
     String unit,
-    Color color,
     double percentage,
   ) {
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: MealAIColors.lightGreyTile,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
@@ -474,10 +417,10 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Colors.black87,
+                  color: MealAIColors.blackText,
                 ),
               ),
               Text(
@@ -485,23 +428,24 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: color,
+                  color: MealAIColors.blackText,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 15),
           Stack(
             alignment: Alignment.center,
             children: [
               SizedBox(
-                height: 80,
-                width: 80,
+                height: 70,
+                width: 70,
                 child: CircularProgressIndicator(
                   value: percentage,
-                  backgroundColor: Colors.grey[200],
-                  valueColor: AlwaysStoppedAnimation<Color>(color),
-                  strokeWidth: 10,
+                  backgroundColor: MealAIColors.stepperColor,
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(MealAIColors.selectedTile),
+                  strokeWidth: 8,
                 ),
               ),
               Column(
@@ -509,16 +453,16 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
                   Text(
                     value.toString(),
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: color,
+                      color: MealAIColors.blackText,
                     ),
                   ),
                   Text(
                     unit,
                     style: TextStyle(
                       fontSize: 14,
-                      color: color.withOpacity(0.7),
+                      color: MealAIColors.blackText.withOpacity(0.7),
                     ),
                   ),
                 ],
@@ -534,33 +478,26 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
     String title,
     int value,
     String unit,
-    IconData icon,
-    Color color,
   ) {
+    IconData icon = title == "Water" ? Icons.water_drop : Icons.grass;
+
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: MealAIColors.lightGreyTile,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: MealAIColors.switchWhiteColor,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
               icon,
-              color: color,
+              color: MealAIColors.blackText,
               size: 24,
             ),
           ),
@@ -571,10 +508,10 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Colors.black87,
+                    color: MealAIColors.blackText,
                   ),
                 ),
                 const SizedBox(height: 5),
@@ -585,7 +522,7 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: color,
+                        color: MealAIColors.blackText,
                       ),
                     ),
                     const SizedBox(width: 3),
@@ -593,7 +530,7 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
                       unit,
                       style: TextStyle(
                         fontSize: 14,
-                        color: color.withOpacity(0.7),
+                        color: MealAIColors.blackText.withOpacity(0.7),
                       ),
                     ),
                   ],
