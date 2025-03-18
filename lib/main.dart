@@ -1,8 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
+import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
 import 'package:turfit/app/modules/DashBoard/view/dashboard.dart';
@@ -19,6 +21,8 @@ final FirebaseUserRepo _userRepository = FirebaseUserRepo();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  configLoading();
 
   // Configure Bloc observer in release mode only if needed
   // This reduces startup overhead
@@ -49,6 +53,22 @@ class MyApp extends StatelessWidget {
   }
 }
 
+void configLoading() {
+  EasyLoading.instance
+    ..displayDuration = const Duration(milliseconds: 2000)
+    ..indicatorType = EasyLoadingIndicatorType.ring
+    ..loadingStyle = EasyLoadingStyle.dark
+    ..indicatorSize = 40.0
+    ..radius = 10.0
+    ..progressColor = MealAIColors.switchWhiteColor
+    ..backgroundColor = MealAIColors.blackText.withOpacity(0.8)
+    ..indicatorColor = MealAIColors.switchWhiteColor
+    ..textColor = MealAIColors.switchWhiteColor
+    ..maskColor = MealAIColors.blackText.withOpacity(0.5)
+    ..userInteractions = true
+    ..dismissOnTap = false;
+}
+
 class MyAppView extends StatelessWidget {
   const MyAppView({super.key});
 
@@ -58,6 +78,7 @@ class MyAppView extends StatelessWidget {
     return Sizer(
       builder: (context, orientation, deviceType) {
         return MaterialApp(
+          builder: EasyLoading.init(),
           title: 'Firebase Auth',
           debugShowCheckedModeBanner: false, // Remove banner for performance
           // theme: themeProvider.lightTheme,
@@ -90,6 +111,25 @@ class MyAppView extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class CustomAnimation extends EasyLoadingAnimation {
+  CustomAnimation();
+
+  @override
+  Widget buildWidget(
+    Widget child,
+    AnimationController controller,
+    AlignmentGeometry alignment,
+  ) {
+    return Opacity(
+      opacity: controller.value,
+      child: RotationTransition(
+        turns: controller,
+        child: child,
+      ),
     );
   }
 }

@@ -1,7 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:turfit/app/constants/colors.dart';
+import 'package:turfit/app/constants/constants.dart';
 import 'package:turfit/app/models/Auth/user.dart';
 import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
 import 'package:turfit/app/modules/DashBoard/view/dashboard.dart';
@@ -16,16 +17,13 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final passwordController = TextEditingController();
-  final emailController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
   bool signInRequired = false;
-  IconData iconPassword = CupertinoIcons.eye_fill;
-  bool obscurePassword = true;
   String? _errorMsg;
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
+
     return BlocListener<SignInBloc, SignInState>(
       listener: (context, state) {
         if (state is SignInSuccess) {
@@ -35,14 +33,19 @@ class _SignInScreenState extends State<SignInScreen> {
           });
           final FirebaseUserRepo _userRepository = FirebaseUserRepo();
 
-          Navigator.of(context).pushReplacement(MaterialPageRoute(
+          // Replace pushReplacement with pushAndRemoveUntil to clear the entire stack
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
               builder: (context) => BlocProvider(
-                    create: (context) => SignInBloc(
-                      userRepository: _userRepository,
-                    ),
-                    // Remove the BlocListener which is causing an extra rendering cycle
-                    child: const HomeScreen(),
-                  )));
+                create: (context) => SignInBloc(
+                  userRepository: _userRepository,
+                ),
+                child: const HomeScreen(),
+              ),
+            ),
+            (route) =>
+                false, // This predicate ensures all previous routes are removed
+          );
         } else if (state is SignInProcess) {
           setState(() {
             signInRequired = true;
@@ -50,131 +53,130 @@ class _SignInScreenState extends State<SignInScreen> {
         } else if (state is SignInFailure) {
           setState(() {
             signInRequired = false;
-            _errorMsg = 'Invalid email or password';
+            _errorMsg = 'Sign in failed';
           });
+
+          // Show error snackbar
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(_errorMsg ?? 'Sign in failed'),
+              backgroundColor: Colors.red.shade700,
+              behavior: SnackBarBehavior.floating,
+              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+          );
         }
       },
       child: Scaffold(
-        body: Form(
-            key: _formKey,
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // const SizedBox(height: 20),
-                // SizedBox(
-                //     width: MediaQuery.of(context).size.width * 0.9,
-                //     child: MyTextField(
-                //         controller: emailController,
-                //         hintText: 'Email',
-                //         obscureText: false,
-                //         keyboardType: TextInputType.emailAddress,
-                //         prefixIcon: const Icon(CupertinoIcons.mail_solid),
-                //         errorMsg: _errorMsg,
-                //         validator: (val) {
-                //           if (val!.isEmpty) {
-                //             return 'Please fill in this field';
-                //           } else if (!RegExp(r'^[\w-\.]+@([\w-]+.)+[\w-]{2,4}$')
-                //               .hasMatch(val)) {
-                //             return 'Please enter a valid email';
-                //           }
-                //           return null;
-                //         })),
-                // const SizedBox(height: 10),
-                // SizedBox(
-                //   width: MediaQuery.of(context).size.width * 0.9,
-                //   child: MyTextField(
-                //     controller: passwordController,
-                //     hintText: 'Password',
-                //     obscureText: obscurePassword,
-                //     keyboardType: TextInputType.visiblePassword,
-                //     prefixIcon: const Icon(CupertinoIcons.lock_fill),
-                //     errorMsg: _errorMsg,
-                //     validator: (val) {
-                //       if (val!.isEmpty) {
-                //         return 'Please fill in this field';
-                //       } else if (!RegExp(
-                //               r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~`)\%\-(_+=;:,.<>/?"[{\]}\|^]).{8,}$')
-                //           .hasMatch(val)) {
-                //         return 'Please enter a valid password';
-                //       }
-                //       return null;
-                //     },
-                //     suffixIcon: IconButton(
-                //       onPressed: () {
-                //         setState(() {
-                //           obscurePassword = !obscurePassword;
-                //           if (obscurePassword) {
-                //             iconPassword = CupertinoIcons.eye_fill;
-                //           } else {
-                //             iconPassword = CupertinoIcons.eye_slash_fill;
-                //           }
-                //         });
-                //       },
-                //       icon: Icon(iconPassword),
-                //     ),
-                //   ),
-                // ),
-                // const SizedBox(height: 20),
-                // !signInRequired
-                //     ? SizedBox(
-                //         width: MediaQuery.of(context).size.width * 0.5,
-                //         child: TextButton(
-                //             onPressed: () {
-                //               if (_formKey.currentState!.validate()) {
-                //                 context.read<SignInBloc>().add(SignInRequired(
-                //                     emailController.text,
-                //                     passwordController.text));
-                //               }
-                //             },
-                //             style: TextButton.styleFrom(
-                //                 elevation: 3.0,
-                //                 backgroundColor:
-                //                     Theme.of(context).colorScheme.primary,
-                //                 foregroundColor: Colors.white,
-                //                 shape: RoundedRectangleBorder(
-                //                     borderRadius: BorderRadius.circular(60))),
-                //             child: const Padding(
-                //               padding: EdgeInsets.symmetric(
-                //                   horizontal: 25, vertical: 5),
-                //               child: Text(
-                //                 'Sign In',
-                //                 textAlign: TextAlign.center,
-                //                 style: TextStyle(
-                //                     color: Colors.white,
-                //                     fontSize: 16,
-                //                     fontWeight: FontWeight.w600),
-                //               ),
-                //             )),
-                //       )
-                //     : const CircularProgressIndicator(),
-                ElevatedButton(
-                  onPressed: () {
-                    context
-                        .read<SignInBloc>()
-                        .add(GoogleSignInRequested(widget.user!));
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Image.asset(
-                      //   'assets/google_logo.png', // Add your Google logo asset
-                      //   height: 24,
-                      // ),
-                      Icon(
-                        Icons.login,
-                        color: MealAIColors.blackText,
+                // Logo or App Name
+                Container(
+                  height: 120,
+                  width: 120,
+                  decoration: BoxDecoration(
+                    color: MealAIColors.blackText.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.local_dining,
+                    size: 70,
+                    color: MealAIColors.blackText,
+                  ),
+                ),
+
+                SizedBox(height: 40),
+
+                // Welcome Text
+                Text(
+                  'Welcome to ${AppInfo.appName}',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: MealAIColors.blackText,
+                  ),
+                ),
+
+                SizedBox(height: 16),
+
+                Text(
+                  "${AppInfo.appDescription}",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+
+                SizedBox(height: 70),
+
+                // Google Sign In Button
+                !signInRequired
+                    ? Container(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            context
+                                .read<SignInBloc>()
+                                .add(GoogleSignInRequested(widget.user!));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: MealAIColors.blackText,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              side: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            elevation: 1,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SvgPicture.asset("assets/svg/google.svg",
+                                  width: 24),
+                              SizedBox(width: 16),
+                              Text(
+                                "Continue with Google",
+                                style: TextStyle(
+                                  color: MealAIColors.blackText,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: CircularProgressIndicator(
+                          color: MealAIColors.blackText,
+                        ),
                       ),
-                      SizedBox(width: 8),
-                      Text("Sign Up with Google",
-                          style: TextStyle(
-                              color: MealAIColors.blackText,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600)),
-                    ],
+
+                SizedBox(height: 20),
+
+                Text(
+                  "By signing in, you agree to our Terms & Privacy Policy",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 12,
                   ),
                 ),
               ],
-            )),
+            ),
+          ),
+        ),
       ),
     );
   }

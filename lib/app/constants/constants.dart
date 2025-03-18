@@ -45,3 +45,10 @@ class AppConstants {
     return nutritionFunFacts[random.nextInt(nutritionFunFacts.length)];
   }
 }
+
+class AppInfo {
+  static String appName = "MealAI";
+
+  static String appDescription =
+      "MealAI is an AI-powered nutrition app that helps you get healthier by providing personalized meal plans and nutrition advice.";
+}
