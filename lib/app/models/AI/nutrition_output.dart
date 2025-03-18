@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 class NutritionOutput {
-  final List<Response> response;
+  final List<NutritionInfo> response;
   final int status;
   final String message;
   final int inputTokenCount;
@@ -28,8 +28,8 @@ class NutritionOutput {
 
   factory NutritionOutput.fromJson(Map<String, dynamic> json) =>
       NutritionOutput(
-        response: List<Response>.from(
-            json["response"].map((x) => Response.fromJson(x))),
+        response: List<NutritionInfo>.from(
+            json["response"].map((x) => NutritionInfo.fromJson(x))),
         status: json["status"],
         message: json["message"],
         inputTokenCount: json["input_token_count"],
@@ -51,17 +51,17 @@ class NutritionOutput {
       };
 }
 
-class Response {
+class NutritionInfo {
   final String name;
   final int calories;
   final int protein;
   final int carbs;
   final int fibre;
   final int fat;
-  final int quantity;
+  final double quantity;
   final String portion;
 
-  Response({
+  NutritionInfo({
     required this.name,
     required this.calories,
     required this.protein,
@@ -72,12 +72,12 @@ class Response {
     required this.portion,
   });
 
-  factory Response.fromRawJson(String str) =>
-      Response.fromJson(json.decode(str));
+  factory NutritionInfo.fromRawJson(String str) =>
+      NutritionInfo.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
-  factory Response.fromJson(Map<String, dynamic> json) => Response(
+  factory NutritionInfo.fromJson(Map<String, dynamic> json) => NutritionInfo(
         name: json["name"],
         calories: json["calories"],
         protein: json["protein"],
