@@ -8,11 +8,13 @@ import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
 import 'package:turfit/app/modules/DashBoard/view/dashboard.dart';
+import 'package:turfit/app/modules/Home/bloc/bloc/user_nutrition_record_bloc.dart';
 import 'package:turfit/app/modules/Onboarding/views/onboarding_home.dart';
 import 'package:turfit/app/modules/Scanner/bloc/bloc/ai_scan_bloc.dart';
 import 'package:turfit/app/providers/theme_provider.dart';
 import 'package:turfit/app/repo/firebase_user_repo.dart';
 import 'package:turfit/app/repo/meal_ai_repo.dart';
+import 'package:turfit/app/utility/service_locator.dart';
 import 'package:turfit/app/utility/simple_bloc_observer.dart';
 
 // Pre-initialize repository for faster startup
@@ -21,7 +23,7 @@ final FirebaseUserRepo _userRepository = FirebaseUserRepo();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
+  setupLocator();
   configLoading();
 
   // Configure Bloc observer in release mode only if needed
@@ -33,8 +35,9 @@ void main() async {
       providers: [
         BlocProvider<AiScanBloc>(
             create: (context) => AiScanBloc(AiRepository())),
+        BlocProvider<UserNutritionRecordBloc>(
+            create: (context) => UserNutritionRecordBloc()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        // Pre-create the AuthenticationBloc at app startup
         BlocProvider<AuthenticationBloc>(
             create: (context) =>
                 AuthenticationBloc(userRepository: _userRepository)),

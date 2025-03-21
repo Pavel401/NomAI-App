@@ -44,6 +44,19 @@ class _MealAiCameraState extends State<MealAiCamera> {
       // Process the selected image
       // You could navigate to a new screen passing the image file
       File imageFile = File(image.path);
+      final scanningBloc = context.read<AiScanBloc>();
+
+      final resizedFile = await ImageUtility.downscaleImage(
+        imageFile.path!,
+        scale: ImageScale.large_2048,
+      );
+
+      final base64String =
+          await ImageUtility.convertImageToBase64(resizedFile.path);
+      scanningBloc.add(AiScanStarted(NutritionInputQuery(
+          imageData: base64String, scanMode: _selectedscanMode)));
+
+      Navigator.pop(context);
       // Example: Navigate to results screen with image
       // Navigator.push(context, MaterialPageRoute(builder: (context) => ResultsScreen(imageFile: imageFile)));
     }
@@ -71,8 +84,8 @@ class _MealAiCameraState extends State<MealAiCamera> {
 
           final base64String =
               await ImageUtility.convertImageToBase64(resizedFile.path);
-          scanningBloc
-              .add(AiScanStarted(NutritionInputQuery(imageData: base64String)));
+          scanningBloc.add(AiScanStarted(NutritionInputQuery(
+              imageData: base64String, scanMode: _selectedscanMode)));
 
           Navigator.pop(context);
 

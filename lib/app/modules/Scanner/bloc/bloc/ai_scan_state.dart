@@ -16,10 +16,11 @@ final class AiScanLoading extends AiScanState {}
 // ✅ Success State (Like controller.data.value)
 final class AiScanSuccess extends AiScanState {
   final NutritionOutput nutritionOutput;
-  AiScanSuccess(this.nutritionOutput);
+  final NutritionInputQuery nutritionInputQuery;
+  AiScanSuccess(this.nutritionOutput, this.nutritionInputQuery);
 
   @override
-  List<Object> get props => [nutritionOutput];
+  List<Object> get props => [nutritionOutput, nutritionInputQuery];
 }
 
 // ✅ Failure State (Like controller.error.value)

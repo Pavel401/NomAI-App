@@ -25,7 +25,7 @@ class AiScanBloc extends Bloc<AiScanEvent, AiScanState> {
           await aiRepository.getNutritionData(event.nutritionInputQuery);
 
       // ✅ Emit Success State
-      emit(AiScanSuccess(nutritionOutput));
+      emit(AiScanSuccess(nutritionOutput, event.nutritionInputQuery));
     } catch (e) {
       // ✅ Emit Failure State
       emit(AiScanFailure("Failed to fetch data"));
