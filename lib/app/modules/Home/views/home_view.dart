@@ -39,72 +39,77 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Nutrition Scan')),
-      body: Column(
-        children: [
-          BlocBuilder<UserNutritionRecordBloc, UserNutritionRecordState>(
-            builder: (context, state) {
-              if (state is UserNutritionRecordLoading) {
-                return CircularProgressIndicator();
-              }
-              if (state is UserNutritionRecordSuccess) {
-                dailyNutritionRecords = state.nutritionRecords;
-                return ListView.builder(
-                    itemCount: dailyNutritionRecords.dailyRecords.length,
-                    shrinkWrap: true,
-                    itemBuilder: (context, index) {
-                      final record = dailyNutritionRecords.dailyRecords[index];
-                      return ListTile(
-                        title: Text(
-                          record.nutritionOutput.response.toString(),
-                          style: TextStyle(
-                            color: Colors.black,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            BlocBuilder<UserNutritionRecordBloc, UserNutritionRecordState>(
+              builder: (context, state) {
+                if (state is UserNutritionRecordLoading) {
+                  return CircularProgressIndicator();
+                }
+                if (state is UserNutritionRecordSuccess) {
+                  dailyNutritionRecords = state.nutritionRecords;
+                  return ListView.builder(
+                      itemCount: dailyNutritionRecords.dailyRecords.length,
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        final record =
+                            dailyNutritionRecords.dailyRecords[index];
+                        return ListTile(
+                          title: Text(
+                            record.nutritionOutput.response.toString(),
+                            style: TextStyle(
+                              color: Colors.black,
+                            ),
                           ),
-                        ),
-                        subtitle: Text(
-                          record.nutritionOutput.executionTimeSeconds
-                              .toString(),
-                          style: TextStyle(
-                            color: Colors.black,
+                          subtitle: Text(
+                            record.nutritionOutput.executionTimeSeconds
+                                .toString(),
+                            style: TextStyle(
+                              color: Colors.black,
+                            ),
                           ),
-                        ),
-                      );
-                    });
-              }
-              if (state is UserNutritionRecordFailure) {
-                return Text("Error: ${state.message}");
-              }
-              return SizedBox();
-            },
-          ),
-          BlocBuilder<AiScanBloc, AiScanState>(
-            builder: (context, state) {
-              if (state is AiScanLoading) {
-                return CircularProgressIndicator();
-              }
+                        );
+                      });
+                }
+                if (state is UserNutritionRecordFailure) {
+                  return Text("Error: ${state.message}");
+                }
+                return SizedBox();
+              },
+            ),
+            BlocBuilder<AiScanBloc, AiScanState>(
+              builder: (context, state) {
+                if (state is AiScanLoading) {
+                  return CircularProgressIndicator();
+                }
 
-              if (state is AiScanSuccess) {
-                dailyNutritionRecords.dailyRecords.add(NutritionRecord(
-                  nutritionOutput: state.nutritionOutput,
-                  recordTime: DateTime.now(),
-                  scanMode: state.nutritionInputQuery.scanMode,
-                ));
+                if (state is AiScanSuccess) {
+                  dailyNutritionRecords.dailyRecords.add(NutritionRecord(
+                    nutritionOutput: state.nutritionOutput,
+                    recordTime: DateTime.now(),
+                    scanMode: state.nutritionInputQuery.scanMode,
+                  ));
 
-                context.read<UserNutritionRecordBloc>().add(UserNutritionAdded(
-                      context.read<AuthenticationBloc>().state.user!.uid,
-                      dailyNutritionRecords,
-                    ));
-                return Text(
-                    "Calories: ${state.nutritionOutput.executionTimeSeconds}");
-              }
+                  context
+                      .read<UserNutritionRecordBloc>()
+                      .add(UserNutritionAdded(
+                        context.read<AuthenticationBloc>().state.user!.uid,
+                        dailyNutritionRecords,
+                      ));
+                  return Text(
+                      "Calories: ${state.nutritionOutput.executionTimeSeconds}");
+                }
 
-              if (state is AiScanFailure) {
-                return Text("Error: ${state.message}");
-              }
+                if (state is AiScanFailure) {
+                  return Text("Error: ${state.message}");
+                }
 
-              return Text("Press the button to scan");
-            },
-          ),
-        ],
+                return Text("Press the button to scan");
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

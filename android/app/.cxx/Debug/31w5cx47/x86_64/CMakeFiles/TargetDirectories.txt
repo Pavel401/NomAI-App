@@ -1,0 +1,2 @@
+/Users/mabud/Desktop/WorkSpace/MealAI/android/app/.cxx/Debug/31w5cx47/x86_64/CMakeFiles/edit_cache.dir
+/Users/mabud/Desktop/WorkSpace/MealAI/android/app/.cxx/Debug/31w5cx47/x86_64/CMakeFiles/rebuild_cache.dir
