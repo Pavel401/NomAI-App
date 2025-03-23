@@ -1,4 +1,4 @@
-package com.example.turfit
+package com.mealai.app
 
 import io.flutter.embedding.android.FlutterActivity
 

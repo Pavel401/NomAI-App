@@ -3,14 +3,14 @@ import 'dart:io';
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:sizer/sizer.dart';
 import 'package:turfit/app/components/scanner_overlays.dart';
 import 'package:turfit/app/constants/colors.dart';
-import 'package:turfit/app/models/AI/nutrition_input.dart';
-import 'package:turfit/app/modules/Scanner/bloc/bloc/ai_scan_bloc.dart';
-import 'package:turfit/app/utility/image_utility.dart';
+import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
+import 'package:turfit/app/modules/Scanner/controller/scanner_controller.dart';
 
 enum ScanMode { food, barcode, gallery }
 
@@ -44,14 +44,19 @@ class _MealAiCameraState extends State<MealAiCamera> {
       // Process the selected image
       // You could navigate to a new screen passing the image file
       File imageFile = File(image.path);
+
+      ScannerController scannerController = Get.put(ScannerController());
+      final authBloc = context.read<AuthenticationBloc>();
+
+      scannerController.processNutritionQueryRequest(
+          authBloc.state.user!.uid.toString(), imageFile, _selectedscanMode);
+      Navigator.pop(context);
       // Example: Navigate to results screen with image
       // Navigator.push(context, MaterialPageRoute(builder: (context) => ResultsScreen(imageFile: imageFile)));
     }
   }
 
   void _captureImage(CameraState state) {
-    final scanningBloc = context.read<AiScanBloc>();
-
     state.when(
       onPhotoMode: (photoState) {
         photoState.takePhoto().then((mediaCapture) async {
@@ -64,16 +69,13 @@ class _MealAiCameraState extends State<MealAiCamera> {
           //               imagePath: mediaCapture.path!,
           //             )));
 
-          final resizedFile = await ImageUtility.downscaleImage(
-            mediaCapture.path!,
-            scale: ImageScale.large_2048,
-          );
+          ScannerController scannerController = Get.put(ScannerController());
+          final authBloc = context.read<AuthenticationBloc>();
 
-          final base64String =
-              await ImageUtility.convertImageToBase64(resizedFile.path);
-          scanningBloc
-              .add(AiScanStarted(NutritionInputQuery(imageData: base64String)));
-
+          scannerController.processNutritionQueryRequest(
+              authBloc.state.user!.uid.toString(),
+              File(mediaCapture.path!),
+              _selectedscanMode);
           Navigator.pop(context);
 
           // Process the captured photo

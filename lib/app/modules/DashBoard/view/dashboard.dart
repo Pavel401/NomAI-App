@@ -179,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          HomeView(),
+          HomePage(),
           Center(child: Text('📷 QR Scan Screen')),
           Center(child: Text('📊 Analytics Screen')),
         ],

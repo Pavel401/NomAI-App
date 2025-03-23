@@ -1,45 +1,37 @@
 {
   "project_info": {
-    "project_number": "1053914152119",
-    "project_id": "nutrix-c7090",
-    "storage_bucket": "nutrix-c7090.firebasestorage.app"
+    "project_number": "760266971868",
+    "project_id": "mealai-f58b5",
+    "storage_bucket": "mealai-f58b5.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1053914152119:android:b76edb4ebf4c893155a132",
+        "mobilesdk_app_id": "1:760266971868:android:294f9d9266ac1887ed7219",
         "android_client_info": {
-          "package_name": "com.example.gymx"
+          "package_name": "com.mealai.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1053914152119-in66s13flhahugeor82g7c6efojdr5ro.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.gymx",
-            "certificate_hash": "3dbed5a9fee86e205413443f86adfc375df3c7b9"
-          }
-        },
-        {
-          "client_id": "1053914152119-cf806t3e5iso4s6lq7808qkkqfsb8m8f.apps.googleusercontent.com",
+          "client_id": "760266971868-hqjqeg6oisva33lnhqhg8kmiud1l4c4u.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAUsjbdHUIRHtwWKLlWzTFGmU3XVYcTYNw"
+          "current_key": "AIzaSyAXOcHJpHJhaXOsE-6qdyrt2UeXNE7ZYaU"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1053914152119-cf806t3e5iso4s6lq7808qkkqfsb8m8f.apps.googleusercontent.com",
+              "client_id": "760266971868-hqjqeg6oisva33lnhqhg8kmiud1l4c4u.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "1053914152119-7vbnefaspn67d2mbtfmhs7ul98gdclt4.apps.googleusercontent.com",
+              "client_id": "760266971868-pcgg8ed4jti5umn0u0fonjoqobc6p7bn.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.example.gymx"

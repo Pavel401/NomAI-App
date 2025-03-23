@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:get/route_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 import 'package:turfit/app/constants/colors.dart';
@@ -9,10 +10,9 @@ import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication
 import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
 import 'package:turfit/app/modules/DashBoard/view/dashboard.dart';
 import 'package:turfit/app/modules/Onboarding/views/onboarding_home.dart';
-import 'package:turfit/app/modules/Scanner/bloc/bloc/ai_scan_bloc.dart';
 import 'package:turfit/app/providers/theme_provider.dart';
 import 'package:turfit/app/repo/firebase_user_repo.dart';
-import 'package:turfit/app/repo/meal_ai_repo.dart';
+import 'package:turfit/app/utility/registry_service.dart';
 import 'package:turfit/app/utility/simple_bloc_observer.dart';
 
 // Pre-initialize repository for faster startup
@@ -23,6 +23,7 @@ void main() async {
   await Firebase.initializeApp();
 
   configLoading();
+  setupRegistry();
 
   // Configure Bloc observer in release mode only if needed
   // This reduces startup overhead
@@ -31,8 +32,6 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        BlocProvider<AiScanBloc>(
-            create: (context) => AiScanBloc(AiRepository())),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         // Pre-create the AuthenticationBloc at app startup
         BlocProvider<AuthenticationBloc>(
@@ -77,7 +76,7 @@ class MyAppView extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
     return Sizer(
       builder: (context, orientation, deviceType) {
-        return MaterialApp(
+        return GetMaterialApp(
           builder: EasyLoading.init(),
           title: 'Firebase Auth',
           debugShowCheckedModeBanner: false, // Remove banner for performance

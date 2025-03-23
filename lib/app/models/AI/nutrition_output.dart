@@ -84,7 +84,7 @@ class NutritionInfo {
         carbs: json["carbs"],
         fibre: json["fibre"],
         fat: json["fat"],
-        quantity: json["quantity"],
+        quantity: json["quantity"]?.toDouble(),
         portion: json["portion"],
       );
 

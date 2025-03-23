@@ -1,50 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
-import 'package:turfit/app/modules/Scanner/bloc/bloc/ai_scan_bloc.dart';
+import 'package:get/get.dart';
+import 'package:turfit/app/models/AI/nutrition_record.dart';
+import 'package:turfit/app/modules/Scanner/controller/scanner_controller.dart';
 
-class HomeView extends StatelessWidget {
+class HomePage extends StatelessWidget {
+  final ScannerController scannerController = Get.put(ScannerController());
+
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<AiScanBloc>();
-    final authBloc = context.read<SignInBloc>();
-
     return Scaffold(
-      appBar: AppBar(title: Text('Nutrition Scan')),
-      body: Column(
-        children: [
-          Row(
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  // ✅ Add Event to Bloc
-                  authBloc.add(SignOutRequired());
-                },
-                child: Text("Logout"),
-              ),
-            ],
-          ),
-          // ✅ Listen to Bloc State (like Obx())
-          BlocBuilder<AiScanBloc, AiScanState>(
-            builder: (context, state) {
-              if (state is AiScanLoading) {
-                return CircularProgressIndicator();
-              }
-
-              if (state is AiScanSuccess) {
-                return Text(
-                    "Calories: ${state.nutritionOutput.executionTimeSeconds}");
-              }
-
-              if (state is AiScanFailure) {
-                return Text("Error: ${state.message}");
-              }
-
-              return Text("Press the button to scan");
-            },
-          ),
-        ],
+      appBar: AppBar(
+        title: Text('Nutrition Scanner'),
       ),
+      body: Obx(() {
+        if (scannerController.isLoading.value) {
+          return Center(child: CircularProgressIndicator());
+        }
+        return ListView.builder(
+          itemCount: scannerController.dailyRecords.length,
+          itemBuilder: (context, index) {
+            NutritionRecord record = scannerController.dailyRecords[index];
+            return ListTile(
+              leading: Image.network(record.nutritionInputQuery.imageUrl!),
+              title: Text('Nutrition Record ${index + 1}'),
+              subtitle: Text('Processed at: ${record.recordTime}'),
+            );
+          },
+        );
+      }),
     );
   }
 }

@@ -1,36 +1,29 @@
+import 'package:turfit/app/models/AI/nutrition_input.dart';
 import 'package:turfit/app/models/AI/nutrition_output.dart';
-import 'package:turfit/app/modules/Scanner/views/scan_view.dart';
 
 class NutritionRecord {
   final NutritionOutput nutritionOutput;
+  final NutritionInputQuery nutritionInputQuery;
   final DateTime recordTime;
-  final String? foodImageData;
-  final String? barcodeData;
-  final ScanMode scanMode;
 
   NutritionRecord({
     required this.nutritionOutput,
     required this.recordTime,
-    required this.scanMode,
-    this.foodImageData,
-    this.barcodeData,
+    required this.nutritionInputQuery,
   });
 
   factory NutritionRecord.fromJson(Map<String, dynamic> json) =>
       NutritionRecord(
-        nutritionOutput: NutritionOutput.fromRawJson(json['nutritionOutput']),
+        nutritionOutput: NutritionOutput.fromJson(json['nutritionOutput']),
+        nutritionInputQuery:
+            NutritionInputQuery.fromJson(json['nutritionInputQuery']),
         recordTime: DateTime.parse(json['recordTime']),
-        foodImageData: json['foodImageData'] as String?,
-        barcodeData: json['barcodeData'] as String?,
-        scanMode: ScanMode.values[json['scanMode']],
       );
 
   Map<String, dynamic> toJson() => {
-        'nutritionOutput': nutritionOutput.toRawJson(),
+        'nutritionOutput': nutritionOutput.toJson(),
         'recordTime': recordTime.toIso8601String(),
-        'foodImageData': foodImageData,
-        'barcodeData': barcodeData,
-        'scanMode': scanMode.index,
+        'nutritionInputQuery': nutritionInputQuery.toJson(),
       };
 }
 
@@ -48,7 +41,8 @@ class DailyNutritionRecords {
   factory DailyNutritionRecords.fromJson(Map<String, dynamic> json) =>
       DailyNutritionRecords(
         dailyRecords: (json['dailyRecords'] as List)
-            .map((item) => NutritionRecord.fromJson(item))
+            .map((item) =>
+                NutritionRecord.fromJson(item as Map<String, dynamic>))
             .toList(),
         recordDate: DateTime.parse(json['recordDate']),
         recordId: json['recordId'],

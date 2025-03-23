@@ -50,19 +50,21 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAUsjbdHUIRHtwWKLlWzTFGmU3XVYcTYNw',
-    appId: '1:1053914152119:android:b76edb4ebf4c893155a132',
-    messagingSenderId: '1053914152119',
-    projectId: 'nutrix-c7090',
-    storageBucket: 'nutrix-c7090.firebasestorage.app',
+    apiKey: 'AIzaSyAXOcHJpHJhaXOsE-6qdyrt2UeXNE7ZYaU',
+    appId: '1:760266971868:android:294f9d9266ac1887ed7219',
+    messagingSenderId: '760266971868',
+    projectId: 'mealai-f58b5',
+    storageBucket: 'mealai-f58b5.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDv2NT8n_f8a-0fVrTe-bL-xyt4yO04MtU',
-    appId: '1:1053914152119:ios:6978e8c61b1856e355a132',
-    messagingSenderId: '1053914152119',
-    projectId: 'nutrix-c7090',
-    storageBucket: 'nutrix-c7090.firebasestorage.app',
-    iosBundleId: 'com.example.gymx',
+    apiKey: 'AIzaSyDDA-sAvK9lMg_vS2MuxV1E_-GL3FOkTt8',
+    appId: '1:760266971868:ios:c97163f2e301c062ed7219',
+    messagingSenderId: '760266971868',
+    projectId: 'mealai-f58b5',
+    storageBucket: 'mealai-f58b5.firebasestorage.app',
+    iosClientId: '760266971868-ulv79u23l561pcm0knji9c9o199eqd8a.apps.googleusercontent.com',
+    iosBundleId: 'com.mealai.app',
   );
+
 }
