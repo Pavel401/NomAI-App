@@ -1,15 +1,18 @@
+import 'package:turfit/app/constants/enums.dart';
 import 'package:turfit/app/models/AI/nutrition_input.dart';
 import 'package:turfit/app/models/AI/nutrition_output.dart';
 
 class NutritionRecord {
-  final NutritionOutput nutritionOutput;
-  final NutritionInputQuery nutritionInputQuery;
-  final DateTime recordTime;
+  NutritionOutput? nutritionOutput;
+  NutritionInputQuery? nutritionInputQuery;
+  DateTime? recordTime;
+  ProcessingStatus? processingStatus;
 
   NutritionRecord({
-    required this.nutritionOutput,
-    required this.recordTime,
-    required this.nutritionInputQuery,
+    this.nutritionOutput,
+    this.recordTime,
+    this.nutritionInputQuery,
+    this.processingStatus,
   });
 
   factory NutritionRecord.fromJson(Map<String, dynamic> json) =>
@@ -18,12 +21,15 @@ class NutritionRecord {
         nutritionInputQuery:
             NutritionInputQuery.fromJson(json['nutritionInputQuery']),
         recordTime: DateTime.parse(json['recordTime']),
+        processingStatus:
+            ProcessingStatus.values.byName(json['processingStatus']),
       );
 
   Map<String, dynamic> toJson() => {
-        'nutritionOutput': nutritionOutput.toJson(),
-        'recordTime': recordTime.toIso8601String(),
-        'nutritionInputQuery': nutritionInputQuery.toJson(),
+        'nutritionOutput': nutritionOutput!.toJson(),
+        'recordTime': recordTime!.toIso8601String(),
+        'nutritionInputQuery': nutritionInputQuery!.toJson(),
+        'processingStatus': processingStatus!.name,
       };
 }
 
