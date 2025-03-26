@@ -104,8 +104,8 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             child: GetBuilder<ScannerController>(
               builder: (controller) {
-                // Check loading state
-                if (controller.isLoading) {
+                // Show loading indicator when fetching records for the first time
+                if (controller.isLoading && controller.dailyRecords.isEmpty) {
                   return Center(
                     child: CircularProgressIndicator(
                       color: MealAIColors.selectedTile,
@@ -132,7 +132,7 @@ class _HomePageState extends State<HomePage> {
                   itemCount: controller.dailyRecords.length,
                   itemBuilder: (context, index) {
                     NutritionRecord record = controller.dailyRecords[index];
-                    return NutritionCard(nutritionRecord: record!);
+                    return NutritionCard(nutritionRecord: record);
                   },
                 );
               },
