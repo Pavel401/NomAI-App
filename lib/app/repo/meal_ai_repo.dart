@@ -11,7 +11,7 @@ class AiRepository {
     try {
       final response = await http.post(
         Uri.parse(BaseUrl.baseUrl + ApiPath.getNutritionData),
-        body: jsonEncode(inputQuery.toJson()),
+        body: jsonEncode(inputQuery.toJsonForMealAIBackend()),
         headers: {"Content-Type": "application/json"},
       );
 
