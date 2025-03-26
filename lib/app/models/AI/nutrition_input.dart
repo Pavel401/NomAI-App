@@ -2,29 +2,35 @@ import 'package:turfit/app/modules/Scanner/views/scan_view.dart';
 
 class NutritionInputQuery {
   final String imageUrl;
-  final ScanMode scanMode;
-  final String imageData;
+  final ScanMode? scanMode;
+  String? imageData;
+  String? imageFilePath;
 
   NutritionInputQuery({
     required this.imageUrl,
     required this.scanMode,
-    required this.imageData,
+    this.imageData,
+    this.imageFilePath,
   });
 
   factory NutritionInputQuery.fromJson(Map<String, dynamic> json) {
     return NutritionInputQuery(
-      imageUrl: json['imageUrl'],
-      scanMode: ScanMode.values.firstWhere(
-        (e) => e.toString() == json['scanMode'],
-        orElse: () => ScanMode.gallery,
-      ),
-      imageData: json['imageData'],
+      imageUrl: json['imageUrl'] ?? '',
+      scanMode: json['scanMode'] == null
+          ? ScanMode.food
+          : ScanMode.values.byName(json['scanMode']),
     );
   }
 
   Map<String, dynamic> toJson() => {
         'imageUrl': imageUrl,
-        'scanMode': scanMode.toString(),
-        'imageData': imageData,
+        'scanMode': scanMode!.name,
+        // 'imageData' is intentionally excluded
+      };
+
+  Map<String, dynamic> toJsonForMealAIBackend() => {
+        // 'imageData' is intentionally excluded
+
+        "imageData": imageData,
       };
 }
