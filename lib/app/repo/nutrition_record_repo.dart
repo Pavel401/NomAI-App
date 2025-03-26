@@ -1,40 +1,54 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:turfit/app/constants/enums.dart';
 import 'package:turfit/app/models/AI/nutrition_record.dart';
 
 class NutritionRecordRepo {
   final usersCollection = FirebaseFirestore.instance.collection('users');
 
   String getRecordId(DateTime date) {
-    return date.day.toString() +
-        date.month.toString() +
-        date.year.toString() +
-        date.weekday.toString();
+    return "${date.year}-${date.month}-${date.day}";
   }
 
-  Future<void> saveNutritionData(
+  Future<QueryStatus> saveNutritionData(
       DailyNutritionRecords record, String userId) async {
     try {
+      final recordId = getRecordId(record.recordDate);
+
       await usersCollection
           .doc(userId)
           .collection('nutritionRecords')
-          .doc(record.recordId)
+          .doc(recordId)
           .set(record.toJson());
+
+      return QueryStatus.SUCCESS;
     } catch (e) {
       print("🔥 [API Error] $e");
-      throw Exception("❌ Something went wrong: $e");
+
+      return QueryStatus.FAILED;
     }
   }
 
-  Future<List<DailyNutritionRecords>> getNutritionData(String userId) async {
+  Future<DailyNutritionRecords> getNutritionData(
+      String userId, DateTime date) async {
+    String recordId = getRecordId(date);
+
     try {
       final snapshot = await usersCollection
           .doc(userId)
           .collection('nutritionRecords')
+          .doc(recordId)
           .get();
 
-      return snapshot.docs
-          .map((doc) => DailyNutritionRecords.fromJson(doc.data()))
-          .toList();
+      if (snapshot.exists) {
+        final data = snapshot.data()!;
+        return DailyNutritionRecords.fromJson(data);
+      } else {
+        return DailyNutritionRecords(
+          dailyRecords: [],
+          recordDate: date,
+          recordId: recordId,
+        );
+      }
     } catch (e) {
       print("🔥 [API Error] $e");
       throw Exception("❌ Something went wrong: $e");
