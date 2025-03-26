@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:turfit/app/constants/enums.dart';
@@ -15,27 +16,38 @@ class NutritionCard extends StatelessWidget {
       child: nutritionRecord.processingStatus == ProcessingStatus.PROCESSING
           ? Row(
               children: [
-                // nutritionRecord.processingStatus == ProcessingStatus.PROCESSING
-                //     ? Image.file(
-                //         File(nutritionRecord.nutritionInputQuery!.imageFilePath!))
-                // : CachedNetworkImage(
-                //     imageUrl: nutritionRecord.nutritionInputQuery!.imageUrl!,
-                //     placeholder: (context, url) => CircularProgressIndicator(),
-                //     width: 20.w,
-                //     height: 10.h,
-                //   ),
-
                 Image.file(
                   File(nutritionRecord.nutritionInputQuery!.imageFilePath!),
                   width: 20.w,
                   height: 10.h,
                 ),
-
+                SizedBox(width: 8),
                 Text("Processing..."),
               ],
             )
           : Row(
-              children: [],
+              children: [
+                CachedNetworkImage(
+                  imageUrl: nutritionRecord.nutritionInputQuery!.imageUrl!,
+                  placeholder: (context, url) => CircularProgressIndicator(),
+                  width: 20.w,
+                  height: 10.h,
+                ),
+                SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Record Time: ${nutritionRecord.recordTime}",
+                      style: TextStyle(fontSize: 12.sp),
+                    ),
+                    Text(
+                      "Status: Completed",
+                      style: TextStyle(fontSize: 10.sp, color: Colors.green),
+                    ),
+                  ],
+                ),
+              ],
             ),
     );
   }
