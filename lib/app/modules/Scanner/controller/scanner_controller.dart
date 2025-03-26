@@ -146,8 +146,8 @@ class ScannerController extends GetxController {
 
     try {
       // Set loading state and update UI
-      // isLoading = true;
-      // update();
+      isLoading = true;
+      update();
 
       final nutritionRecordRepo = serviceLocator<NutritionRecordRepo>();
 
@@ -160,15 +160,12 @@ class ScannerController extends GetxController {
       dailyRecords = records.dailyRecords;
 
       print("✅ Successfully retrieved records");
-      update();
     } catch (e) {
       print("🔥 [API Error] $e");
 
       // Clear records on error
       dailyRecords.clear();
       existingNutritionRecords = null;
-      update();
-
       throw Exception("❌ Something went wrong: $e");
     } finally {
       // Always set loading to false
