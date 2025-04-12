@@ -121,14 +121,15 @@ class NutritionView extends StatelessWidget {
               ListView.separated(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
-                itemCount: nutritionRecord.nutritionOutput!.response.length,
+                itemCount: nutritionRecord
+                    .nutritionOutput!.response.nutritionData.length,
                 separatorBuilder: (context, index) => Divider(
                   color: Colors.grey[300],
                   height: 1,
                 ),
                 itemBuilder: (context, index) {
-                  final nutritionInfo =
-                      nutritionRecord.nutritionOutput!.response[index];
+                  final nutritionInfo = nutritionRecord
+                      .nutritionOutput!.response.nutritionData[index];
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Row(
@@ -146,7 +147,7 @@ class NutritionView extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                '${nutritionInfo.quantity} ${nutritionInfo.portion}',
+                                '${nutritionInfo.portion}',
                                 style: TextStyle(color: Colors.black54),
                               ),
                             ],

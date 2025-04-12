@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/modules/Home/views/home_view.dart';
@@ -65,8 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
             /// Move to QR Scan Page (index 1)
             // _onItemTapped(1);
 
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => MealAiCamera()));
+            Get.to(() => MealAiCamera());
           },
           child: Padding(
             padding: const EdgeInsets.all(8),

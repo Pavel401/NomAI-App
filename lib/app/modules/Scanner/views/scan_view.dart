@@ -131,8 +131,40 @@ class _MealAiCameraState extends State<MealAiCamera> {
           sensor: Sensor.position(SensorPosition.back),
           zoom: 0.0,
         ),
-        previewFit: CameraPreviewFit.cover,
-        onMediaTap: (mediaCapture) {},
+        // previewFit: CameraPreviewFit.cover,
+        // onMediaTap: (mediaCapture) {},
+
+        bottomActionsBuilder: (state) {
+          return AwesomeBottomActions(
+            state: state,
+            captureButton: AwesomeBouncingWidget(
+              onTap: () {
+                _captureImage(state);
+              },
+              disabledOpacity: 0.3,
+              duration: const Duration(milliseconds: 100),
+              vibrationEnabled: true,
+              child: SizedBox(
+                key: const ValueKey('staticCameraButton'),
+                height: 80,
+                width: 80,
+                child: CustomPaint(
+                  painter: state.when(
+                    onPhotoMode: (_) => CameraButtonPainter(),
+                    // onPreparingCamera: (_) => CameraButtonPainter(),
+                    // onVideoMode: (_) => VideoButtonPainter(),
+                    // onVideoRecordingMode: (_) =>
+                    //     VideoButtonPainter(isRecording: true),
+                  ),
+                ),
+              ),
+            ),
+            left: AwesomeFlashButton(
+              state: state,
+            ),
+            right: SizedBox(),
+          );
+        },
         theme: AwesomeTheme(
           bottomActionsBackgroundColor: Colors.transparent,
           buttonTheme: AwesomeButtonTheme(
@@ -204,46 +236,46 @@ class _MealAiCameraState extends State<MealAiCamera> {
             ),
           );
         },
-        bottomActionsBuilder: (state) => Padding(
-          padding: const EdgeInsets.only(bottom: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  // GestureDetector(
-                  //   onTap: _toggleFlashMode,
-                  //   child: CircleAvatar(
-                  //     backgroundColor: Colors.white,
-                  //     radius: 25,
-                  //     child: Icon(
-                  //       _currentFlashMode == FlashMode.auto
-                  //           ? Icons.flash_auto
-                  //           : _currentFlashMode == FlashMode.on
-                  //               ? Icons.flash_on
-                  //               : Icons.flash_off,
-                  //       color: Colors.black,
-                  //     ),
-                  //   ),
-                  // ),
-                  // const SizedBox(width: 40),
-                  GestureDetector(
-                    onTap: () => _captureImage(state),
-                    child: Container(
-                      width: 70,
-                      height: 70,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black, width: 4),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+        // bottomActionsBuilder: (state) => Padding(
+        //   padding: const EdgeInsets.only(bottom: 20),
+        //   child: Row(
+        //     mainAxisAlignment: MainAxisAlignment.center,
+        //     children: [
+        //       Row(
+        //         children: [
+        //           // GestureDetector(
+        //           //   onTap: _toggleFlashMode,
+        //           //   child: CircleAvatar(
+        //           //     backgroundColor: Colors.white,
+        //           //     radius: 25,
+        //           //     child: Icon(
+        //           //       _currentFlashMode == FlashMode.auto
+        //           //           ? Icons.flash_auto
+        //           //           : _currentFlashMode == FlashMode.on
+        //           //               ? Icons.flash_on
+        //           //               : Icons.flash_off,
+        //           //       color: Colors.black,
+        //           //     ),
+        //           //   ),
+        //           // ),
+        //           // const SizedBox(width: 40),
+        //           GestureDetector(
+        //             onTap: () => _captureImage(state),
+        //             child: Container(
+        //               width: 70,
+        //               height: 70,
+        //               decoration: BoxDecoration(
+        //                 color: Colors.white,
+        //                 shape: BoxShape.circle,
+        //                 border: Border.all(color: Colors.black, width: 4),
+        //               ),
+        //             ),
+        //           ),
+        //         ],
+        //       ),
+        //     ],
+        //   ),
+        // ),
         middleContentBuilder: (state) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.end,

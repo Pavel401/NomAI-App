@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 class NutritionOutput {
-  final List<NutritionInfo> response;
+  final NutritionResponse response;
   final int status;
   final String message;
   final int inputTokenCount;
@@ -28,8 +28,7 @@ class NutritionOutput {
 
   factory NutritionOutput.fromJson(Map<String, dynamic> json) =>
       NutritionOutput(
-        response: List<NutritionInfo>.from(
-            json["response"].map((x) => NutritionInfo.fromJson(x))),
+        response: NutritionResponse.fromJson(json["response"]),
         status: json["status"],
         message: json["message"],
         inputTokenCount: json["input_token_count"],
@@ -40,7 +39,7 @@ class NutritionOutput {
       );
 
   Map<String, dynamic> toJson() => {
-        "response": List<dynamic>.from(response.map((x) => x.toJson())),
+        "response": response.toJson(),
         "status": status,
         "message": message,
         "input_token_count": inputTokenCount,
@@ -51,6 +50,29 @@ class NutritionOutput {
       };
 }
 
+class NutritionResponse {
+  final String foodName;
+  final List<NutritionInfo> nutritionData;
+
+  NutritionResponse({
+    required this.foodName,
+    required this.nutritionData,
+  });
+
+  factory NutritionResponse.fromJson(Map<String, dynamic> json) =>
+      NutritionResponse(
+        foodName: json["foodName"],
+        nutritionData: List<NutritionInfo>.from(
+            json["nutritionData"].map((x) => NutritionInfo.fromJson(x))),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "foodName": foodName,
+        "nutritionData":
+            List<dynamic>.from(nutritionData.map((x) => x.toJson())),
+      };
+}
+
 class NutritionInfo {
   final String name;
   final int calories;
@@ -58,8 +80,10 @@ class NutritionInfo {
   final int carbs;
   final int fibre;
   final int fat;
-  final double quantity;
   final String portion;
+  final String? preparationMethod;
+  final double healthScore;
+  final String analysis;
 
   NutritionInfo({
     required this.name,
@@ -68,8 +92,10 @@ class NutritionInfo {
     required this.carbs,
     required this.fibre,
     required this.fat,
-    required this.quantity,
     required this.portion,
+    required this.preparationMethod,
+    required this.healthScore,
+    required this.analysis,
   });
 
   factory NutritionInfo.fromRawJson(String str) =>
@@ -84,8 +110,10 @@ class NutritionInfo {
         carbs: json["carbs"],
         fibre: json["fibre"],
         fat: json["fat"],
-        quantity: json["quantity"]?.toDouble(),
         portion: json["portion"],
+        preparationMethod: json["preparationMethod"],
+        healthScore: json["healthScore"]?.toDouble(),
+        analysis: json["analysis"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -95,7 +123,9 @@ class NutritionInfo {
         "carbs": carbs,
         "fibre": fibre,
         "fat": fat,
-        "quantity": quantity,
         "portion": portion,
+        "preparationMethod": preparationMethod,
+        "healthScore": healthScore,
+        "analysis": analysis,
       };
 }

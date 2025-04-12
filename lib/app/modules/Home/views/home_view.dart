@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:sizer/sizer.dart';
 import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/models/AI/nutrition_record.dart';
 import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:turfit/app/modules/Home/component/nutrition_card.dart';
+import 'package:turfit/app/modules/Home/views/nutrition_view.dart';
 import 'package:turfit/app/modules/Scanner/controller/scanner_controller.dart';
 
 class HomePage extends StatefulWidget {
@@ -132,11 +134,24 @@ class _HomePageState extends State<HomePage> {
                   itemCount: controller.dailyRecords.length,
                   itemBuilder: (context, index) {
                     NutritionRecord record = controller.dailyRecords[index];
-                    return NutritionCard(nutritionRecord: record);
+                    return NutritionCard(
+                        nutritionRecord: record,
+                        onTap: () {
+                          // Navigate to record details page
+                          // Navigator.of(context).push(MaterialPageRoute(
+                          //   builder: (context) => RecordDetailsPage(record: record),
+                          // ));
+
+                          Get.to(() => NutritionView(nutritionRecord: record));
+                        });
                   },
                 );
               },
             ),
+          ),
+
+          SizedBox(
+            height: 10.h,
           ),
         ],
       ),

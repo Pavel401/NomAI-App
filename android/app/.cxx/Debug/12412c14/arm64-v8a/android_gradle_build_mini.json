@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/Users/mabud/fvm/versions/3.29.2/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/mabud/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/mabud/Desktop/WorkSpace/MealAI/android/app/.cxx/Debug/12412c14/arm64-v8a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/mabud/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/mabud/Desktop/WorkSpace/MealAI/android/app/.cxx/Debug/12412c14/arm64-v8a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}

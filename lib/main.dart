@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:get/route_manager.dart';
+import 'package:get/get.dart' as getx;
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 import 'package:turfit/app/constants/colors.dart';
@@ -76,9 +76,14 @@ class MyAppView extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
     return Sizer(
       builder: (context, orientation, deviceType) {
-        return GetMaterialApp(
+        return getx.GetMaterialApp(
           builder: EasyLoading.init(),
+
           title: 'Firebase Auth',
+
+          defaultTransition: getx.Transition
+              .fadeIn, // You can change this to fade, zoom, downToUp, etc.
+          transitionDuration: const Duration(milliseconds: 300), // Optional
           debugShowCheckedModeBanner: false, // Remove banner for performance
           // theme: themeProvider.lightTheme,
           // darkTheme: themeProvider.darkTheme,
