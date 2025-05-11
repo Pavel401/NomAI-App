@@ -50,3 +50,8 @@ app.*.map.json
 android/.gradle/
 android/.idea/
 android/local.properties
+
+# android/.gradle/
+# android/app/build/
+# android/app/intermediates/
+android/app/.cxx
