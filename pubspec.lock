@@ -233,6 +233,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.0"
+  circular_progress_stack:
+    dependency: "direct main"
+    description:
+      name: circular_progress_stack
+      sha256: "204ab4af5e56fa68506818fd443981393488924ad5e276554e104c2f834d839d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.4"
   cli_util:
     dependency: transitive
     description:
@@ -1168,6 +1176,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
+  percent_indicator:
+    dependency: "direct main"
+    description:
+      name: percent_indicator
+      sha256: "157d29133bbc6ecb11f923d36e7960a96a3f28837549a20b65e5135729f0f9fd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.2.5"
   petitparser:
     dependency: transitive
     description:
