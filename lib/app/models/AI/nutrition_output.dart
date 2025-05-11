@@ -1,34 +1,41 @@
+// To parse this JSON data, do
+//
+//     final nutritionOutput = nutritionOutputFromJson(jsonString);
+
 import 'dart:convert';
 
+NutritionOutput nutritionOutputFromJson(String str) =>
+    NutritionOutput.fromJson(json.decode(str));
+
+String nutritionOutputToJson(NutritionOutput data) =>
+    json.encode(data.toJson());
+
 class NutritionOutput {
-  final NutritionResponse response;
-  final int status;
-  final String message;
-  final int inputTokenCount;
-  final int outputTokenCount;
-  final int totalTokenCount;
-  final double estimatedCost;
-  final double executionTimeSeconds;
+  Response? response;
+  int? status;
+  String? message;
+  int? inputTokenCount;
+  int? outputTokenCount;
+  int? totalTokenCount;
+  double? estimatedCost;
+  double? executionTimeSeconds;
 
   NutritionOutput({
-    required this.response,
-    required this.status,
-    required this.message,
-    required this.inputTokenCount,
-    required this.outputTokenCount,
-    required this.totalTokenCount,
-    required this.estimatedCost,
-    required this.executionTimeSeconds,
+    this.response,
+    this.status,
+    this.message,
+    this.inputTokenCount,
+    this.outputTokenCount,
+    this.totalTokenCount,
+    this.estimatedCost,
+    this.executionTimeSeconds,
   });
-
-  factory NutritionOutput.fromRawJson(String str) =>
-      NutritionOutput.fromJson(json.decode(str));
-
-  String toRawJson() => json.encode(toJson());
 
   factory NutritionOutput.fromJson(Map<String, dynamic> json) =>
       NutritionOutput(
-        response: NutritionResponse.fromJson(json["response"]),
+        response: json["response"] == null
+            ? null
+            : Response.fromJson(json["response"]),
         status: json["status"],
         message: json["message"],
         inputTokenCount: json["input_token_count"],
@@ -39,7 +46,7 @@ class NutritionOutput {
       );
 
   Map<String, dynamic> toJson() => {
-        "response": response.toJson(),
+        "response": response?.toJson(),
         "status": status,
         "message": message,
         "input_token_count": inputTokenCount,
@@ -50,70 +57,76 @@ class NutritionOutput {
       };
 }
 
-class NutritionResponse {
-  final String foodName;
-  final List<NutritionInfo> nutritionData;
+class Response {
+  String? foodName;
+  List<Ingredient>? ingredients;
+  List<Ingredient>? suggestAlternatives;
 
-  NutritionResponse({
-    required this.foodName,
-    required this.nutritionData,
+  Response({
+    this.foodName,
+    this.ingredients,
+    this.suggestAlternatives,
   });
 
-  factory NutritionResponse.fromJson(Map<String, dynamic> json) =>
-      NutritionResponse(
+  factory Response.fromJson(Map<String, dynamic> json) => Response(
         foodName: json["foodName"],
-        nutritionData: List<NutritionInfo>.from(
-            json["nutritionData"].map((x) => NutritionInfo.fromJson(x))),
+        ingredients: json["ingredients"] == null
+            ? []
+            : List<Ingredient>.from(
+                json["ingredients"]!.map((x) => Ingredient.fromJson(x))),
+        suggestAlternatives: json["suggestAlternatives"] == null
+            ? []
+            : List<Ingredient>.from(json["suggestAlternatives"]!
+                .map((x) => Ingredient.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
         "foodName": foodName,
-        "nutritionData":
-            List<dynamic>.from(nutritionData.map((x) => x.toJson())),
+        "ingredients": ingredients == null
+            ? []
+            : List<dynamic>.from(ingredients!.map((x) => x.toJson())),
+        "suggestAlternatives": suggestAlternatives == null
+            ? []
+            : List<dynamic>.from(suggestAlternatives!.map((x) => x.toJson())),
       };
 }
 
-class NutritionInfo {
-  final String name;
-  final int calories;
-  final int protein;
-  final int carbs;
-  final int fibre;
-  final int fat;
-  final String portion;
-  final String? preparationMethod;
-  final double healthScore;
-  final String analysis;
+class Ingredient {
+  String? name;
+  int? calories;
+  int? protein;
+  int? carbs;
+  int? fibre;
+  int? fat;
+  int? quantity;
+  String? portion;
+  int? healthScore;
+  String? healthComments;
 
-  NutritionInfo({
-    required this.name,
-    required this.calories,
-    required this.protein,
-    required this.carbs,
-    required this.fibre,
-    required this.fat,
-    required this.portion,
-    required this.preparationMethod,
-    required this.healthScore,
-    required this.analysis,
+  Ingredient({
+    this.name,
+    this.calories,
+    this.protein,
+    this.carbs,
+    this.fibre,
+    this.fat,
+    this.quantity,
+    this.portion,
+    this.healthScore,
+    this.healthComments,
   });
 
-  factory NutritionInfo.fromRawJson(String str) =>
-      NutritionInfo.fromJson(json.decode(str));
-
-  String toRawJson() => json.encode(toJson());
-
-  factory NutritionInfo.fromJson(Map<String, dynamic> json) => NutritionInfo(
+  factory Ingredient.fromJson(Map<String, dynamic> json) => Ingredient(
         name: json["name"],
         calories: json["calories"],
         protein: json["protein"],
         carbs: json["carbs"],
         fibre: json["fibre"],
         fat: json["fat"],
+        quantity: json["quantity"],
         portion: json["portion"],
-        preparationMethod: json["preparationMethod"],
-        healthScore: json["healthScore"]?.toDouble(),
-        analysis: json["analysis"],
+        healthScore: json["healthScore"],
+        healthComments: json["healthComments"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -123,9 +136,9 @@ class NutritionInfo {
         "carbs": carbs,
         "fibre": fibre,
         "fat": fat,
+        "quantity": quantity,
         "portion": portion,
-        "preparationMethod": preparationMethod,
         "healthScore": healthScore,
-        "analysis": analysis,
+        "healthComments": healthComments,
       };
 }

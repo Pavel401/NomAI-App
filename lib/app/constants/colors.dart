@@ -54,9 +54,13 @@ class MealAIColors {
   static const Color selectedTile = Color(0xFF212121);
   static const Color switchWhiteColor = Color(0xFFFFFFFF);
   static const Color switchBlackColor = Color(0xFF000000);
+  static const Color black = Color(0xFF000000);
 
   static const Color whiteText = Color(0xFFFFFFFF);
   static const Color blackText = Color(0xFF000000);
+  static const Color red = Color(0xFFFF0000);
+
+  static Color blueGrey = "#514f62".toColor();
 
   static const Color stepperColor = Color(0xFFE0E0E0);
 

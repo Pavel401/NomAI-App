@@ -4,12 +4,15 @@ class NutritionInputQuery {
   final String imageUrl;
   final ScanMode? scanMode;
   String? imageData;
+  String? message;
+
   String? imageFilePath;
 
   NutritionInputQuery({
     required this.imageUrl,
     required this.scanMode,
     this.imageData,
+    this.message,
     this.imageFilePath,
   });
 
@@ -32,5 +35,6 @@ class NutritionInputQuery {
         // 'imageData' is intentionally excluded
 
         "imageData": imageData,
+        "message": message,
       };
 }
