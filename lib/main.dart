@@ -85,7 +85,7 @@ class MyAppView extends StatelessWidget {
               .fadeIn, // You can change this to fade, zoom, downToUp, etc.
           transitionDuration: const Duration(milliseconds: 300), // Optional
           debugShowCheckedModeBanner: false, // Remove banner for performance
-          // theme: themeProvider.lightTheme,
+          theme: themeProvider.lightTheme,
           // darkTheme: themeProvider.darkTheme,
           // themeMode:
           //     themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,

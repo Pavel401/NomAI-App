@@ -41,7 +41,7 @@ class NutritionView extends StatelessWidget {
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image.network(
-                            nutritionRecord.nutritionInputQuery!.imageUrl!,
+                            nutritionRecord.nutritionInputQuery!.imageUrl,
                             fit: BoxFit.cover,
                             loadingBuilder: (context, child, loadingProgress) {
                               if (loadingProgress == null) return child;
@@ -122,14 +122,14 @@ class NutritionView extends StatelessWidget {
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: nutritionRecord
-                    .nutritionOutput!.response.nutritionData.length,
+                    .nutritionOutput!.response!.ingredients!.length,
                 separatorBuilder: (context, index) => Divider(
                   color: Colors.grey[300],
                   height: 1,
                 ),
                 itemBuilder: (context, index) {
                   final nutritionInfo = nutritionRecord
-                      .nutritionOutput!.response.nutritionData[index];
+                      .nutritionOutput!.response!.ingredients![index];
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Row(
@@ -140,7 +140,7 @@ class NutritionView extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                nutritionInfo.name,
+                                nutritionInfo.name!,
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontWeight: FontWeight.w600,
@@ -207,11 +207,11 @@ class NutritionView extends StatelessWidget {
                     ),
                     _buildMetricRow(
                       'Estimated Cost',
-                      '\$${nutritionRecord.nutritionOutput!.estimatedCost.toStringAsFixed(4)}',
+                      '\$${nutritionRecord.nutritionOutput!.estimatedCost!.toStringAsFixed(4)}',
                     ),
                     _buildMetricRow(
                       'Execution Time',
-                      '${nutritionRecord.nutritionOutput!.executionTimeSeconds.toStringAsFixed(2)} seconds',
+                      '${nutritionRecord.nutritionOutput!.executionTimeSeconds!.toStringAsFixed(2)} seconds',
                     ),
                   ],
                 ),

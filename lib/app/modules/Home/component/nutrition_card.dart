@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/constants/enums.dart';
+import 'package:turfit/app/models/AI/nutrition_output.dart';
 import 'package:turfit/app/models/AI/nutrition_record.dart';
 
 class NutritionCard extends StatelessWidget {
@@ -28,12 +29,12 @@ class NutritionCard extends StatelessWidget {
     if (nutritionRecord.nutritionOutput != null &&
         nutritionRecord.processingStatus != ProcessingStatus.PROCESSING) {
       final nutritionData =
-          nutritionRecord.nutritionOutput!.response.nutritionData;
-      for (var item in nutritionData) {
-        totalCalories += item.calories;
-        totalProtein += item.protein;
-        totalCarbs += item.carbs;
-        totalFat += item.fat;
+          nutritionRecord.nutritionOutput!.response?.ingredients;
+      for (Ingredient item in nutritionData ?? []) {
+        totalCalories += item.calories!;
+        totalProtein += item.protein!;
+        totalCarbs += item.carbs!;
+        totalFat += item.fat!;
       }
     }
 
@@ -117,8 +118,10 @@ class NutritionCard extends StatelessWidget {
   }
 
   Widget _buildCompletedCard(BuildContext context, Map<String, int> totals) {
-    final foodName =
-        nutritionRecord.nutritionOutput?.response.foodName ?? 'Unknown Food';
+    // Fetching food name from the first item in the list
+    final foodName = nutritionRecord.nutritionOutput?.response!.foodName != null
+        ? nutritionRecord.nutritionOutput?.response!.foodName
+        : "Unknown Food";
 
     return Container(
       height: 16.h,
@@ -132,7 +135,7 @@ class NutritionCard extends StatelessWidget {
             ),
             child: nutritionRecord.nutritionInputQuery?.imageUrl != null
                 ? CachedNetworkImage(
-                    imageUrl: nutritionRecord.nutritionInputQuery!.imageUrl!,
+                    imageUrl: nutritionRecord.nutritionInputQuery!.imageUrl,
                     placeholder: (context, url) => Container(
                       color: Colors.grey[300],
                       child: Center(
@@ -166,7 +169,7 @@ class NutritionCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    foodName,
+                    foodName!,
                     style: context.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),

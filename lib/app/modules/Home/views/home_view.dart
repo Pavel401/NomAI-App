@@ -1,7 +1,10 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
+import 'package:timeline_date_picker_plus/timeline_date_picker_plus.dart';
 import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/models/AI/nutrition_record.dart';
 import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
@@ -19,6 +22,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late ScannerController _scannerController;
   late String _userId;
+
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -41,119 +46,152 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: MealAIColors.lightGreyTile,
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: MealAIColors.selectedTile,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text(
           'Nutrition Scanner',
           style: TextStyle(color: MealAIColors.whiteText),
         ),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: CircleAvatar(
+            backgroundColor: const Color(0xFF817C88),
+            child: IconButton(
+              icon: const Icon(Icons.local_fire_department_outlined),
+              color: MealAIColors.whiteText,
+              onPressed: () {},
+            ),
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: CircleAvatar(
+              backgroundColor: const Color(0xFF817C88),
+              child: IconButton(
+                icon: const Icon(Icons.settings_outlined),
+                color: MealAIColors.whiteText,
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ],
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          // Date Selection Card
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              MealAIColors.blueGrey,
+              MealAIColors.blueGrey.withOpacity(0.9),
+              MealAIColors.blueGrey.withOpacity(0.8),
+              MealAIColors.blueGrey.withOpacity(0.7),
+              MealAIColors.blueGrey.withOpacity(0.6),
+              MealAIColors.blueGrey.withOpacity(0.5),
+              MealAIColors.blueGrey.withOpacity(0.4),
+              MealAIColors.blueGrey.withOpacity(0.3),
+              MealAIColors.blueGrey.withOpacity(0.2),
+              MealAIColors.blueGrey.withOpacity(0.1),
+              MealAIColors.whiteText,
+            ],
+            stops: const [
+              0.0,
+              0.1,
+              0.2,
+              0.3,
+              0.4,
+              0.5,
+              0.6,
+              0.7,
+              0.8,
+              0.9,
+              1.0,
+            ],
+          ),
+        ),
+        child: Column(
+          children: [
+            SizedBox(
+                height: kToolbarHeight + MediaQuery.of(context).padding.top),
+            Container(
+              child: DateScroller(
+                initialDate: DateTime.now(),
+                lastDate: DateTime.now().add(Duration(days: 6)),
+                selectedDate: _selectedDate,
+                showMonthName: false,
+                onDateSelected: (date) {
+                  setState(() {
+                    _selectedDate = date;
+                  });
+                  _scannerController.getRecordByDate(_userId, date);
+                },
+                showScheduleDots: true,
+                scheduleCounts: {},
+                selectedShape: DateSelectedShape.circle,
+                selectedDateBackgroundColor: MealAIColors
+                    .selectedTile, // A vibrant contrast color from your palette
+                dayNameColor: Colors.white70,
+                dayNameSundayColor: MealAIColors.red,
+                dayNumberColor: Colors.white,
+                dayNumberSundayColor: MealAIColors.red,
+                dayNumberSelectedColor: MealAIColors.whiteText,
+                activeMonthTextColor: Colors.white,
+                dayNameTextStyle:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                dayNumberTextStyle:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                monthTextStyle:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
-              child: ListTile(
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                title: Text(
-                  'Select Date',
-                  style: TextStyle(
-                    color: MealAIColors.blackText,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                trailing: Icon(
-                  Icons.calendar_today,
-                  color: MealAIColors.selectedTile,
-                ),
-                onTap: () async {
-                  final DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: _scannerController.selectedDate,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2101),
-                    builder: (context, child) {
-                      return Theme(
-                        data: ThemeData.light().copyWith(
-                          colorScheme: ColorScheme.light(
-                            primary: MealAIColors.selectedTile,
-                          ),
+            ),
+            // SizedBox(height: 10.h),
+            Expanded(
+              child: GetBuilder<ScannerController>(
+                builder: (controller) {
+                  if (controller.isLoading && controller.dailyRecords.isEmpty) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: MealAIColors.selectedTile,
+                      ),
+                    );
+                  }
+
+                  if (controller.dailyRecords.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No nutrition records found',
+                        style: TextStyle(
+                          color: MealAIColors.blackText,
+                          fontSize: 16,
                         ),
-                        child: child!,
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    itemCount: controller.dailyRecords.length,
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 1.w, vertical: 1.h),
+                    itemBuilder: (context, index) {
+                      NutritionRecord record = controller.dailyRecords[index];
+                      return NutritionCard(
+                        nutritionRecord: record,
+                        onTap: () {
+                          Get.to(() => NutritionView(nutritionRecord: record));
+                        },
                       );
                     },
                   );
-
-                  if (picked != null &&
-                      picked != _scannerController.selectedDate) {
-                    _scannerController.selectedDate = picked;
-                    _scannerController.getRecordByDate(_userId, picked);
-                  }
                 },
               ),
             ),
-          ),
-
-          // Nutrition Records List
-          Expanded(
-            child: GetBuilder<ScannerController>(
-              builder: (controller) {
-                // Show loading indicator when fetching records for the first time
-                if (controller.isLoading && controller.dailyRecords.isEmpty) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      color: MealAIColors.selectedTile,
-                    ),
-                  );
-                }
-
-                // Check if records are empty
-                if (controller.dailyRecords.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No nutrition records found',
-                      style: TextStyle(
-                        color: MealAIColors.blackText,
-                        fontSize: 16,
-                      ),
-                    ),
-                  );
-                }
-
-                // Build list of records
-                return ListView.builder(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: controller.dailyRecords.length,
-                  itemBuilder: (context, index) {
-                    NutritionRecord record = controller.dailyRecords[index];
-                    return NutritionCard(
-                        nutritionRecord: record,
-                        onTap: () {
-                          // Navigate to record details page
-                          // Navigator.of(context).push(MaterialPageRoute(
-                          //   builder: (context) => RecordDetailsPage(record: record),
-                          // ));
-
-                          Get.to(() => NutritionView(nutritionRecord: record));
-                        });
-                  },
-                );
-              },
-            ),
-          ),
-
-          SizedBox(
-            height: 10.h,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
