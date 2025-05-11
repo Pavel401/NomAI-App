@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:timeline_date_picker_plus/timeline_date_picker_plus.dart';
+import 'package:turfit/app/components/nutritionTrackerCard.dart'
+    show NutritionTrackerCard;
 import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/models/AI/nutrition_record.dart';
 import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
@@ -114,11 +116,9 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-        child: Column(
+        child: ListView(
           children: [
-            SizedBox(
-                height: kToolbarHeight + MediaQuery.of(context).padding.top),
-            Container(
+            Center(
               child: DateScroller(
                 initialDate: DateTime.now(),
                 lastDate: DateTime.now().add(Duration(days: 6)),
@@ -149,46 +149,75 @@ class _HomePageState extends State<HomePage> {
                     const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
             ),
-            // SizedBox(height: 10.h),
-            Expanded(
-              child: GetBuilder<ScannerController>(
-                builder: (controller) {
-                  if (controller.isLoading && controller.dailyRecords.isEmpty) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        color: MealAIColors.selectedTile,
-                      ),
-                    );
-                  }
 
-                  if (controller.dailyRecords.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'No nutrition records found',
-                        style: TextStyle(
-                          color: MealAIColors.blackText,
-                          fontSize: 16,
-                        ),
-                      ),
-                    );
-                  }
+            /// Nutrition Tracker Card
+            NutritionTrackerCard(
+                maximumCalories: 2521,
+                consumedCalories: 670,
+                burnedCalories: 200,
+                maximumFat: 85,
+                consumedFat: 12,
+                maximumProtein: 400,
+                consumedProtein: 123,
+                maximumCarb: 300,
+                consumedCarb: 200),
 
-                  return ListView.builder(
-                    itemCount: controller.dailyRecords.length,
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 1.w, vertical: 1.h),
-                    itemBuilder: (context, index) {
-                      NutritionRecord record = controller.dailyRecords[index];
-                      return NutritionCard(
-                        nutritionRecord: record,
-                        onTap: () {
-                          Get.to(() => NutritionView(nutritionRecord: record));
-                        },
-                      );
-                    },
-                  );
-                },
+            SizedBox(
+              height: 2.h,
+            ),
+
+            ///Meals List
+            Padding(
+              padding: EdgeInsets.only(left: 4.w, right: 4.w),
+              child: Row(
+                children: [
+                  Text("Recently Eaten",
+                      style: TextStyle(
+                        color: MealAIColors.blackText,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      )),
+                ],
               ),
+            ),
+            GetBuilder<ScannerController>(
+              builder: (controller) {
+                if (controller.isLoading && controller.dailyRecords.isEmpty) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: MealAIColors.selectedTile,
+                    ),
+                  );
+                }
+
+                if (controller.dailyRecords.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No nutrition records found',
+                      style: TextStyle(
+                        color: MealAIColors.blackText,
+                        fontSize: 16,
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: controller.dailyRecords.length,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.symmetric(horizontal: 1.w, vertical: 1.h),
+                  itemBuilder: (context, index) {
+                    NutritionRecord record = controller.dailyRecords[index];
+                    return NutritionCard(
+                      nutritionRecord: record,
+                      onTap: () {
+                        Get.to(() => NutritionView(nutritionRecord: record));
+                      },
+                    );
+                  },
+                );
+              },
             ),
           ],
         ),
