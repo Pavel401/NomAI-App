@@ -37,11 +37,21 @@ class DailyNutritionRecords {
   final List<NutritionRecord> dailyRecords;
   final String recordId;
   final DateTime recordDate;
+  int dailyConsumedCalories = 0;
+  int dailyBurnedCalories = 0;
+  int dailyConsumedProtein = 0;
+  int dailyConsumedFat = 0;
+  int dailyConsumedCarb = 0;
 
   DailyNutritionRecords({
     required this.dailyRecords,
     required this.recordDate,
     required this.recordId,
+    this.dailyConsumedCalories = 0,
+    this.dailyBurnedCalories = 0,
+    this.dailyConsumedProtein = 0,
+    this.dailyConsumedFat = 0,
+    this.dailyConsumedCarb = 0,
   });
 
   factory DailyNutritionRecords.fromJson(Map<String, dynamic> json) =>
@@ -52,11 +62,21 @@ class DailyNutritionRecords {
             .toList(),
         recordDate: DateTime.parse(json['recordDate']),
         recordId: json['recordId'],
+        dailyConsumedCalories: json['dailyConsumedCalories'] ?? 0,
+        dailyBurnedCalories: json['dailyBurnedCalories'] ?? 0,
+        dailyConsumedProtein: json['dailyConsumedProtein'] ?? 0,
+        dailyConsumedFat: json['dailyConsumedFat'] ?? 0,
+        dailyConsumedCarb: json['dailyConsumedCarb'] ?? 0,
       );
 
   Map<String, dynamic> toJson() => {
         'dailyRecords': dailyRecords.map((record) => record.toJson()).toList(),
         'recordDate': recordDate.toIso8601String(),
         'recordId': recordId,
+        'dailyConsumedCalories': dailyConsumedCalories,
+        'dailyBurnedCalories': dailyBurnedCalories,
+        'dailyConsumedProtein': dailyConsumedProtein,
+        'dailyConsumedFat': dailyConsumedFat,
+        'dailyConsumedCarb': dailyConsumedCarb,
       };
 }

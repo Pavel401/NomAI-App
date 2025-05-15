@@ -18,6 +18,7 @@ class NutritionOutput {
   int? outputTokenCount;
   int? totalTokenCount;
   double? estimatedCost;
+
   double? executionTimeSeconds;
 
   NutritionOutput({
