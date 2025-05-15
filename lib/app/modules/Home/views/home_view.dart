@@ -9,10 +9,12 @@ import 'package:turfit/app/components/nutritionTrackerCard.dart'
     show NutritionTrackerCard;
 import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/models/AI/nutrition_record.dart';
+import 'package:turfit/app/models/Auth/user.dart';
 import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:turfit/app/modules/Home/component/nutrition_card.dart';
 import 'package:turfit/app/modules/Home/views/nutrition_view.dart';
 import 'package:turfit/app/modules/Scanner/controller/scanner_controller.dart';
+import 'package:turfit/app/repo/firebase_user_repo.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -27,17 +29,33 @@ class _HomePageState extends State<HomePage> {
 
   DateTime _selectedDate = DateTime.now();
 
+  late AuthenticationBloc authenticationBloc;
+  final FirebaseUserRepo _userRepository = FirebaseUserRepo();
+
+  late UserModel userModel;
   @override
   void initState() {
     super.initState();
     // Initialize scanner controller
     _scannerController = Get.put(ScannerController());
-
+    authenticationBloc = context.read<AuthenticationBloc>();
     // Get user ID from authentication bloc
     _userId = context.read<AuthenticationBloc>().state.user!.uid;
+    _fetchUserData();
 
     // Fetch initial records
     _fetchRecords();
+  }
+
+  void _fetchUserData() async {
+    userModel = await _userRepository.getUserById(_userId);
+
+    _scannerController.updateNutritionValues(
+      maxCalories: userModel.userInfo!.userMacros.calories ?? 0,
+      maxFat: userModel.userInfo!.userMacros.fat ?? 0,
+      maxProtein: userModel.userInfo!.userMacros.protein ?? 0,
+      maxCarb: userModel.userInfo!.userMacros.carbs ?? 0,
+    );
   }
 
   void _fetchRecords() {
@@ -48,41 +66,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          'Nutrition Scanner',
-          style: TextStyle(color: MealAIColors.whiteText),
-        ),
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16),
-          child: CircleAvatar(
-            backgroundColor: const Color(0xFF817C88),
-            child: IconButton(
-              icon: const Icon(Icons.local_fire_department_outlined),
-              color: MealAIColors.whiteText,
-              onPressed: () {},
-            ),
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: CircleAvatar(
-              backgroundColor: const Color(0xFF817C88),
-              child: IconButton(
-                icon: const Icon(Icons.settings_outlined),
-                color: MealAIColors.whiteText,
-                onPressed: () {},
-              ),
-            ),
-          ),
-        ],
-        centerTitle: true,
-      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -118,9 +101,46 @@ class _HomePageState extends State<HomePage> {
         ),
         child: ListView(
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: CircleAvatar(
+                    backgroundColor: const Color(0xFF817C88),
+                    child: IconButton(
+                      icon: const Icon(Icons.person_outline),
+                      color: MealAIColors.whiteText,
+                      onPressed: () {},
+                    ),
+                  ),
+                ),
+                Text(
+                  'Nutrition Scanner',
+                  style: TextStyle(
+                      color: MealAIColors.whiteText,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: CircleAvatar(
+                    backgroundColor: const Color(0xFF817C88),
+                    child: IconButton(
+                      icon: const Icon(Icons.settings_outlined),
+                      color: MealAIColors.whiteText,
+                      onPressed: () {},
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 2.h,
+            ),
             Center(
               child: DateScroller(
-                initialDate: DateTime.now(),
+                initialDate: userModel.createdAt,
                 lastDate: DateTime.now().add(Duration(days: 6)),
                 selectedDate: _selectedDate,
                 showMonthName: false,
@@ -150,18 +170,21 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-            /// Nutrition Tracker Card
-            NutritionTrackerCard(
-                maximumCalories: 2521,
-                consumedCalories: 670,
-                burnedCalories: 200,
-                maximumFat: 85,
-                consumedFat: 12,
-                maximumProtein: 400,
-                consumedProtein: 123,
-                maximumCarb: 300,
-                consumedCarb: 200),
-
+            GetBuilder<ScannerController>(
+              builder: (controller) {
+                return NutritionTrackerCard(
+                  maximumCalories: controller.maximumCalories.value,
+                  consumedCalories: controller.consumedCalories.value,
+                  burnedCalories: controller.burnedCalories.value,
+                  maximumFat: controller.maximumFat.value,
+                  consumedFat: controller.consumedFat.value,
+                  maximumProtein: controller.maximumProtein.value,
+                  consumedProtein: controller.consumedProtein.value,
+                  maximumCarb: controller.maximumCarb.value,
+                  consumedCarb: controller.consumedCarb.value,
+                );
+              },
+            ),
             SizedBox(
               height: 2.h,
             ),
