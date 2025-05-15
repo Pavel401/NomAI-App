@@ -1,220 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:percent_indicator/circular_percent_indicator.dart';
-// import 'package:sizer/sizer.dart';
-// import 'package:turfit/app/constants/colors.dart';
-
-// class NutritionTrackerCard extends StatelessWidget {
-//   const NutritionTrackerCard({Key? key}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Card(
-//       color: MealAIColors.whiteText,
-//       margin: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
-//       shape: RoundedRectangleBorder(
-//         borderRadius: BorderRadius.circular(10),
-//       ),
-//       child: Padding(
-//         padding: EdgeInsets.all(16),
-//         child: Column(
-//           children: [
-//             Row(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 // Left section - Circular progress with calories
-//                 Expanded(
-//                   flex: 1,
-//                   child: CircularPercentIndicator(
-//                     radius: 80,
-//                     lineWidth: 10.0,
-//                     percent: 0.0,
-//                     backgroundColor: Colors.grey.shade200,
-//                     progressColor: Colors.blue,
-//                     center: Column(
-//                       mainAxisAlignment: MainAxisAlignment.center,
-//                       children: [
-//                         const Text(
-//                           "Consumed:",
-//                           style: TextStyle(
-//                             color: Colors.grey,
-//                             fontSize: 16,
-//                           ),
-//                         ),
-//                         const Text(
-//                           "0",
-//                           style: TextStyle(
-//                             color: Color(0xFF2D3142),
-//                             fontSize: 42,
-//                             fontWeight: FontWeight.bold,
-//                           ),
-//                         ),
-//                         Text(
-//                           "/2573 kcal",
-//                           style: TextStyle(
-//                             color: Colors.grey,
-//                             fontSize: 14,
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                 ),
-
-//                 // Right section - Nutrients breakdown
-//                 Expanded(
-//                   flex: 1,
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.end,
-//                     children: [
-//                       // Score indicator
-//                       Container(
-//                         padding:
-//                             EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-//                         decoration: BoxDecoration(
-//                           color: Colors.grey.shade200,
-//                           borderRadius: BorderRadius.circular(20),
-//                         ),
-//                         child: Row(
-//                           mainAxisSize: MainAxisSize.min,
-//                           children: [
-//                             Text(
-//                               "-- ",
-//                               style: TextStyle(
-//                                 color: Colors.grey,
-//                                 fontWeight: FontWeight.bold,
-//                               ),
-//                             ),
-//                             Text(
-//                               "No score",
-//                               style: TextStyle(
-//                                 color: Colors.grey,
-//                               ),
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                       SizedBox(height: 20),
-
-//                       // Nutrient bars
-//                       _buildNutrientBar("Fat", "0", "85g"),
-//                       SizedBox(height: 16),
-//                       _buildNutrientBar("Protein", "0", "128g"),
-//                       SizedBox(height: 16),
-//                       _buildNutrientBar("Carb", "0", "321g"),
-//                     ],
-//                   ),
-//                 ),
-//               ],
-//             ),
-//             SizedBox(height: 16),
-
-//             // Bottom action buttons
-//             Row(
-//               children: [
-//                 Expanded(
-//                   child: Container(
-//                     padding: EdgeInsets.symmetric(vertical: 12),
-//                     decoration: BoxDecoration(
-//                       color: Color(0xFFFCECE7),
-//                       borderRadius: BorderRadius.circular(10),
-//                     ),
-//                     child: Row(
-//                       mainAxisAlignment: MainAxisAlignment.center,
-//                       children: [
-//                         Icon(Icons.local_fire_department, color: Colors.red),
-//                         SizedBox(width: 8),
-//                         Text(
-//                           "BURNED: 0",
-//                           style: TextStyle(
-//                             color: Colors.brown,
-//                             fontWeight: FontWeight.bold,
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                 ),
-//                 SizedBox(width: 8),
-//                 Expanded(
-//                   child: Container(
-//                     padding: EdgeInsets.symmetric(vertical: 12),
-//                     decoration: BoxDecoration(
-//                       color: Color(0xFFF0F9E8),
-//                       borderRadius: BorderRadius.circular(10),
-//                     ),
-//                     child: Row(
-//                       mainAxisAlignment: MainAxisAlignment.center,
-//                       children: [
-//                         Icon(Icons.restaurant, color: Colors.green),
-//                         SizedBox(width: 8),
-//                         Text(
-//                           "CONSUMED: 0",
-//                           style: TextStyle(
-//                             color: Colors.green,
-//                             fontWeight: FontWeight.bold,
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildNutrientBar(String label, String value, String total) {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Row(
-//           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//           children: [
-//             Text(
-//               label,
-//               style: TextStyle(
-//                 color: Colors.grey,
-//                 fontSize: 16,
-//               ),
-//             ),
-//             RichText(
-//               text: TextSpan(
-//                 children: [
-//                   TextSpan(
-//                     text: value,
-//                     style: TextStyle(
-//                       color: Colors.black,
-//                       fontWeight: FontWeight.bold,
-//                       fontSize: 16,
-//                     ),
-//                   ),
-//                   TextSpan(
-//                     text: "/$total",
-//                     style: TextStyle(
-//                       color: Colors.grey,
-//                       fontSize: 16,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ],
-//         ),
-//         SizedBox(height: 6),
-//         Container(
-//           height: 8,
-//           decoration: BoxDecoration(
-//             color: Colors.grey.shade200,
-//             borderRadius: BorderRadius.circular(4),
-//           ),
-//         ),
-//       ],
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:sizer/sizer.dart';
@@ -246,18 +29,30 @@ class NutritionTrackerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int remainingCalories = maximumCalories - consumedCalories;
+    // Calculate remaining calories, ensuring it doesn't go below 0
+    int remainingCalories =
+        (maximumCalories - consumedCalories + burnedCalories)
+            .clamp(0, maximumCalories);
+
+    // Calculate actual remaining calories (can be negative) for better status indication
+    int actualRemainingCalories =
+        maximumCalories - consumedCalories + burnedCalories;
+
+    // Calculate calorie percentage based on consumed vs maximum
     double caloriesPercent =
         (consumedCalories / maximumCalories).clamp(0.0, 1.0);
 
+    // Determine if user has exceeded their calorie limit
+    bool exceededLimit = actualRemainingCalories < 0;
+
     return Column(
       children: [
-        // Calories Card
+        // Enhanced Calories Card with Clear Max/Consumed/Exceeded Indicators
         Container(
           margin: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
           decoration: BoxDecoration(
             color: MealAIColors.whiteText,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(15),
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.withOpacity(0.2),
@@ -270,86 +65,209 @@ class NutritionTrackerCard extends StatelessWidget {
           child: Padding(
             padding:
                 EdgeInsets.only(left: 4.w, right: 4.w, top: 2.h, bottom: 2.h),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                // Header with Title and Status Indicator
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      remainingCalories.toString(),
+                      "Daily Nutrition",
                       style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 42,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(
-                      "Calories Remaining",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: exceededLimit
+                            ? Colors.red.withOpacity(0.1)
+                            : Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                    SizedBox(height: 1.h),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.add_circle_outline,
-                          color: MealAIColors.black,
-                          size: 16,
-                        ),
-                        SizedBox(width: 0.5.w),
-                        Text(
-                          "${consumedCalories} consumed",
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
+                      child: Row(
+                        children: [
+                          Icon(
+                            exceededLimit
+                                ? Icons.warning_rounded
+                                : Icons.check_circle_outline,
+                            color: exceededLimit ? Colors.red : Colors.green,
+                            size: 16,
                           ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 0.5.h),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.remove_circle_outline,
-                          color: Colors.red,
-                          size: 16,
-                        ),
-                        SizedBox(width: 0.5.w),
-                        Text(
-                          "${burnedCalories} burned",
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
+                          SizedBox(width: 4),
+                          Text(
+                            exceededLimit ? "Limit Exceeded" : "On Track",
+                            style: TextStyle(
+                              color: exceededLimit ? Colors.red : Colors.green,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
-                SizedBox(width: 2.w),
-                CircularPercentIndicator(
-                  radius: 60,
-                  lineWidth: 10.0,
-                  percent: caloriesPercent,
-                  backgroundColor: MealAIColors.gaugeColor,
-                  progressColor:
-                      caloriesPercent > 0.9 ? Colors.red : MealAIColors.black,
-                  center: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: MealAIColors.greyLight,
-                        child: Icon(
-                          Icons.local_fire_department,
-                          color: MealAIColors.black,
-                          size: 35,
+
+                SizedBox(height: 2.h),
+
+                // Main Calorie Information
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Left Column: Calorie Stats
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Calorie Counter Card
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: exceededLimit
+                                ? Colors.red.withOpacity(0.05)
+                                : Colors.grey.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Calories",
+                                style: TextStyle(
+                                  color: Colors.grey.shade700,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              SizedBox(height: 0.5.h),
+                              exceededLimit
+                                  ? RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: "$consumedCalories",
+                                            style: TextStyle(
+                                              color: Colors.red,
+                                              fontSize: 26,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: " / $maximumCalories",
+                                            style: TextStyle(
+                                              color: Colors.grey.shade700,
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  : RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: "$consumedCalories",
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 26,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: " / $maximumCalories",
+                                            style: TextStyle(
+                                              color: Colors.grey.shade700,
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                              SizedBox(height: 0.5.h),
+                              exceededLimit
+                                  ? Text(
+                                      "${actualRemainingCalories.abs()} calories over limit",
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    )
+                                  : Text(
+                                      "$remainingCalories calories remaining",
+                                      style: TextStyle(
+                                        color: Colors.green.shade700,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                            ],
+                          ),
                         ),
+
+                        SizedBox(height: 1.h),
+
+                        // Calories In/Out Row
+                        Row(
+                          children: [
+                            _buildCalorieInfoBox(
+                              "Consumed",
+                              consumedCalories,
+                              Icons.add_circle_outline,
+                              Colors.blue.shade700,
+                            ),
+                            SizedBox(width: 8),
+                            _buildCalorieInfoBox(
+                              "Burned",
+                              burnedCalories,
+                              Icons.local_fire_department,
+                              Colors.orange.shade700,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    // Right Column: Progress Circle
+                    CircularPercentIndicator(
+                      radius: 60,
+                      lineWidth: 12.0,
+                      animation: true,
+                      animationDuration: 1000,
+                      percent: caloriesPercent,
+                      backgroundColor: MealAIColors.gaugeColor,
+                      progressColor:
+                          _getProgressColor(caloriesPercent, exceededLimit),
+                      circularStrokeCap: CircularStrokeCap.round,
+                      center: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${(caloriesPercent * 100).toInt()}%",
+                            style: TextStyle(
+                              color: exceededLimit ? Colors.red : Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            "consumed",
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -395,9 +313,60 @@ class NutritionTrackerCard extends StatelessWidget {
     );
   }
 
+  // Helper widget for calorie in/out information
+  Widget _buildCalorieInfoBox(
+      String label, int value, IconData icon, Color color) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 16,
+          ),
+          SizedBox(width: 4),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontSize: 12,
+                ),
+              ),
+              Text(
+                "$value",
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper method to determine progress color based on percentage
+  Color _getProgressColor(double percent, bool exceeded) {
+    if (exceeded) return Colors.red;
+    if (percent > 0.9) return Colors.orange;
+    if (percent > 0.75) return Colors.amber;
+    return MealAIColors.black;
+  }
+
   Widget _buildNutrientBox(
       String label, int value, int max, Color color, IconData icon) {
     double percent = (value / max).clamp(0.0, 1.0);
+    bool exceededLimit = value > max;
 
     return Expanded(
       child: Container(
@@ -421,7 +390,7 @@ class NutritionTrackerCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: color, size: 16),
+                Icon(icon, color: exceededLimit ? Colors.red : color, size: 16),
                 SizedBox(width: 4),
                 Text(
                   label,
@@ -434,91 +403,40 @@ class NutritionTrackerCard extends StatelessWidget {
               ],
             ),
             SizedBox(height: 0.8.h),
-            Text(
-              "$value/$max g",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: "$value",
+                    style: TextStyle(
+                      color: exceededLimit ? Colors.red : Colors.black,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                    text: "/$max g",
+                    style: TextStyle(
+                      color: Colors.grey.shade700,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
               ),
             ),
             SizedBox(height: 0.8.h),
             LinearProgressIndicator(
               value: percent,
               backgroundColor: Colors.grey.shade200,
-              valueColor: AlwaysStoppedAnimation<Color>(color),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                  exceededLimit ? Colors.red : color),
               minHeight: 4,
               borderRadius: BorderRadius.circular(2),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildNutrientProgressBar(String label, String value, String total,
-      double percent, Color color, BuildContext context) {
-    percent = percent.clamp(0.0, 1.0);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.grey.shade700,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: value,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  TextSpan(
-                    text: "/$total g",
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 6),
-        Stack(
-          children: [
-            Container(
-              height: 10,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(5),
-              ),
-            ),
-            Container(
-              height: 10,
-              width: MediaQuery.of(context).size.width * 0.8 * percent,
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(5),
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
