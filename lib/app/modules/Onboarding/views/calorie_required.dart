@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/models/Auth/user.dart';
+import 'package:turfit/app/models/Auth/user_repo.dart';
 import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
 import 'package:turfit/app/modules/Auth/views/sign_in_screen.dart';
+import 'package:turfit/app/repo/firebase_user_repo.dart';
 import 'package:turfit/app/utility/user_utility.dart';
 
 class DailyCalorieRequired extends StatefulWidget {
@@ -278,7 +280,18 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
             // Next button
             Center(
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  //     FirebaseUserRepo userRepository = FirebaseUserRepo();
+
+                  //  await   userRepository.updateUserData(
+                  //         context.read<AuthenticationBloc>().state.user!.uid,
+                  //         widget.userBasicInfo);
+
+                  UserBasicInfo updatedUserBasicInfo =
+                      widget.userBasicInfo.copyWith(
+                    userMacros: _userMacros,
+                  );
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -288,7 +301,7 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
                                 .read<AuthenticationBloc>()
                                 .userRepository),
                         child: SignInScreen(
-                          user: widget.userBasicInfo,
+                          user: updatedUserBasicInfo,
                         ),
                       ),
                     ),

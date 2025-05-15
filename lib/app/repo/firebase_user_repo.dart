@@ -102,4 +102,38 @@ class FirebaseUserRepo implements UserRepository {
   Future<void> logOut() async {
     await _firebaseAuth.signOut();
   }
+
+  Future<UserModel> getUserById(String userId) async {
+    try {
+      final DocumentSnapshot snapshot = await usersCollection.doc(userId).get();
+      if (snapshot.exists) {
+        return UserModel.fromEntity(snapshot.data() as Map<String, dynamic>);
+      } else {
+        throw Exception('User not found');
+      }
+    } catch (e) {
+      log(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> updateUserData(String userId, UserBasicInfo info) async {
+    try {
+      await usersCollection.doc(userId).update({
+        'user_info': {
+          'user_macros': {
+            'daily_calories': info.userMacros.calories,
+            'daily_fat': info.userMacros.fat,
+            'daily_protein': info.userMacros.protein,
+            'daily_carb': info.userMacros.carbs,
+            'daily_water': info.userMacros.water,
+            'daily_fiber': info.userMacros.fiber,
+          },
+        }
+      });
+    } catch (e) {
+      log(e.toString());
+      rethrow;
+    }
+  }
 }
