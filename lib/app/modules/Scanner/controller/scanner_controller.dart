@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:get/get.dart';
 import 'package:turfit/app/constants/enums.dart';
@@ -13,6 +14,16 @@ import 'package:turfit/app/utility/image_utility.dart';
 import 'package:turfit/app/utility/registry_service.dart';
 
 class ScannerController extends GetxController {
+  // Variables for NutritionTrackerCard as RxInt with default value 0
+  RxInt maximumCalories = 0.obs;
+  RxInt consumedCalories = 0.obs;
+  RxInt burnedCalories = 0.obs;
+  RxInt maximumFat = 0.obs;
+  RxInt consumedFat = 0.obs;
+  RxInt maximumProtein = 0.obs;
+  RxInt consumedProtein = 0.obs;
+  RxInt maximumCarb = 0.obs;
+  RxInt consumedCarb = 0.obs;
   // Variables for state management
   List<NutritionRecord> dailyRecords = [];
   DateTime selectedDate = DateTime.now();
@@ -124,10 +135,45 @@ class ScannerController extends GetxController {
         processingStatus: ProcessingStatus.COMPLETED,
       ));
 
+      int totalNutritionValue = 0;
+      int totalProteinValue = 0;
+      int totalFatValue = 0;
+      int totalCarbValue = 0;
+      int totalFiberValue = 0;
+      for (int i = 0; i < rawNutritionData.response!.ingredients!.length; i++) {
+        totalNutritionValue +=
+            rawNutritionData.response!.ingredients![i].calories ?? 0;
+        totalProteinValue +=
+            rawNutritionData.response!.ingredients![i].protein ?? 0;
+        totalFatValue += rawNutritionData.response!.ingredients![i].fat ?? 0;
+        totalCarbValue += rawNutritionData.response!.ingredients![i].carbs ?? 0;
+        totalFiberValue +=
+            rawNutritionData.response!.ingredients![i].fibre ?? 0;
+      }
+
+      int totalConsumedCalories =
+          existingNutritionRecords!.dailyConsumedCalories +
+                  totalNutritionValue ??
+              0;
+      int totalConsumedFat =
+          existingNutritionRecords!.dailyConsumedFat + totalFatValue ?? 0;
+      int totalConsumedProtein =
+          existingNutritionRecords!.dailyConsumedProtein + totalProteinValue ??
+              0;
+      int totalConsumedCarb =
+          existingNutritionRecords!.dailyConsumedCarb + totalCarbValue ?? 0;
+      int totalBurnedCalories =
+          existingNutritionRecords!.dailyBurnedCalories ?? 0;
+
       DailyNutritionRecords dailyNutritionRecords = DailyNutritionRecords(
         dailyRecords: dailyRecords,
         recordDate: time,
         recordId: dailyRecordID,
+        dailyConsumedCalories: totalConsumedCalories,
+        dailyBurnedCalories: totalBurnedCalories,
+        dailyConsumedProtein: totalConsumedProtein,
+        dailyConsumedFat: totalConsumedFat,
+        dailyConsumedCarb: totalConsumedCarb,
       );
 
       final status = await nutritionRecordRepo.saveNutritionData(
@@ -159,6 +205,22 @@ class ScannerController extends GetxController {
       existingNutritionRecords = records;
       dailyRecords = records.dailyRecords;
 
+      // int maximumCalories = 0;
+      // int consumedCalories = 0;
+      // int burnedCalories = 0;
+      // int maximumFat = 0;
+      // int consumedFat = 0;
+      // int maximumProtein = 0;
+      // int consumedProtein = 0;
+      // int maximumCarb = 0;
+      // int consumedCarb = 0;
+
+      consumedCalories.value = records.dailyConsumedCalories ?? 0;
+      burnedCalories.value = records.dailyBurnedCalories ?? 0;
+      consumedFat.value = records.dailyConsumedFat ?? 0;
+      consumedProtein.value = records.dailyConsumedProtein ?? 0;
+      consumedCarb.value = records.dailyConsumedCarb ?? 0;
+
       print("✅ Successfully retrieved records");
     } catch (e) {
       print("🔥 [API Error] $e");
@@ -172,5 +234,29 @@ class ScannerController extends GetxController {
       isLoading = false;
       update();
     }
+  }
+
+  void updateNutritionValues({
+    int? maxCalories,
+    int? conCalories,
+    int? burnCalories,
+    int? maxFat,
+    int? conFat,
+    int? maxProtein,
+    int? conProtein,
+    int? maxCarb,
+    int? conCarb,
+  }) {
+    if (maxCalories != null) maximumCalories.value = maxCalories;
+    if (conCalories != null) consumedCalories.value = conCalories;
+    if (burnCalories != null) burnedCalories.value = burnCalories;
+    if (maxFat != null) maximumFat.value = maxFat;
+    if (conFat != null) consumedFat.value = conFat;
+    if (maxProtein != null) maximumProtein.value = maxProtein;
+    if (conProtein != null) consumedProtein.value = conProtein;
+    if (maxCarb != null) maximumCarb.value = maxCarb;
+    if (conCarb != null) consumedCarb.value = conCarb;
+
+    update();
   }
 }
