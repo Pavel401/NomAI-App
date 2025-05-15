@@ -523,6 +523,70 @@ class UserBasicInfo {
     final parts = timeString.split(':');
     return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
   }
+
+  UserBasicInfo copyWith({
+    Gender? selectedGender,
+    int? age,
+    WeeklyPace? selectedPace,
+    DateTime? birthDate,
+    double? currentHeight,
+    double? currentWeight,
+    double? desiredWeight,
+    String? selectedHaveYouTriedApps,
+    String? selectedWorkoutOption,
+    HealthMode? selectedGoal,
+    String? selectedObstacle,
+    String? selectedDietKnowledge,
+    List<String>? selectedMeals,
+    String? selectedBodySatisfaction,
+    String? selectedDiet,
+    String? selectedMealTiming,
+    TimeOfDay? firstMealOfDay,
+    TimeOfDay? secondMealOfDay,
+    TimeOfDay? thirdMealOfDay,
+    String? selectedMacronutrientKnowledge,
+    String? selectedAllergy,
+    String? selectedEatOut,
+    String? selectedHomeCooked,
+    ActivityLevel? selectedActivityLevel,
+    String? selectedSleepPattern,
+    UserMacros? userMacros,
+  }) {
+    return UserBasicInfo(
+      selectedGender: selectedGender ?? this.selectedGender,
+      age: age ?? this.age,
+      selectedPace: selectedPace ?? this.selectedPace,
+      birthDate: birthDate ?? this.birthDate,
+      currentHeight: currentHeight ?? this.currentHeight,
+      currentWeight: currentWeight ?? this.currentWeight,
+      desiredWeight: desiredWeight ?? this.desiredWeight,
+      selectedHaveYouTriedApps:
+          selectedHaveYouTriedApps ?? this.selectedHaveYouTriedApps,
+      selectedWorkoutOption:
+          selectedWorkoutOption ?? this.selectedWorkoutOption,
+      selectedGoal: selectedGoal ?? this.selectedGoal,
+      selectedObstacle: selectedObstacle ?? this.selectedObstacle,
+      selectedDietKnowledge:
+          selectedDietKnowledge ?? this.selectedDietKnowledge,
+      selectedMeals: selectedMeals ?? this.selectedMeals,
+      selectedBodySatisfaction:
+          selectedBodySatisfaction ?? this.selectedBodySatisfaction,
+      selectedDiet: selectedDiet ?? this.selectedDiet,
+      selectedMealTiming: selectedMealTiming ?? this.selectedMealTiming,
+      firstMealOfDay: firstMealOfDay ?? this.firstMealOfDay,
+      secondMealOfDay: secondMealOfDay ?? this.secondMealOfDay,
+      thirdMealOfDay: thirdMealOfDay ?? this.thirdMealOfDay,
+      selectedMacronutrientKnowledge:
+          selectedMacronutrientKnowledge ?? this.selectedMacronutrientKnowledge,
+      selectedAllergy: selectedAllergy ?? this.selectedAllergy,
+      selectedEatOut: selectedEatOut ?? this.selectedEatOut,
+      selectedHomeCooked: selectedHomeCooked ?? this.selectedHomeCooked,
+      selectedActivityLevel:
+          selectedActivityLevel ?? this.selectedActivityLevel,
+      selectedSleepPattern: selectedSleepPattern ?? this.selectedSleepPattern,
+      userMacros: userMacros ?? this.userMacros,
+    );
+  }
 }
 
 class UserMacros {
