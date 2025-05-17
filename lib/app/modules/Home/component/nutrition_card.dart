@@ -9,6 +9,7 @@ import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/constants/enums.dart';
 import 'package:turfit/app/models/AI/nutrition_output.dart';
 import 'package:turfit/app/models/AI/nutrition_record.dart';
+import 'package:turfit/app/utility/date_utility.dart';
 
 class NutritionCard extends StatelessWidget {
   final NutritionRecord nutritionRecord;
@@ -152,14 +153,37 @@ class NutritionCard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        foodName!,
-                        style: context.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            foodName!,
+                            style: context.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 2.w,
+                              vertical: 0.5.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: MealAIColors.lightGreyTile,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              DateUtility.getTimeFromDateTime(
+                                nutritionRecord.recordTime!.toLocal(),
+                              ),
+                              style: context.textTheme.bodySmall?.copyWith(
+                                color: Colors.black54,
+                              ),
+                            ),
+                          )
+                        ],
                       ),
                       SizedBox(height: 4),
                       Row(
