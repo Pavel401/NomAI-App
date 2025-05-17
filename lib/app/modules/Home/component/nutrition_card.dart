@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bounceable/flutter_bounceable.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:turfit/app/constants/colors.dart';
@@ -49,18 +50,31 @@ class NutritionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final totals = _totalNutrition;
+    final isProcessing =
+        nutritionRecord.processingStatus == ProcessingStatus.PROCESSING;
 
-    return GestureDetector(
+    return Bounceable(
       onTap: onTap,
-      child: Card(
-        elevation: 3,
+      child: Container(
         margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        shape: RoundedRectangleBorder(
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
+          // boxShadow: [
+          //   BoxShadow(
+          //     color: Colors.black.withOpacity(0.08),
+          //     blurRadius: 10,
+          //     offset: Offset(0, 4),
+          //   ),
+          // ],
         ),
-        child: nutritionRecord.processingStatus == ProcessingStatus.PROCESSING
-            ? _buildProcessingCard(context)
-            : _buildCompletedCard(context, totals),
+        child: Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          clipBehavior: Clip.antiAlias,
+          child: isProcessing
+              ? _buildProcessingCard(context)
+              : _buildCompletedCard(context, totals),
+        ),
       ),
     );
   }
@@ -70,48 +84,47 @@ class NutritionCard extends StatelessWidget {
       height: 12.h,
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              bottomLeft: Radius.circular(16),
-            ),
-            child: nutritionRecord.nutritionInputQuery?.imageFilePath != null
-                ? Image.file(
-                    File(nutritionRecord.nutritionInputQuery!.imageFilePath!),
-                    width: 25.w,
-                    height: 12.h,
-                    fit: BoxFit.cover,
-                  )
-                : Container(
-                    width: 25.w,
-                    height: 12.h,
-                    color: Colors.grey[300],
-                    child: Icon(Icons.image, color: Colors.grey[600]),
-                  ),
-          ),
+          _buildFoodImage(context, 25.w, 12.h),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Analyzing your food...",
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              MealAIColors.darkPrimary),
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        "Analyzing your food...",
+                        style: context.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    backgroundColor: Colors.grey[200],
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(MealAIColors.darkPrimary),
+                  Text(
+                    "We're calculating the nutritional value",
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: Colors.black54,
+                    ),
                   ),
                 ],
               ),
             ),
           ),
+          // _buildChevron(context),
         ],
       ),
     );
@@ -128,162 +141,228 @@ class NutritionCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              bottomLeft: Radius.circular(16),
-            ),
-            child: nutritionRecord.nutritionInputQuery?.imageUrl != null
-                ? CachedNetworkImage(
-                    imageUrl: nutritionRecord.nutritionInputQuery!.imageUrl,
-                    placeholder: (context, url) => Container(
-                      color: Colors.grey[300],
-                      child: Center(
-                        child: SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: Colors.grey[300],
-                      child: Icon(Icons.error, color: Colors.red),
-                    ),
-                    width: 25.w,
-                    height: 16.h,
-                    fit: BoxFit.cover,
-                  )
-                : Container(
-                    width: 25.w,
-                    height: 16.h,
-                    color: Colors.grey[300],
-                    child: Icon(Icons.image, color: Colors.grey[600]),
-                  ),
-          ),
+          _buildFoodImage(context, 25.w, 16.h),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    foodName!,
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 4),
-                  // Display total nutrition info
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildNutritionRow(
-                        context,
-                        Icons.local_fire_department,
-                        "${totals['calories']} kcal",
-                        MealAIColors.darkPrimary,
+                      Text(
+                        foodName!,
+                        style: context.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 2),
+                      SizedBox(height: 4),
                       Row(
                         children: [
-                          _buildNutritionBadge(
-                            context,
-                            "CARBS",
-                            "${totals['carbs']}g",
-                            Colors.amber[700]!,
+                          Icon(
+                            Icons.local_fire_department_rounded,
+                            color: MealAIColors.darkPrimary,
+                            size: 16,
                           ),
                           SizedBox(width: 4),
-                          _buildNutritionBadge(
-                            context,
-                            "PROTEIN",
-                            "${totals['protein']}g",
-                            Colors.green[700]!,
-                          ),
-                          SizedBox(width: 4),
-                          _buildNutritionBadge(
-                            context,
-                            "FAT",
-                            "${totals['fat']}g",
-                            Colors.red[700]!,
+                          Text(
+                            "${totals['calories']} kcal",
+                            style: context.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: MealAIColors.darkPrimary,
+                            ),
                           ),
                         ],
                       ),
                     ],
                   ),
+                  // Nutrition badges row
+                  _buildNutritionBadgesRow(context, totals),
                 ],
               ),
             ),
           ),
-          Container(
-            height: 16.h,
-            width: 8.w,
-            decoration: BoxDecoration(
-              color: MealAIColors.darkPrimary.withOpacity(0.1),
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(16),
-                bottomRight: Radius.circular(16),
+          // _buildChevron(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFoodImage(BuildContext context, double width, double height) {
+    return Hero(
+      tag: 'food_image_${nutritionRecord.hashCode}',
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(16),
+          bottomLeft: Radius.circular(16),
+        ),
+        child: Container(
+          width: width,
+          height: height,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Image or placeholder
+              if (nutritionRecord.nutritionInputQuery?.imageFilePath != null)
+                Image.file(
+                  File(nutritionRecord.nutritionInputQuery!.imageFilePath!),
+                  width: 25.w,
+                  height: 12.h,
+                  fit: BoxFit.cover,
+                )
+              else if (nutritionRecord.nutritionInputQuery?.imageUrl != null)
+                CachedNetworkImage(
+                  imageUrl: nutritionRecord.nutritionInputQuery!.imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => _buildImagePlaceholder(),
+                  errorWidget: (context, url, error) => _buildImageError(),
+                )
+              else
+                _buildImagePlaceholder(),
+
+              // Optional: Add a subtle gradient overlay for better text contrast
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.black.withOpacity(0.2),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
               ),
-            ),
-            child: Center(
-              child: Icon(
-                Icons.arrow_forward_ios,
-                color: MealAIColors.darkPrimary,
-                size: 16,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImagePlaceholder() {
+    return Container(
+      color: Colors.grey[200],
+      child: Center(
+        child: Icon(
+          Icons.restaurant,
+          color: Colors.grey[400],
+          size: 32,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageError() {
+    return Container(
+      color: Colors.grey[200],
+      child: Center(
+        child: Icon(
+          Icons.error_outline,
+          color: Colors.red[300],
+          size: 32,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNutritionBadgesRow(
+      BuildContext context, Map<String, int> totals) {
+    return Row(
+      children: [
+        Expanded(
+            child: _buildMacroNutrientBadge(
+          context,
+          "CARBS",
+          "${totals['carbs']}g",
+          Colors.amber[700]!,
+          Icons.grain_rounded,
+        )),
+        SizedBox(width: 6),
+        Expanded(
+            child: _buildMacroNutrientBadge(
+          context,
+          "PROTEIN",
+          "${totals['protein']}g",
+          Colors.green[700]!,
+          Icons.fitness_center_rounded,
+        )),
+        SizedBox(width: 6),
+        Expanded(
+            child: _buildMacroNutrientBadge(
+          context,
+          "FAT",
+          "${totals['fat']}g",
+          Colors.red[700]!,
+          Icons.opacity_rounded,
+        )),
+      ],
+    );
+  }
+
+  Widget _buildMacroNutrientBadge(BuildContext context, String label,
+      String value, Color color, IconData icon) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 12,
+          ),
+          SizedBox(width: 4),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                value,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
+              Text(
+                label,
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: color.withOpacity(0.8),
+                  fontSize: 6.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildNutritionRow(
-      BuildContext context, IconData icon, String text, Color color) {
-    return Row(
-      children: [
-        Icon(icon, color: color, size: 16),
-        SizedBox(width: 4),
-        Text(
-          text,
-          style: context.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildNutritionBadge(
-      BuildContext context, String label, String value, Color color) {
+  Widget _buildChevron(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      width: 8.w,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
+        color: MealAIColors.darkPrimary.withOpacity(0.08),
+        borderRadius: BorderRadius.only(
+          topRight: Radius.circular(16),
+          bottomRight: Radius.circular(16),
+        ),
       ),
-      child: RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: value,
-              style: context.textTheme.bodySmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            TextSpan(
-              text: " $label",
-              style: context.textTheme.bodySmall?.copyWith(
-                color: color.withOpacity(0.8),
-                fontSize: 6.sp,
-              ),
-            ),
-          ],
+      child: Center(
+        child: Icon(
+          Icons.chevron_right_rounded,
+          color: MealAIColors.darkPrimary,
+          size: 24,
         ),
       ),
     );
