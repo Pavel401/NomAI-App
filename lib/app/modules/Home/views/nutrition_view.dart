@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bounceable/flutter_bounceable.dart';
+import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/models/AI/nutrition_record.dart';
 
 class NutritionView extends StatelessWidget {
@@ -9,18 +11,54 @@ class NutritionView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        foregroundColor: Colors.black,
-        title: Text(
-          'Nutrition Details',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
+        leading: Bounceable(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Container(
+            margin: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: MealAIColors.greyLight,
+            ),
+            child: Icon(Icons.chevron_left,
+                color: MealAIColors.blueGrey, size: 30),
           ),
         ),
+        title: Text(
+          'Nutrition',
+        ),
+        centerTitle: true,
+        actions: [
+          Bounceable(
+            onTap: () {},
+            child: Container(
+              margin: EdgeInsets.only(right: 16),
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: MealAIColors.greyLight,
+              ),
+              child:
+                  Icon(Icons.ios_share_outlined, color: MealAIColors.blueGrey),
+            ),
+          ),
+          Bounceable(
+            onTap: () {},
+            child: Container(
+              margin: EdgeInsets.only(right: 16),
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: MealAIColors.greyLight,
+              ),
+              child: Icon(Icons.delete_outline, color: Colors.red),
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
