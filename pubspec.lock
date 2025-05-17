@@ -13,10 +13,10 @@ packages:
     dependency: transitive
     description:
       name: _flutterfire_internals
-      sha256: "401dd18096f5eaa140404ccbbbf346f83c850e6f27049698a7ee75a3488ddb32"
+      sha256: de9ecbb3ddafd446095f7e833c853aff2fa1682b017921fe63a833f9d6f0e422
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.52"
+    version: "1.3.54"
   analyzer:
     dependency: transitive
     description:
@@ -233,14 +233,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.0"
-  circular_progress_stack:
-    dependency: "direct main"
-    description:
-      name: circular_progress_stack
-      sha256: "204ab4af5e56fa68506818fd443981393488924ad5e276554e104c2f834d839d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.4"
   cli_util:
     dependency: transitive
     description:
@@ -258,29 +250,29 @@ packages:
     source: hosted
     version: "1.1.2"
   cloud_firestore:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: cloud_firestore
-      sha256: d7204f3263ba3236c037972f1ea2821569bd7b896fa348c3d557e3b76b6dc143
+      sha256: "6ca737017131a77940fdcca3e13bf6efb5633d50b83514bba24f5fd68e7f340f"
       url: "https://pub.dev"
     source: hosted
-    version: "5.6.3"
+    version: "5.6.7"
   cloud_firestore_platform_interface:
     dependency: transitive
     description:
       name: cloud_firestore_platform_interface
-      sha256: "10a8519164a0e38fce52f78d540bce1170fc210d07989fe49597723400fcd0f1"
+      sha256: "082c9aa0602efc1ee8c44c4e8a29a456b198f79a7f62657df39144c97e364cfb"
       url: "https://pub.dev"
     source: hosted
-    version: "6.6.3"
+    version: "6.6.7"
   cloud_firestore_web:
     dependency: transitive
     description:
       name: cloud_firestore_web
-      sha256: "4b9e34f53c32dc9891aea247d82bfb21fe7779c0064d84baea1a4f18210146de"
+      sha256: e1ddeacedd1c5a2e54089bbeb2d95d03b0096eccf8889024598f09f092ed8746
       url: "https://pub.dev"
     source: hosted
-    version: "4.4.3"
+    version: "4.4.7"
   code_builder:
     dependency: transitive
     description:
@@ -477,10 +469,10 @@ packages:
     dependency: "direct main"
     description:
       name: firebase_core
-      sha256: "6a4ea0f1d533443c8afc3d809cd36a4e2b8f2e2e711f697974f55bb31d71d1b8"
+      sha256: "017d17d9915670e6117497e640b2859e0b868026ea36bf3a57feb28c3b97debe"
       url: "https://pub.dev"
     source: hosted
-    version: "3.12.0"
+    version: "3.13.0"
   firebase_core_platform_interface:
     dependency: transitive
     description:
@@ -493,10 +485,10 @@ packages:
     dependency: transitive
     description:
       name: firebase_core_web
-      sha256: e47f5c2776de018fa19bc9f6f723df136bc75cdb164d64b65305babd715c8e41
+      sha256: "129a34d1e0fb62e2b488d988a1fc26cc15636357e50944ffee2862efe8929b23"
       url: "https://pub.dev"
     source: hosted
-    version: "2.21.0"
+    version: "2.22.0"
   firebase_storage:
     dependency: "direct main"
     description:
@@ -542,6 +534,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "9.0.0"
+  flutter_bounceable:
+    dependency: "direct main"
+    description:
+      name: flutter_bounceable
+      sha256: "2e46ad87e5870188a459d1e88f5acbf7bf0217651a6655f9ff079bc0c5976010"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   flutter_cache_manager:
     dependency: transitive
     description:
@@ -664,94 +664,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
-  geocoding:
-    dependency: "direct main"
-    description:
-      name: geocoding
-      sha256: d580c801cba9386b4fac5047c4c785a4e19554f46be42f4f5e5b7deacd088a66
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
-  geocoding_android:
-    dependency: transitive
-    description:
-      name: geocoding_android
-      sha256: "1b13eca79b11c497c434678fed109c2be020b158cec7512c848c102bc7232603"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.3.1"
-  geocoding_ios:
-    dependency: transitive
-    description:
-      name: geocoding_ios
-      sha256: "94ddba60387501bd1c11e18dca7c5a9e8c645d6e3da9c38b9762434941870c24"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.1"
-  geocoding_platform_interface:
-    dependency: transitive
-    description:
-      name: geocoding_platform_interface
-      sha256: "8c2c8226e5c276594c2e18bfe88b19110ed770aeb7c1ab50ede570be8b92229b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.2.0"
-  geoflutterfire_plus:
-    dependency: "direct main"
-    description:
-      name: geoflutterfire_plus
-      sha256: b21db377fb940eb511abcf0258a54c515882c1eda78fa0c6759b3cbb020a8f8b
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.32"
-  geolocator:
-    dependency: "direct main"
-    description:
-      name: geolocator
-      sha256: "149876cc5207a0f5daf4fdd3bfcf0a0f27258b3fe95108fa084f527ad0568f1b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "12.0.0"
-  geolocator_android:
-    dependency: transitive
-    description:
-      name: geolocator_android
-      sha256: "7aefc530db47d90d0580b552df3242440a10fe60814496a979aa67aa98b1fd47"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.6.1"
-  geolocator_apple:
-    dependency: transitive
-    description:
-      name: geolocator_apple
-      sha256: c4ecead17985ede9634f21500072edfcb3dba0ef7b97f8d7bc556d2d722b3ba3
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.9"
-  geolocator_platform_interface:
-    dependency: transitive
-    description:
-      name: geolocator_platform_interface
-      sha256: "386ce3d9cce47838355000070b1d0b13efb5bc430f8ecda7e9238c8409ace012"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.2.4"
-  geolocator_web:
-    dependency: transitive
-    description:
-      name: geolocator_web
-      sha256: "2ed69328e05cd94e7eb48bb0535f5fc0c0c44d1c4fa1e9737267484d05c29b5e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.1"
-  geolocator_windows:
-    dependency: transitive
-    description:
-      name: geolocator_windows
-      sha256: "53da08937d07c24b0d9952eb57a3b474e29aae2abf9dd717f7e1230995f13f0e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.3"
   get:
     dependency: "direct main"
     description:
@@ -1004,10 +916,10 @@ packages:
     dependency: "direct main"
     description:
       name: linear_progress_bar
-      sha256: "6e5d69807f4b24db35ebb2eddd9da5cfef5a82ef0b29b1e03b460d5ac3af0563"
+      sha256: "8265c87323e661092adc96ae04d18072c34dce318b586965c3818d5d979f60d6"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.3"
+    version: "1.2.0"
   lints:
     dependency: transitive
     description:
