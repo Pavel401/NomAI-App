@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:get/get.dart';
 import 'package:turfit/app/constants/enums.dart';
@@ -114,11 +113,12 @@ class ScannerController extends GetxController {
 
       if (imageUrl == null) {
         print("Failed to upload image.");
+        throw Exception("Failed to upload image");
       }
 
       ///Prepare input data for AI (with imageData)
       final inputData = NutritionInputQuery(
-        imageUrl: imageUrl!,
+        imageUrl: imageUrl,
         scanMode: scanMode,
         imageData: base64String, // Include imageData for API request
         imageFilePath: image.path,
@@ -135,35 +135,50 @@ class ScannerController extends GetxController {
         processingStatus: ProcessingStatus.COMPLETED,
       ));
 
+      // Calculate nutrition totals from ingredients
       int totalNutritionValue = 0;
       int totalProteinValue = 0;
       int totalFatValue = 0;
       int totalCarbValue = 0;
       int totalFiberValue = 0;
-      for (int i = 0; i < rawNutritionData.response!.ingredients!.length; i++) {
-        totalNutritionValue +=
-            rawNutritionData.response!.ingredients![i].calories ?? 0;
-        totalProteinValue +=
-            rawNutritionData.response!.ingredients![i].protein ?? 0;
-        totalFatValue += rawNutritionData.response!.ingredients![i].fat ?? 0;
-        totalCarbValue += rawNutritionData.response!.ingredients![i].carbs ?? 0;
-        totalFiberValue +=
-            rawNutritionData.response!.ingredients![i].fibre ?? 0;
+
+      if (rawNutritionData.response?.ingredients != null) {
+        for (final ingredient in rawNutritionData.response!.ingredients!) {
+          totalNutritionValue += ingredient.calories ?? 0;
+          totalProteinValue += ingredient.protein ?? 0;
+          totalFatValue += ingredient.fat ?? 0;
+          totalCarbValue += ingredient.carbs ?? 0;
+          totalFiberValue += ingredient.fibre ?? 0;
+        }
       }
 
+      // Initialize a new record if we don't have one yet
+      if (existingNutritionRecords == null) {
+        existingNutritionRecords = DailyNutritionRecords(
+          dailyRecords: [],
+          recordDate: time,
+          recordId: dailyRecordID,
+          dailyConsumedCalories: 0,
+          dailyBurnedCalories: 0,
+          dailyConsumedProtein: 0,
+          dailyConsumedFat: 0,
+          dailyConsumedCarb: 0,
+        );
+      }
+
+      // Correctly calculate the totals with proper null safety
       int totalConsumedCalories =
-          existingNutritionRecords!.dailyConsumedCalories +
-                  totalNutritionValue ??
-              0;
+          (existingNutritionRecords?.dailyConsumedCalories ?? 0) +
+              totalNutritionValue;
       int totalConsumedFat =
-          existingNutritionRecords!.dailyConsumedFat + totalFatValue ?? 0;
+          (existingNutritionRecords?.dailyConsumedFat ?? 0) + totalFatValue;
       int totalConsumedProtein =
-          existingNutritionRecords!.dailyConsumedProtein + totalProteinValue ??
-              0;
+          (existingNutritionRecords?.dailyConsumedProtein ?? 0) +
+              totalProteinValue;
       int totalConsumedCarb =
-          existingNutritionRecords!.dailyConsumedCarb + totalCarbValue ?? 0;
+          (existingNutritionRecords?.dailyConsumedCarb ?? 0) + totalCarbValue;
       int totalBurnedCalories =
-          existingNutritionRecords!.dailyBurnedCalories ?? 0;
+          existingNutritionRecords?.dailyBurnedCalories ?? 0;
 
       DailyNutritionRecords dailyNutritionRecords = DailyNutritionRecords(
         dailyRecords: dailyRecords,
@@ -181,9 +196,19 @@ class ScannerController extends GetxController {
 
       existingNutritionRecords = dailyNutritionRecords;
 
+      // Update reactive properties directly rather than via updateNutritionValues
+      consumedCalories.value = totalConsumedCalories;
+      burnedCalories.value = totalBurnedCalories;
+      consumedFat.value = totalConsumedFat;
+      consumedProtein.value = totalConsumedProtein;
+      consumedCarb.value = totalConsumedCarb;
+
+      // Call update() to refresh non-reactive UI elements
       update();
     } catch (e) {
       print("🔥 [API Error] $e");
+      // Update the UI to reflect the error state
+      update();
     }
   }
 
