@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
+import 'package:turfit/app/modules/Auth/blocs/my_user_bloc/my_user_bloc.dart';
+import 'package:turfit/app/modules/Auth/blocs/my_user_bloc/my_user_event.dart';
 import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
 import 'package:turfit/app/modules/DashBoard/view/dashboard.dart';
 import 'package:turfit/app/modules/Onboarding/views/onboarding_home.dart';
@@ -37,6 +39,19 @@ void main() async {
         BlocProvider<AuthenticationBloc>(
             create: (context) =>
                 AuthenticationBloc(userRepository: _userRepository)),
+        // BlocProvider<UserBloc>(
+        //   create: (context) {
+        //     final userBloc = UserBloc(userRepository: _userRepository);
+        //     // Listen to auth state changes to load user data when authenticated
+        //     context.read<AuthenticationBloc>().stream.listen((authState) {
+        //       if (authState.status == AuthenticationStatus.authenticated &&
+        //           authState.user != null) {
+        //         userBloc.add(LoadUserModel(authState.user!.uid));
+        //       }
+        //     });
+        //     return userBloc;
+        //   },
+        // ),
       ],
       child: const MyApp(),
     ),
@@ -95,10 +110,19 @@ class MyAppView extends StatelessWidget {
             builder: (context, state) {
               if (state.status == AuthenticationStatus.authenticated) {
                 // Lazily provide SignInBloc only when needed
-                return BlocProvider(
-                  create: (context) => SignInBloc(
-                    userRepository: _userRepository,
-                  ),
+                return MultiBlocProvider(
+                  providers: [
+                    BlocProvider<SignInBloc>(
+                      create: (context) => SignInBloc(
+                        userRepository: _userRepository,
+                      ),
+                    ),
+                    BlocProvider<UserBloc>(
+                      create: (context) => UserBloc(
+                        userRepository: _userRepository,
+                      )..add(LoadUserModel(state.user!.uid)),
+                    ),
+                  ],
                   // Remove the BlocListener which is causing an extra rendering cycle
                   child: const HomeScreen(),
                 );

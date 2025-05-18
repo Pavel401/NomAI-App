@@ -1,8 +1,27 @@
-part of 'my_user_bloc.dart';
+import 'package:equatable/equatable.dart';
+import 'package:turfit/app/models/Auth/user.dart';
 
-sealed class MyUserEvent extends Equatable {
-  const MyUserEvent();
+abstract class UserEvent extends Equatable {
+  const UserEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
+}
+
+class LoadUserModel extends UserEvent {
+  final String uid;
+
+  const LoadUserModel(this.uid);
+
+  @override
+  List<Object?> get props => [uid];
+}
+
+class UpdateUserModel extends UserEvent {
+  final UserModel userModel;
+
+  const UpdateUserModel(this.userModel);
+
+  @override
+  List<Object?> get props => [userModel];
 }
