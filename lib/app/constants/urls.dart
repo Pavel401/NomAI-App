@@ -1,5 +1,6 @@
 class BaseUrl {
-  static const String baseUrl = 'https://nutrix.up.railway.app/';
+  // static const String baseUrl = 'https://nutrix.up.railway.app/';
+  static const String baseUrl = 'http://10.0.2.2:8000/'; // Instead of 127.0.0.1
 }
 
 class ApiPath {

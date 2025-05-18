@@ -156,14 +156,15 @@ class NutritionCard extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            foodName!,
-                            style: context.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                          Expanded(
+                            child: Text(
+                              foodName ?? "Unknown Food",
+                              style: context.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                           Container(
                             padding: EdgeInsets.symmetric(
@@ -218,52 +219,49 @@ class NutritionCard extends StatelessWidget {
   }
 
   Widget _buildFoodImage(BuildContext context, double width, double height) {
-    return Hero(
-      tag: 'food_image_${nutritionRecord.hashCode}',
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          bottomLeft: Radius.circular(16),
-        ),
-        child: Container(
-          width: width,
-          height: height,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Image or placeholder
-              if (nutritionRecord.nutritionInputQuery?.imageFilePath != null)
-                Image.file(
-                  File(nutritionRecord.nutritionInputQuery!.imageFilePath!),
-                  width: 25.w,
-                  height: 12.h,
-                  fit: BoxFit.cover,
-                )
-              else if (nutritionRecord.nutritionInputQuery?.imageUrl != null)
-                CachedNetworkImage(
-                  imageUrl: nutritionRecord.nutritionInputQuery!.imageUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => _buildImagePlaceholder(),
-                  errorWidget: (context, url, error) => _buildImageError(),
-                )
-              else
-                _buildImagePlaceholder(),
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topLeft: Radius.circular(16),
+        bottomLeft: Radius.circular(16),
+      ),
+      child: Container(
+        width: width,
+        height: height,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Image or placeholder
+            if (nutritionRecord.nutritionInputQuery?.imageFilePath != null)
+              Image.file(
+                File(nutritionRecord.nutritionInputQuery!.imageFilePath!),
+                width: 25.w,
+                height: 12.h,
+                fit: BoxFit.cover,
+              )
+            else if (nutritionRecord.nutritionInputQuery?.imageUrl != null)
+              CachedNetworkImage(
+                imageUrl: nutritionRecord.nutritionInputQuery!.imageUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => _buildImagePlaceholder(),
+                errorWidget: (context, url, error) => _buildImageError(),
+              )
+            else
+              _buildImagePlaceholder(),
 
-              // Optional: Add a subtle gradient overlay for better text contrast
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Colors.black.withOpacity(0.2),
-                      Colors.transparent,
-                    ],
-                  ),
+            // Optional: Add a subtle gradient overlay for better text contrast
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Colors.black.withOpacity(0.2),
+                    Colors.transparent,
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

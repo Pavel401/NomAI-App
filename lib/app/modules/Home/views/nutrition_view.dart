@@ -124,7 +124,6 @@ class NutritionView extends StatelessWidget {
   Widget _buildFoodImage() {
     return Center(
       child: Container(
-        // margin: EdgeInsets.all(16),
         width: double.infinity,
         height: 30.h,
         decoration: BoxDecoration(
@@ -204,12 +203,12 @@ class NutritionView extends StatelessWidget {
             ),
           ],
         ),
-        // const SizedBox(height: 16),
-        // HealthScoreWidget(
-        //   healthScore:
-        //       nutritionRecord.nutritionOutput!.response!.overallHealthScore ??
-        //           0,
-        // ),
+        if (response.overallHealthScore != null) ...[
+          const SizedBox(height: 16),
+          HealthScoreWidget(
+            healthScore: response.overallHealthScore ?? 0,
+          ),
+        ],
       ],
     );
   }
@@ -229,7 +228,7 @@ class NutritionView extends StatelessWidget {
         totalProtein += ingredient.protein ?? 0;
         totalCarbs += ingredient.carbs ?? 0;
         totalFat += ingredient.fat ?? 0;
-        totalFiber += ingredient.fibre ?? 0;
+        totalFiber += ingredient.fiber ?? 0; // Changed from fibre to fiber
       }
     }
 
@@ -412,19 +411,18 @@ class NutritionView extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          ingredient.name ?? 'Unknown',
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                        ),
-                        if (ingredient.quantity != null &&
-                            ingredient.portion != null)
-                          Text(
-                            '${ingredient.quantity} ${ingredient.portion}',
-                            style: Theme.of(context).textTheme.bodyMedium,
+                        Expanded(
+                          child: Text(
+                            ingredient.name ?? 'Unknown',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
+                        ),
+                        // Note: Removed quantity and portion fields as they're not in the model
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -438,8 +436,8 @@ class NutritionView extends StatelessWidget {
                             'C', '${ingredient.carbs ?? 0}g'),
                         _buildIngredientNutrient(
                             'F', '${ingredient.fat ?? 0}g'),
-                        _buildIngredientNutrient(
-                            'Fiber', '${ingredient.fibre ?? 0}g'),
+                        _buildIngredientNutrient('Fiber',
+                            '${ingredient.fiber ?? 0}g'), // Changed from fibre to fiber
                       ],
                     ),
                     if (ingredient.healthComments != null &&

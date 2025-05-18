@@ -148,7 +148,7 @@ class ScannerController extends GetxController {
           totalProteinValue += ingredient.protein ?? 0;
           totalFatValue += ingredient.fat ?? 0;
           totalCarbValue += ingredient.carbs ?? 0;
-          totalFiberValue += ingredient.fibre ?? 0;
+          totalFiberValue += ingredient.fiber ?? 0;
         }
       }
 
