@@ -84,7 +84,7 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
         });
       } else {
         // Trigger confetti animation on the last page
-        int age = UserUtility.calculateAge(birthday);
+        int age = EnhancedUserNutrition.calculateAccurateAge(birthday);
 
         // print("The height is $currentHeight");
         // print("The weight is $currentWeight");
@@ -1137,7 +1137,8 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
                 tile:
                     _currentPage == _totalPages - 1 ? "Go to Sign Up" : "Next",
                 onPressed: () {
-                  _populateDemoData();
+                  // _populateDemoData();
+                  _onNext();
                 },
               ),
             ],

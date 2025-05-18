@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/models/Auth/user.dart';
-import 'package:turfit/app/models/Auth/user_repo.dart';
 import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
 import 'package:turfit/app/modules/Auth/views/sign_in_screen.dart';
-import 'package:turfit/app/repo/firebase_user_repo.dart';
 import 'package:turfit/app/utility/user_utility.dart';
 
 class DailyCalorieRequired extends StatefulWidget {
@@ -76,7 +74,7 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
     double weight = user.currentWeight!;
     double targetWeight = user.desiredWeight!;
 
-    _userMacros = UserUtility.calculateUserNutrition(
+    _userMacros = EnhancedUserNutrition.calculateScientificNutrition(
       user.selectedGender,
       user.birthDate,
       height,
