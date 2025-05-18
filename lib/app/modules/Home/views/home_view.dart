@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bounceable/flutter_bounceable.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:timeline_date_picker_plus/timeline_date_picker_plus.dart';
@@ -11,10 +12,14 @@ import 'package:turfit/app/constants/colors.dart';
 import 'package:turfit/app/models/AI/nutrition_record.dart';
 import 'package:turfit/app/models/Auth/user.dart';
 import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
+import 'package:turfit/app/modules/Auth/blocs/my_user_bloc/my_user_bloc.dart';
+import 'package:turfit/app/modules/Auth/blocs/my_user_bloc/my_user_event.dart';
+import 'package:turfit/app/modules/Auth/blocs/my_user_bloc/my_user_state.dart';
 import 'package:turfit/app/modules/Demo/views/bounce.dart';
 import 'package:turfit/app/modules/Home/component/nutrition_card.dart';
 import 'package:turfit/app/modules/Home/views/nutrition_view.dart';
 import 'package:turfit/app/modules/Scanner/controller/scanner_controller.dart';
+import 'package:turfit/app/modules/Settings/views/settings.dart';
 import 'package:turfit/app/repo/firebase_user_repo.dart';
 
 class HomePage extends StatefulWidget {
@@ -42,12 +47,11 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     // Initialize scanner controller
     _scannerController = Get.put(ScannerController());
-    authenticationBloc = context.read<AuthenticationBloc>();
-    // Get user ID from authentication bloc
-    _userId = context.read<AuthenticationBloc>().state.user!.uid;
 
-    // Initialize data loading
-    _initializeData();
+    // Defer the initialization to ensure the context is available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeData();
+    });
   }
 
   Future<void> _initializeData() async {
@@ -57,43 +61,77 @@ class _HomePageState extends State<HomePage> {
         _errorMessage = null;
       });
 
-      await _fetchUserData();
-      _fetchRecords();
+      // Get user ID from authentication bloc
+      final authState = context.read<AuthenticationBloc>().state;
+      if (authState.user == null) {
+        setState(() {
+          _errorMessage = 'User not authenticated. Please log in again.';
+          _isLoading = false;
+        });
+        return;
+      }
 
-      setState(() {
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'Error loading data: ${e.toString()}';
-      });
-    }
-  }
+      _userId = authState.user!.uid;
 
-  Future<void> _fetchUserData() async {
-    try {
-      final userData = await _userRepository.getUserById(_userId);
-      setState(() {
-        userModel = userData;
-      });
+      // Listen to user bloc state changes
+      final userBloc = context.read<UserBloc>();
+      final userState = userBloc.state;
 
-      // Update nutrition values in scanner controller
-      if (userModel != null && userModel!.userInfo != null) {
-        _scannerController.updateNutritionValues(
-          maxCalories: userModel!.userInfo!.userMacros.calories ?? 0,
-          maxFat: userModel!.userInfo!.userMacros.fat ?? 0,
-          maxProtein: userModel!.userInfo!.userMacros.protein ?? 0,
-          maxCarb: userModel!.userInfo!.userMacros.carbs ?? 0,
-        );
+      if (userState is UserLoaded) {
+        // User already loaded
+        setState(() {
+          userModel = userState.userModel;
+          _isLoading = false;
+        });
+        _updateNutritionValues(userState.userModel);
+        _fetchRecords();
+      } else {
+        // Load user data
+        userBloc.add(LoadUserModel(_userId));
+
+        // Wait for user data to be loaded
+        await for (final state in userBloc.stream) {
+          if (state is UserLoaded) {
+            setState(() {
+              userModel = state.userModel;
+              _isLoading = false;
+            });
+            _updateNutritionValues(state.userModel);
+            _fetchRecords();
+            break;
+          } else if (state is UserError) {
+            setState(() {
+              _errorMessage = 'Failed to load user data: ${state.message}';
+              _isLoading = false;
+            });
+            break;
+          }
+        }
       }
     } catch (e) {
-      throw Exception('Failed to load user data: ${e.toString()}');
+      setState(() {
+        _errorMessage = 'An unexpected error occurred: $e';
+        _isLoading = false;
+      });
     }
   }
 
   void _fetchRecords() {
-    _scannerController.getRecordByDate(_userId, _selectedDate);
+    if (_userId.isNotEmpty) {
+      _scannerController.getRecordByDate(_userId, _selectedDate);
+    }
+  }
+
+  // Update nutrition values when user data changes
+  void _updateNutritionValues(UserModel? userModel) {
+    if (userModel != null && userModel.userInfo != null) {
+      _scannerController.updateNutritionValues(
+        maxCalories: userModel.userInfo!.userMacros.calories ?? 0,
+        maxFat: userModel.userInfo!.userMacros.fat ?? 0,
+        maxProtein: userModel.userInfo!.userMacros.protein ?? 0,
+        maxCarb: userModel.userInfo!.userMacros.carbs ?? 0,
+      );
+    }
   }
 
   @override
@@ -225,12 +263,21 @@ class _HomePageState extends State<HomePage> {
         ),
         Padding(
           padding: const EdgeInsets.only(right: 16),
-          child: CircleAvatar(
-            backgroundColor: const Color(0xFF817C88),
-            child: IconButton(
-              icon: const Icon(Icons.settings_outlined),
-              color: MealAIColors.whiteText,
-              onPressed: () {},
+          child: Bounceable(
+            onTap: () {
+              Get.to(() => SettingsView());
+            },
+            child: CircleAvatar(
+              backgroundColor: const Color(0xFF817C88),
+              child:
+                  Icon(Icons.settings_outlined, color: MealAIColors.whiteText),
+              // child: IconButton(
+              //   icon: const Icon(Icons.settings_outlined),
+              //   color: MealAIColors.whiteText,
+              //   onPressed: () {
+
+              //   },
+              // ),
             ),
           ),
         ),
