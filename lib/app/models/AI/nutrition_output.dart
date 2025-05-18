@@ -11,7 +11,7 @@ String nutritionOutputToJson(NutritionOutput data) =>
     json.encode(data.toJson());
 
 class NutritionOutput {
-  Response? response;
+  NutritionResponse? response;
   int? status;
   String? message;
   int? inputTokenCount;
@@ -36,7 +36,7 @@ class NutritionOutput {
       NutritionOutput(
         response: json["response"] == null
             ? null
-            : Response.fromJson(json["response"]),
+            : NutritionResponse.fromJson(json["response"]),
         status: json["status"],
         message: json["message"],
         inputTokenCount: json["input_token_count"],
@@ -58,18 +58,23 @@ class NutritionOutput {
       };
 }
 
-class Response {
+class NutritionResponse {
   String? foodName;
   List<Ingredient>? ingredients;
+  int? overallHealthScore;
+  String? overallHealthComments;
   List<Ingredient>? suggestAlternatives;
 
-  Response({
+  NutritionResponse({
     this.foodName,
     this.ingredients,
     this.suggestAlternatives,
+    this.overallHealthScore,
+    this.overallHealthComments,
   });
 
-  factory Response.fromJson(Map<String, dynamic> json) => Response(
+  factory NutritionResponse.fromJson(Map<String, dynamic> json) =>
+      NutritionResponse(
         foodName: json["foodName"],
         ingredients: json["ingredients"] == null
             ? []
@@ -79,6 +84,11 @@ class Response {
             ? []
             : List<Ingredient>.from(json["suggestAlternatives"]!
                 .map((x) => Ingredient.fromJson(x))),
+        overallHealthScore:
+            json["overallHealthScore"] == null ? 0 : json["overallHealthScore"],
+        overallHealthComments: json["overallHealthComments"] == null
+            ? ""
+            : json["overallHealthComments"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -89,6 +99,8 @@ class Response {
         "suggestAlternatives": suggestAlternatives == null
             ? []
             : List<dynamic>.from(suggestAlternatives!.map((x) => x.toJson())),
+        "overallHealthScore": overallHealthScore,
+        "overallHealthComments": overallHealthComments,
       };
 }
 

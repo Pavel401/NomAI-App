@@ -117,7 +117,7 @@ class FirebaseUserRepo implements UserRepository {
     }
   }
 
-  Future<void> updateUserData(String userId, UserBasicInfo info) async {
+  Future<void> updateUserMacroData(String userId, UserBasicInfo info) async {
     try {
       await usersCollection.doc(userId).update({
         'user_info': {
@@ -131,6 +131,15 @@ class FirebaseUserRepo implements UserRepository {
           },
         }
       });
+    } catch (e) {
+      log(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> updateUserData(UserModel user) async {
+    try {
+      await usersCollection.doc(user.userId).update(user.toEntity());
     } catch (e) {
       log(e.toString());
       rethrow;
