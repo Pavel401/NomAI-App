@@ -302,27 +302,27 @@ class NutritionCard extends StatelessWidget {
         Expanded(
             child: _buildMacroNutrientBadge(
           context,
-          "CARBS",
-          "${totals['carbs']}g",
-          Colors.amber[700]!,
-          Icons.grain_rounded,
+          "PROTEIN",
+          "${totals['protein']}g",
+          MealAIColors.proteinColor,
+          Icons.fitness_center_rounded,
         )),
-        SizedBox(width: 6),
+        SizedBox(width: 2.w),
         Expanded(
             child: _buildMacroNutrientBadge(
           context,
-          "PROTEIN",
-          "${totals['protein']}g",
-          Colors.green[700]!,
-          Icons.fitness_center_rounded,
+          "CARBS",
+          "${totals['carbs']}g",
+          MealAIColors.carbsColor,
+          Icons.grain_rounded,
         )),
-        SizedBox(width: 6),
+        SizedBox(width: 2.w),
         Expanded(
             child: _buildMacroNutrientBadge(
           context,
           "FAT",
           "${totals['fat']}g",
-          Colors.red[700]!,
+          MealAIColors.fatColor,
           Icons.opacity_rounded,
         )),
       ],

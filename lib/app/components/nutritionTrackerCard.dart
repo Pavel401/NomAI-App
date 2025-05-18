@@ -278,7 +278,7 @@ class NutritionTrackerCard extends StatelessWidget {
                 "Proteins",
                 consumedProtein,
                 maximumProtein,
-                Colors.blue.shade700,
+                MealAIColors.proteinColor,
                 Icons.fitness_center,
               ),
 
@@ -287,7 +287,7 @@ class NutritionTrackerCard extends StatelessWidget {
                 "Carbs",
                 consumedCarb,
                 maximumCarb,
-                Colors.orange.shade700,
+                MealAIColors.carbsColor,
                 Icons.grain,
               ),
 
@@ -296,7 +296,7 @@ class NutritionTrackerCard extends StatelessWidget {
                 "Fats",
                 consumedFat,
                 maximumFat,
-                Colors.green.shade700,
+                MealAIColors.fatColor,
                 Icons.opacity,
               ),
             ],
