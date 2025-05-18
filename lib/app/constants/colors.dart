@@ -51,6 +51,8 @@ class MealAIColors {
   ///Static colors
 
   static Color lightGreyTile = "#F9F8FD".toColor();
+
+  static Color grey = Colors.grey;
   static const Color selectedTile = Color(0xFF212121);
   static const Color switchWhiteColor = Color(0xFFFFFFFF);
   static const Color switchBlackColor = Color(0xFF000000);
@@ -67,6 +69,11 @@ class MealAIColors {
   static const Color greyLight = Color.fromRGBO(235, 235, 235, 1);
 
   static Color gaugeColor = Colors.grey.withOpacity(0.2);
+  static Color proteinColor = "#E91E63".toColor(); // Pink for protein/strength
+  static Color carbsColor = "#558B2F".toColor();
+  static Color fatColor = Colors.blue;
+  static Color waterColor =
+      "#0288D1".toColor(); // Richer blue for water/hydration
 }
 
 extension HexColorExtension on String {
