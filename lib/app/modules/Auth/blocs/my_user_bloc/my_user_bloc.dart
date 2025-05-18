@@ -1,13 +1,31 @@
 import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
 
-part 'my_user_event.dart';
-part 'my_user_state.dart';
+import 'package:turfit/app/modules/Auth/blocs/my_user_bloc/my_user_event.dart';
+import 'package:turfit/app/modules/Auth/blocs/my_user_bloc/my_user_state.dart';
+import 'package:turfit/app/repo/firebase_user_repo.dart';
 
-class MyUserBloc extends Bloc<MyUserEvent, MyUserState> {
-  MyUserBloc() : super(MyUserInitial()) {
-    on<MyUserEvent>((event, emit) {
-      // TODO: implement event handler
+class UserBloc extends Bloc<UserEvent, UserState> {
+  final FirebaseUserRepo userRepository;
+
+  UserBloc({required this.userRepository}) : super(UserInitial()) {
+    on<LoadUserModel>((event, emit) async {
+      emit(UserLoading());
+      try {
+        final userModel = await userRepository.getUserById(event.uid);
+        emit(UserLoaded(userModel));
+      } catch (e) {
+        emit(UserError("Failed to load user data: ${e.toString()}"));
+      }
+    });
+
+    on<UpdateUserModel>((event, emit) async {
+      emit(UserLoading());
+      try {
+        await userRepository.updateUserData(event.userModel);
+        emit(UserLoaded(event.userModel));
+      } catch (e) {
+        emit(UserError("Failed to update user data: ${e.toString()}"));
+      }
     });
   }
 }
