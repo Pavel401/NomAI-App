@@ -18,7 +18,6 @@ class NutritionOutput {
   int? outputTokenCount;
   int? totalTokenCount;
   double? estimatedCost;
-
   double? executionTimeSeconds;
 
   NutritionOutput({
@@ -59,15 +58,25 @@ class NutritionOutput {
 }
 
 class NutritionResponse {
+  String? message;
   String? foodName;
+  String? portion;
+  double? portionSize;
+  int? confidenceScore;
   List<Ingredient>? ingredients;
+  List<PrimaryConcern>? primaryConcerns;
+  List<Ingredient>? suggestAlternatives;
   int? overallHealthScore;
   String? overallHealthComments;
-  List<Ingredient>? suggestAlternatives;
 
   NutritionResponse({
+    this.message,
     this.foodName,
+    this.portion,
+    this.portionSize,
+    this.confidenceScore,
     this.ingredients,
+    this.primaryConcerns,
     this.suggestAlternatives,
     this.overallHealthScore,
     this.overallHealthComments,
@@ -75,27 +84,39 @@ class NutritionResponse {
 
   factory NutritionResponse.fromJson(Map<String, dynamic> json) =>
       NutritionResponse(
+        message: json["message"],
         foodName: json["foodName"],
+        portion: json["portion"],
+        portionSize: json["portionSize"]?.toDouble(),
+        confidenceScore: json["confidenceScore"],
         ingredients: json["ingredients"] == null
             ? []
             : List<Ingredient>.from(
                 json["ingredients"]!.map((x) => Ingredient.fromJson(x))),
+        primaryConcerns: json["primaryConcerns"] == null
+            ? []
+            : List<PrimaryConcern>.from(json["primaryConcerns"]!
+                .map((x) => PrimaryConcern.fromJson(x))),
         suggestAlternatives: json["suggestAlternatives"] == null
             ? []
             : List<Ingredient>.from(json["suggestAlternatives"]!
                 .map((x) => Ingredient.fromJson(x))),
-        overallHealthScore:
-            json["overallHealthScore"] == null ? 0 : json["overallHealthScore"],
-        overallHealthComments: json["overallHealthComments"] == null
-            ? ""
-            : json["overallHealthComments"],
+        overallHealthScore: json["overallHealthScore"],
+        overallHealthComments: json["overallHealthComments"],
       );
 
   Map<String, dynamic> toJson() => {
+        "message": message,
         "foodName": foodName,
+        "portion": portion,
+        "portionSize": portionSize,
+        "confidenceScore": confidenceScore,
         "ingredients": ingredients == null
             ? []
             : List<dynamic>.from(ingredients!.map((x) => x.toJson())),
+        "primaryConcerns": primaryConcerns == null
+            ? []
+            : List<dynamic>.from(primaryConcerns!.map((x) => x.toJson())),
         "suggestAlternatives": suggestAlternatives == null
             ? []
             : List<dynamic>.from(suggestAlternatives!.map((x) => x.toJson())),
@@ -109,10 +130,10 @@ class Ingredient {
   int? calories;
   int? protein;
   int? carbs;
-  int? fibre;
+  int? fiber; // Changed from fibre to fiber
   int? fat;
-  int? quantity;
-  String? portion;
+  int? sugar;
+  int? sodium;
   int? healthScore;
   String? healthComments;
 
@@ -121,10 +142,10 @@ class Ingredient {
     this.calories,
     this.protein,
     this.carbs,
-    this.fibre,
+    this.fiber,
     this.fat,
-    this.quantity,
-    this.portion,
+    this.sugar,
+    this.sodium,
     this.healthScore,
     this.healthComments,
   });
@@ -134,10 +155,10 @@ class Ingredient {
         calories: json["calories"],
         protein: json["protein"],
         carbs: json["carbs"],
-        fibre: json["fibre"],
+        fiber: json["fiber"], // Changed from fibre to fiber
         fat: json["fat"],
-        quantity: json["quantity"],
-        portion: json["portion"],
+        sugar: json["sugar"],
+        sodium: json["sodium"],
         healthScore: json["healthScore"],
         healthComments: json["healthComments"],
       );
@@ -147,11 +168,64 @@ class Ingredient {
         "calories": calories,
         "protein": protein,
         "carbs": carbs,
-        "fibre": fibre,
+        "fiber": fiber, // Changed from fibre to fiber
         "fat": fat,
-        "quantity": quantity,
-        "portion": portion,
+        if (sugar != null) "sugar": sugar,
+        if (sodium != null) "sodium": sodium,
         "healthScore": healthScore,
         "healthComments": healthComments,
+      };
+}
+
+class PrimaryConcern {
+  String? issue;
+  String? explanation;
+  List<Recommendation>? recommendations;
+
+  PrimaryConcern({
+    this.issue,
+    this.explanation,
+    this.recommendations,
+  });
+
+  factory PrimaryConcern.fromJson(Map<String, dynamic> json) => PrimaryConcern(
+        issue: json["issue"],
+        explanation: json["explanation"],
+        recommendations: json["recommendations"] == null
+            ? []
+            : List<Recommendation>.from(json["recommendations"]!
+                .map((x) => Recommendation.fromJson(x))),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "issue": issue,
+        "explanation": explanation,
+        "recommendations": recommendations == null
+            ? []
+            : List<dynamic>.from(recommendations!.map((x) => x.toJson())),
+      };
+}
+
+class Recommendation {
+  String? food;
+  String? quantity;
+  String? reasoning;
+
+  Recommendation({
+    this.food,
+    this.quantity,
+    this.reasoning,
+  });
+
+  factory Recommendation.fromJson(Map<String, dynamic> json) => Recommendation(
+        food: json["food"],
+        quantity: json["quantity"],
+        reasoning: json["reasoning"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "food": food,
+        "quantity": quantity,
+        "reasoning": reasoning,
       };
 }

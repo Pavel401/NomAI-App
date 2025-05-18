@@ -8,12 +8,20 @@ class NutritionInputQuery {
 
   String? imageFilePath;
 
+  List<String>? dietaryPreferences;
+  List<String>? allergies;
+
+  List<String>? selectedGoals;
+
   NutritionInputQuery({
     required this.imageUrl,
     required this.scanMode,
     this.imageData,
     this.message,
     this.imageFilePath,
+    this.dietaryPreferences,
+    this.allergies,
+    this.selectedGoals,
   });
 
   factory NutritionInputQuery.fromJson(Map<String, dynamic> json) {
@@ -22,12 +30,23 @@ class NutritionInputQuery {
       scanMode: json['scanMode'] == null
           ? ScanMode.food
           : ScanMode.values.byName(json['scanMode']),
+      imageData: json['imageData'] ?? '',
+      message: json['message'] ?? '',
+      dietaryPreferences: json['dietaryPreferences'] != null
+          ? List<String>.from(json['dietaryPreferences'])
+          : [],
+      allergies:
+          json['allergies'] != null ? List<String>.from(json['allergies']) : [],
+      selectedGoals: json['selectedGoals'] != null
+          ? List<String>.from(json['selectedGoals'])
+          : [],
     );
   }
 
   Map<String, dynamic> toJson() => {
         'imageUrl': imageUrl,
         'scanMode': scanMode!.name,
+
         // 'imageData' is intentionally excluded
       };
 
@@ -36,5 +55,8 @@ class NutritionInputQuery {
 
         "imageData": imageData,
         "message": message,
+        "dietaryPreferences": dietaryPreferences,
+        "allergies": allergies,
+        "selectedGoals": selectedGoals,
       };
 }
