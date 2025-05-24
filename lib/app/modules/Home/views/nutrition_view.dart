@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_bounceable/flutter_bounceable.dart';
+import 'package:get/get.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:sizer/sizer.dart';
 
@@ -64,6 +65,42 @@ class NutritionView extends StatelessWidget {
                     if (response.suggestAlternatives != null &&
                         response.suggestAlternatives!.isNotEmpty)
                       _buildAlternativesList(context, response),
+
+                    if (response.primaryConcerns != null &&
+                        response.primaryConcerns!.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      Text(
+                        'Primary Concerns',
+                        style: context.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      for (var concern in response.primaryConcerns!)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              concern.issue ?? 'Unknown Concern',
+                              style: context.textTheme.bodyMedium,
+                            ),
+                            Text(
+                              concern.explanation ?? 'Unknown Concern',
+                              style: context.textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 8),
+                            for (Recommendation suggestion
+                                in concern.recommendations ?? [])
+                              Text(
+                                '- ${suggestion.food} -- ${suggestion.reasoning} -- ${suggestion.quantity}',
+                                style: context.textTheme.bodySmall?.copyWith(
+                                  color: Colors.grey.shade700,
+                                ),
+                              ),
+                            const SizedBox(height: 12),
+                          ],
+                        )
+                    ],
                   ],
                 ),
               ),
@@ -175,38 +212,18 @@ class NutritionView extends StatelessWidget {
             Expanded(
               child: Text(
                 response.foodName ?? 'Unknown Food',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: context.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
           ],
         ),
-        SizedBox(height: 2.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.access_time,
-              size: 16,
-              color: MealAIColors.grey,
-            ),
-            SizedBox(width: 4),
-            Text(
-              DateUtility.getTimeFromDateTime(
-                nutritionRecord.recordTime?.toLocal() ?? DateTime.now(),
-              ),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: MealAIColors.grey,
-                  ),
-            ),
-          ],
-        ),
         if (response.overallHealthScore != null) ...[
-          const SizedBox(height: 16),
+          SizedBox(height: 2.h),
           HealthScoreWidget(
-            healthScore: response.overallHealthScore ?? 0,
+            nutritionRecord: nutritionRecord,
           ),
         ],
       ],
@@ -237,71 +254,52 @@ class NutritionView extends StatelessWidget {
       children: [
         Text(
           'Nutrition Facts',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: context.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 16),
         Row(
           children: [
-            Expanded(
-              child: _buildNutrientBox(
-                context,
-                'Calories',
-                '$totalCalories',
-                'kcal',
-                Colors.orange.shade200,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _buildNutrientBox(
-                context,
-                'Protein',
-                '$totalProtein',
-                'g',
-                Colors.red.shade200,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
+            // Expanded(
+            //   child: _buildNutrientBox(
+            //     context,
+            //     'Calories',
+            //     '$totalCalories',
+            //     'kcal',
+            //     Colors.orange.shade200,
+            //   ),
+            // ),
             Expanded(
               child: _buildNutrientBox(
                 context,
                 'Carbs',
                 '$totalCarbs',
                 'g',
-                Colors.blue.shade200,
+                MealAIColors.carbsColor,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 2.w),
+            Expanded(
+              child: _buildNutrientBox(
+                context,
+                'Protein',
+                '$totalProtein',
+                'g',
+                MealAIColors.proteinColor,
+              ),
+            ),
+            SizedBox(width: 2.w),
+
             Expanded(
               child: _buildNutrientBox(
                 context,
                 'Fat',
                 '$totalFat',
                 'g',
-                Colors.yellow.shade200,
+                MealAIColors.fatColor,
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: _buildNutrientBox(
-                context,
-                'Fiber',
-                '$totalFiber',
-                'g',
-                Colors.green.shade200,
-              ),
-            ),
-            const Expanded(child: SizedBox()),
           ],
         ),
       ],
@@ -325,9 +323,9 @@ class NutritionView extends StatelessWidget {
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+            style: context.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 4),
           Row(
@@ -337,14 +335,14 @@ class NutritionView extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: context.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(width: 2),
               Text(
                 unit,
-                style: Theme.of(context).textTheme.bodySmall,
+                style: context.textTheme.bodySmall,
               ),
             ],
           ),
@@ -360,9 +358,9 @@ class NutritionView extends StatelessWidget {
       children: [
         Text(
           'Health Insights',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: context.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 12),
         Container(
@@ -373,7 +371,7 @@ class NutritionView extends StatelessWidget {
           ),
           child: Text(
             response.overallHealthComments ?? '',
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: context.textTheme.bodyMedium,
           ),
         ),
       ],
@@ -387,11 +385,11 @@ class NutritionView extends StatelessWidget {
       children: [
         Text(
           'Ingredients',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: context.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 2.h),
         ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -414,41 +412,38 @@ class NutritionView extends StatelessWidget {
                         Expanded(
                           child: Text(
                             ingredient.name ?? 'Unknown',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: context.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         // Note: Removed quantity and portion fields as they're not in the model
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        _buildIngredientNutrient(
-                            'Cal', '${ingredient.calories ?? 0}'),
-                        _buildIngredientNutrient(
-                            'P', '${ingredient.protein ?? 0}g'),
-                        _buildIngredientNutrient(
-                            'C', '${ingredient.carbs ?? 0}g'),
-                        _buildIngredientNutrient(
-                            'F', '${ingredient.fat ?? 0}g'),
-                        _buildIngredientNutrient('Fiber',
-                            '${ingredient.fiber ?? 0}g'), // Changed from fibre to fiber
-                      ],
-                    ),
+                    // const SizedBox(height: 8),
+                    // Row(
+                    //   children: [
+                    //     _buildIngredientNutrient(
+                    //         'Cal', '${ingredient.calories ?? 0}'),
+                    //     _buildIngredientNutrient(
+                    //         'P', '${ingredient.protein ?? 0}g'),
+                    //     _buildIngredientNutrient(
+                    //         'C', '${ingredient.carbs ?? 0}g'),
+                    //     _buildIngredientNutrient(
+                    //         'F', '${ingredient.fat ?? 0}g'),
+                    //     _buildIngredientNutrient('Fiber',
+                    //         '${ingredient.fiber ?? 0}g'), // Changed from fibre to fiber
+                    //   ],
+                    // ),
                     if (ingredient.healthComments != null &&
                         ingredient.healthComments!.isNotEmpty) ...[
-                      const SizedBox(height: 8),
+                      SizedBox(height: 1.h),
                       Text(
                         ingredient.healthComments!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontStyle: FontStyle.italic,
-                              color: Colors.grey.shade700,
-                            ),
+                        style: context.textTheme.bodySmall?.copyWith(
+                          fontStyle: FontStyle.italic,
+                          color: Colors.grey.shade700,
+                        ),
                       ),
                     ],
                   ],
@@ -492,9 +487,9 @@ class NutritionView extends StatelessWidget {
       children: [
         Text(
           'Healthier Alternatives',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: context.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 12),
         ListView.builder(
@@ -520,12 +515,9 @@ class NutritionView extends StatelessWidget {
                         Expanded(
                           child: Text(
                             alternative.name ?? 'Unknown',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: context.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         if (alternative.healthScore != null)
@@ -538,13 +530,10 @@ class NutritionView extends StatelessWidget {
                             ),
                             child: Text(
                               'Score: ${alternative.healthScore}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              style: context.textTheme.bodySmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                       ],
@@ -554,7 +543,7 @@ class NutritionView extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         alternative.healthComments!,
-                        style: Theme.of(context).textTheme.bodySmall,
+                        style: context.textTheme.bodySmall,
                       ),
                     ],
                   ],
@@ -569,23 +558,50 @@ class NutritionView extends StatelessWidget {
 }
 
 class HealthScoreWidget extends StatelessWidget {
-  final int healthScore; // Should be between 0 and 10
-
+  // final int healthScore; // Should be between 0 and 10
+  final NutritionRecord nutritionRecord;
   const HealthScoreWidget({
     super.key,
-    required this.healthScore,
+    required this.nutritionRecord,
   });
 
   @override
   Widget build(BuildContext context) {
     // Clamp score between 0.0 and 1.0
-    double scorePercent = (healthScore.clamp(0, 10)) / 10;
+    double scorePercent = (nutritionRecord
+            .nutritionOutput!.response!.overallHealthScore!
+            .clamp(0, 10)) /
+        10;
 
-    return Column(
+    int healthScore = nutritionRecord
+        .nutritionOutput!.response!.overallHealthScore!
+        .clamp(0, 10)
+        .toInt();
+
+    return Row(
       children: [
+        Text("Meal Time : ",
+            style: context.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            )),
+        Text(
+          DateUtility.getTimeFromDateTime(
+            nutritionRecord.recordTime?.toLocal() ?? DateTime.now(),
+          ),
+          style: context.textTheme.bodyMedium?.copyWith(
+            color: MealAIColors.grey,
+          ),
+        ),
+        Expanded(child: Container()),
+        Text(
+          "Health Score: ",
+          style: context.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         CircularPercentIndicator(
-          radius: 50,
-          lineWidth: 10.0,
+          radius: 5.w,
+          lineWidth: 2.0,
           animation: true,
           animationDuration: 1000,
           percent: scorePercent,
@@ -594,29 +610,51 @@ class HealthScoreWidget extends StatelessWidget {
           circularStrokeCap: CircularStrokeCap.round,
           center: Text(
             '$healthScore',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: _getProgressColor(scorePercent),
-                ),
+            style: context.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: _getProgressColor(scorePercent),
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Health Score',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade700,
-              ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          _getHealthRating(healthScore),
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: _getProgressColor(scorePercent),
-              ),
         ),
       ],
     );
+
+    // return Column(
+    //   children: [
+    //     CircularPercentIndicator(
+    //       radius: 50,
+    //       lineWidth: 10.0,
+    //       animation: true,
+    //       animationDuration: 1000,
+    //       percent: scorePercent,
+    //       backgroundColor: Colors.grey.shade200,
+    //       progressColor: _getProgressColor(scorePercent),
+    //       circularStrokeCap: CircularStrokeCap.round,
+    //       center: Text(
+    //         '$healthScore',
+    //         style: context.textTheme.headlineMedium?.copyWith(
+    //               fontWeight: FontWeight.bold,
+    //               color: _getProgressColor(scorePercent),
+    //             ),
+    //       ),
+    //     ),
+    //     const SizedBox(height: 8),
+    //     Text(
+    //       'Health Score',
+    //       style: context.textTheme.bodyMedium?.copyWith(
+    //             color: Colors.grey.shade700,
+    //           ),
+    //     ),
+    //     const SizedBox(height: 4),
+    //     Text(
+    //       _getHealthRating(healthScore),
+    //       style: context.textTheme.bodyMedium?.copyWith(
+    //             fontWeight: FontWeight.bold,
+    //             color: _getProgressColor(scorePercent),
+    //           ),
+    //     ),
+    //   ],
+    // );
   }
 
   Color _getProgressColor(double percent) {
