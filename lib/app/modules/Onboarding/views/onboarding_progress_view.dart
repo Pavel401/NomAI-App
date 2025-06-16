@@ -779,9 +779,19 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
                     checkmarkColor:
                         MealAIColors.whiteText, // Color of the checkmark
                     onSelected: (selected) {
-                      setState(() {
-                        selectedDiet = diet;
-                      });
+                      // setState(() {
+                      //   selectedDiet = diet;
+                      // });
+
+                      if (selected) {
+                        setState(() {
+                          selectedDiet = diet;
+                        });
+                      } else {
+                        setState(() {
+                          selectedDiet = ""; // Deselect the chip
+                        });
+                      }
                     },
                   );
                 }).toList(),
