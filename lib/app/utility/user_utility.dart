@@ -6,17 +6,14 @@ class EnhancedUserNutrition {
   static const double MIN_CALORIES_MALE = 1500;
   static const double MIN_CALORIES_OTHER = 1350;
 
-  // Improved LBM calculation with better coefficients based on recent research
+  // Improved LBM calculation with better coefficients
   static double calculateEnhancedLBM(
       Gender gender, double weightKg, double heightCm) {
     if (gender == Gender.male) {
-      // Enhanced Boer formula for males
       return (0.407 * weightKg) + (0.267 * heightCm) - 19.2;
     } else if (gender == Gender.female) {
-      // Enhanced Boer formula for females
       return (0.252 * weightKg) + (0.473 * heightCm) - 48.3;
     } else {
-      // Average of both formulas for non-binary individuals
       return ((0.407 * weightKg) +
               (0.267 * heightCm) -
               19.2 +
@@ -27,42 +24,25 @@ class EnhancedUserNutrition {
     }
   }
 
-  // Katch-McArdle BMR formula based on LBM
+  // Katch-McArdle BMR formula
   static double calculatePreciseBMR(
       Gender gender, double weightKg, double heightCm, int age) {
     double lbm = calculateEnhancedLBM(gender, weightKg, heightCm);
     return 370 + (21.6 * lbm);
   }
 
-  // Evidence-based activity multipliers
-  static double calculateAccurateTDEE(double bmr, ActivityLevel activityLevel) {
-    switch (activityLevel) {
-      case ActivityLevel.sedentary:
-        return bmr * 1.2; // Updated from 1.1 to align with research
-      case ActivityLevel.lightlyActive:
-        return bmr * 1.375; // Updated from 1.3 to align with research
-      case ActivityLevel.moderatelyActive:
-        return bmr * 1.55; // Updated from 1.45 to align with research
-      case ActivityLevel.veryActive:
-        return bmr * 1.725; // Updated from 1.6 to align with research
-      default:
-        return bmr * 1.375;
-    }
-  }
-
-  // Scientific calorie adjustment based on goal, with body fat consideration
+  // Calorie adjustment based on goal
   static double adjustCaloriesForGoal(
-      double tdee,
+      double baseCalories,
       HealthMode goal,
       WeeklyPace pace,
       Gender gender,
       double currentWeight,
       double targetWeight) {
-    // Estimate body fat percentage based on weight differential
     double estimatedBodyFat =
         ((currentWeight - targetWeight) / currentWeight) * 100;
     if (estimatedBodyFat > 40) estimatedBodyFat = 40;
-    if (estimatedBodyFat < 0) estimatedBodyFat = 5; // Minimum healthy body fat
+    if (estimatedBodyFat < 0) estimatedBodyFat = 5;
 
     double adjustment = 0;
 
@@ -70,47 +50,40 @@ class EnhancedUserNutrition {
       case HealthMode.weightLoss:
         switch (pace) {
           case WeeklyPace.slow:
-            // 0.25kg/week loss (~250 cal deficit)
             adjustment = 250;
             break;
           case WeeklyPace.moderate:
-            // 0.5kg/week loss (~500 cal deficit)
             adjustment = 500;
             break;
           case WeeklyPace.fast:
-            // 0.75-1kg/week loss (~750-1000 cal deficit)
             adjustment = estimatedBodyFat > 25 ? 1000 : 750;
             break;
           case WeeklyPace.none:
             adjustment = 0;
             break;
         }
-        tdee -= adjustment;
+        baseCalories -= adjustment;
         break;
 
       case HealthMode.muscleGain:
-        // Scientific surplus based on training status
-        tdee += estimatedBodyFat < 15 ? 350 : 250;
+        baseCalories += estimatedBodyFat < 15 ? 350 : 250;
         break;
 
       case HealthMode.maintainWeight:
       case HealthMode.none:
-      default:
-        // No adjustment needed
         break;
     }
 
-    // Apply safety minimums based on biological sex
     double minCalories = gender == Gender.male
         ? MIN_CALORIES_MALE
         : gender == Gender.female
             ? MIN_CALORIES_FEMALE
             : MIN_CALORIES_OTHER;
 
-    return tdee < minCalories ? minCalories : tdee;
+    return baseCalories < minCalories ? minCalories : baseCalories;
   }
 
-  // Evidence-based macro calculation
+  // Macro breakdown based on calories and goal
   static UserMacros calculateScientificMacros(
       double calories, HealthMode goal, double bodyWeight) {
     double proteinPerKg;
@@ -119,17 +92,13 @@ class EnhancedUserNutrition {
 
     switch (goal) {
       case HealthMode.weightLoss:
-        // Higher protein during deficit to preserve muscle mass
         proteinPerKg = 2.0;
-        fatPercentage = 0.3; // Minimum needed for hormone production
+        fatPercentage = 0.3;
         break;
-
       case HealthMode.muscleGain:
-        // Optimal protein for muscle protein synthesis
         proteinPerKg = 1.8;
         fatPercentage = 0.25;
         break;
-
       case HealthMode.maintainWeight:
       case HealthMode.none:
       default:
@@ -138,7 +107,6 @@ class EnhancedUserNutrition {
         break;
     }
 
-    // Calculate macros based on research-backed ratios
     int proteinGrams = (bodyWeight * proteinPerKg).round();
     double proteinCalories = proteinGrams * 4;
 
@@ -148,10 +116,8 @@ class EnhancedUserNutrition {
     double remainingCalories = calories - (proteinCalories + fatCalories);
     int carbGrams = (remainingCalories / 4).round();
 
-    // Water intake based on weight (ml per kg)
     int waterIntake = (bodyWeight * 35).round();
 
-    // Fiber calculation with healthy minimum and maximum
     int fiberIntake = (calories / 1000 * minFiberPer1000Cal).round();
     if (fiberIntake < 25) fiberIntake = 25;
     if (fiberIntake > 40) fiberIntake = 40;
@@ -166,7 +132,26 @@ class EnhancedUserNutrition {
     );
   }
 
-  // Main method that utilizes all the enhanced scientific calculations
+  // New method that ignores activity level
+  static UserMacros calculateNutritionWithoutActivityLevel(
+      Gender gender,
+      DateTime birthDate,
+      double height,
+      double weight,
+      WeeklyPace weeklyPace,
+      double targetWeight,
+      HealthMode healthMode) {
+    int age = calculateAccurateAge(birthDate);
+
+    double bmr = calculatePreciseBMR(gender, weight, height, age);
+    // No TDEE multiplier applied
+    double adjustedCalories = adjustCaloriesForGoal(
+        bmr, healthMode, weeklyPace, gender, weight, targetWeight);
+
+    return calculateScientificMacros(adjustedCalories, healthMode, weight);
+  }
+
+  // Existing method using activity level (for reference)
   static UserMacros calculateScientificNutrition(
       Gender gender,
       DateTime birthDate,
@@ -178,7 +163,6 @@ class EnhancedUserNutrition {
       ActivityLevel activityLevel) {
     int age = calculateAccurateAge(birthDate);
 
-    // Chain of enhanced calculations
     double bmr = calculatePreciseBMR(gender, weight, height, age);
     double tdee = calculateAccurateTDEE(bmr, activityLevel);
     double adjustedCalories = adjustCaloriesForGoal(
@@ -187,17 +171,29 @@ class EnhancedUserNutrition {
     return calculateScientificMacros(adjustedCalories, healthMode, weight);
   }
 
-  // More accurate age calculation considering leap years
+  // Original activity-based TDEE calculation
+  static double calculateAccurateTDEE(double bmr, ActivityLevel activityLevel) {
+    switch (activityLevel) {
+      case ActivityLevel.sedentary:
+        return bmr * 1.2;
+      case ActivityLevel.lightlyActive:
+        return bmr * 1.375;
+      case ActivityLevel.moderatelyActive:
+        return bmr * 1.55;
+      case ActivityLevel.veryActive:
+        return bmr * 1.725;
+      default:
+        return bmr * 1.375;
+    }
+  }
+
   static int calculateAccurateAge(DateTime birthDate) {
     final now = DateTime.now();
     int age = now.year - birthDate.year;
-
-    // Check if birthday has occurred this year
     if (now.month < birthDate.month ||
         (now.month == birthDate.month && now.day < birthDate.day)) {
       age--;
     }
-
     return age;
   }
 }
