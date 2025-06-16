@@ -1,16 +1,25 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:turfit/app/constants/urls.dart';
 import 'package:turfit/app/models/AI/nutrition_input.dart';
 import 'package:turfit/app/models/AI/nutrition_output.dart';
+import 'package:turfit/app/providers/remoteconfig.dart';
 
 class AiRepository {
   Future<NutritionOutput> getNutritionData(
       NutritionInputQuery inputQuery) async {
+    String remoteConfigUrl = RemoteConfigService.getImageProcessingBackendURL();
+
+    // String baseUrl = kDebugMode ? BaseUrl.baseUrl : remoteConfigUrl;
+    String baseUrl = remoteConfigUrl + ApiPath.getNutritionData;
+
+    print("🌐 [API Request] Base URL: $baseUrl");
+
     try {
       final response = await http.post(
-        Uri.parse(BaseUrl.baseUrl + ApiPath.getNutritionData),
+        Uri.parse(baseUrl),
         body: jsonEncode(inputQuery.toJsonForMealAIBackend()),
         headers: {"Content-Type": "application/json"},
       );
