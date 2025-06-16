@@ -74,7 +74,7 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
     double weight = user.currentWeight!;
     double targetWeight = user.desiredWeight!;
 
-    _userMacros = EnhancedUserNutrition.calculateScientificNutrition(
+    _userMacros = EnhancedUserNutrition.calculateNutritionWithoutActivityLevel(
       user.selectedGender,
       user.birthDate,
       height,
@@ -82,7 +82,6 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
       user.selectedPace,
       targetWeight,
       user.selectedGoal,
-      user.selectedActivityLevel,
     );
   }
 
