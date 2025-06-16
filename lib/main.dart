@@ -12,6 +12,7 @@ import 'package:turfit/app/modules/Auth/blocs/my_user_bloc/my_user_event.dart';
 import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
 import 'package:turfit/app/modules/DashBoard/view/dashboard.dart';
 import 'package:turfit/app/modules/Onboarding/views/onboarding_home.dart';
+import 'package:turfit/app/providers/remoteconfig.dart';
 import 'package:turfit/app/providers/theme_provider.dart';
 import 'package:turfit/app/repo/firebase_user_repo.dart';
 import 'package:turfit/app/utility/registry_service.dart';
@@ -23,7 +24,9 @@ final FirebaseUserRepo _userRepository = FirebaseUserRepo();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
+  var remoteConfigService = await RemoteConfigService.getInstance();
+  await remoteConfigService!.initialise();
+  debugPrint("Initialized Remote Config");
   configLoading();
   setupRegistry();
 

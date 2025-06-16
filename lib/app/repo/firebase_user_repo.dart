@@ -121,7 +121,7 @@ class FirebaseUserRepo implements UserRepository {
     try {
       await usersCollection.doc(userId).update({
         'user_info': {
-          'user_macros': {
+          'macros': {
             'daily_calories': info.userMacros.calories,
             'daily_fat': info.userMacros.fat,
             'daily_protein': info.userMacros.protein,
