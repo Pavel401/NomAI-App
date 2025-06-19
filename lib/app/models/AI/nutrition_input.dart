@@ -1,4 +1,4 @@
-import 'package:turfit/app/modules/Scanner/views/scan_view.dart';
+import 'package:NomAi/app/modules/Scanner/views/scan_view.dart';
 
 class NutritionInputQuery {
   final String imageUrl;

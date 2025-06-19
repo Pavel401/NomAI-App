@@ -7,10 +7,10 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:sizer/sizer.dart';
-import 'package:turfit/app/components/scanner_overlays.dart';
-import 'package:turfit/app/constants/colors.dart';
-import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
-import 'package:turfit/app/modules/Scanner/controller/scanner_controller.dart';
+import 'package:NomAi/app/components/scanner_overlays.dart';
+import 'package:NomAi/app/constants/colors.dart';
+import 'package:NomAi/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
+import 'package:NomAi/app/modules/Scanner/controller/scanner_controller.dart';
 
 enum ScanMode { food, barcode, gallery }
 

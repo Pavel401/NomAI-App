@@ -1,4 +1,4 @@
-package com.example.gymx
+package com.NomAi.app
 
 import io.flutter.embedding.android.FlutterActivity
 

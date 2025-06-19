@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bounceable/flutter_bounceable.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:sizer/sizer.dart';
-import 'package:turfit/app/constants/colors.dart';
+import 'package:NomAi/app/constants/colors.dart';
 
 class NutritionTrackerCard extends StatelessWidget {
   final int maximumCalories;

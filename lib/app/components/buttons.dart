@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:turfit/app/constants/colors.dart';
+import 'package:NomAi/app/constants/colors.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String tile;

@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:turfit/app/models/Auth/user.dart';
+import 'package:NomAi/app/models/Auth/user.dart';
 
 abstract class UserRepository {
   Stream<User?> get user;

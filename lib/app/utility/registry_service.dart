@@ -1,7 +1,7 @@
+import 'package:NomAi/app/repo/meal_ai_repo.dart';
+import 'package:NomAi/app/repo/nutrition_record_repo.dart';
+import 'package:NomAi/app/repo/storage_service.dart';
 import 'package:get_it/get_it.dart';
-import 'package:turfit/app/repo/meal_ai_repo.dart';
-import 'package:turfit/app/repo/nutrition_record_repo.dart';
-import 'package:turfit/app/repo/storage_service.dart';
 
 final serviceLocator = GetIt.instance;
 

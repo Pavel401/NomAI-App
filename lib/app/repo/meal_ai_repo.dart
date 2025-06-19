@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:turfit/app/constants/urls.dart';
-import 'package:turfit/app/models/AI/nutrition_input.dart';
-import 'package:turfit/app/models/AI/nutrition_output.dart';
-import 'package:turfit/app/providers/remoteconfig.dart';
+import 'package:NomAi/app/constants/urls.dart';
+import 'package:NomAi/app/models/AI/nutrition_input.dart';
+import 'package:NomAi/app/models/AI/nutrition_output.dart';
+import 'package:NomAi/app/providers/remoteconfig.dart';
 
 class AiRepository {
   Future<NutritionOutput> getNutritionData(

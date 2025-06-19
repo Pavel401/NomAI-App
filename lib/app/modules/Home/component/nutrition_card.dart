@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bounceable/flutter_bounceable.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
-import 'package:turfit/app/constants/colors.dart';
-import 'package:turfit/app/constants/enums.dart';
-import 'package:turfit/app/models/AI/nutrition_output.dart';
-import 'package:turfit/app/models/AI/nutrition_record.dart';
-import 'package:turfit/app/utility/date_utility.dart';
+import 'package:NomAi/app/constants/colors.dart';
+import 'package:NomAi/app/constants/enums.dart';
+import 'package:NomAi/app/models/AI/nutrition_output.dart';
+import 'package:NomAi/app/models/AI/nutrition_record.dart';
+import 'package:NomAi/app/utility/date_utility.dart';
 
 class NutritionCard extends StatelessWidget {
   final NutritionRecord nutritionRecord;

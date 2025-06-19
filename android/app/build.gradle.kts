@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.mealai.app"
+    namespace = "com.NomAi.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,20 +21,37 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.mealai.app"
+        applicationId = "com.NomAi.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 24
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        versionCode = 34 // Match pubspec.yaml
+        versionName = "0.1.0" // Match pubspec.yaml
+    }
+
+    signingConfigs {
+        create("release") {
+            val keyProperties = java.util.Properties()
+            val keyPropertiesFile = rootProject.file("../key.properties")
+            if (keyPropertiesFile.exists()) {
+                keyProperties.load(java.io.FileInputStream(keyPropertiesFile))
+                storeFile = file(keyProperties["storeFile"] as String)
+                storePassword = keyProperties["storePassword"] as String
+                keyAlias = keyProperties["keyAlias"] as String
+                keyPassword = keyProperties["keyPassword"] as String
+            }
+        }
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = false // Set to true and configure ProGuard for obfuscation if needed
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }

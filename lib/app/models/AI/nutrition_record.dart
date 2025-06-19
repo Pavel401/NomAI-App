@@ -1,6 +1,6 @@
-import 'package:turfit/app/constants/enums.dart';
-import 'package:turfit/app/models/AI/nutrition_input.dart';
-import 'package:turfit/app/models/AI/nutrition_output.dart';
+import 'package:NomAi/app/constants/enums.dart';
+import 'package:NomAi/app/models/AI/nutrition_input.dart';
+import 'package:NomAi/app/models/AI/nutrition_output.dart';
 
 class NutritionRecord {
   NutritionOutput? nutritionOutput;

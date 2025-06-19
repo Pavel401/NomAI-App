@@ -6,10 +6,10 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:sizer/sizer.dart';
 
 // Assuming these are defined elsewhere in your codebase
-import 'package:turfit/app/constants/colors.dart';
-import 'package:turfit/app/models/AI/nutrition_output.dart';
-import 'package:turfit/app/models/AI/nutrition_record.dart';
-import 'package:turfit/app/utility/date_utility.dart';
+import 'package:NomAi/app/constants/colors.dart';
+import 'package:NomAi/app/models/AI/nutrition_output.dart';
+import 'package:NomAi/app/models/AI/nutrition_record.dart';
+import 'package:NomAi/app/utility/date_utility.dart';
 
 class NutritionView extends StatelessWidget {
   final NutritionRecord nutritionRecord;

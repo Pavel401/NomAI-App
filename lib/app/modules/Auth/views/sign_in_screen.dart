@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:turfit/app/constants/colors.dart';
-import 'package:turfit/app/constants/constants.dart';
-import 'package:turfit/app/models/Auth/user.dart';
-import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
-import 'package:turfit/app/modules/DashBoard/view/dashboard.dart';
-import 'package:turfit/app/repo/firebase_user_repo.dart';
+import 'package:NomAi/app/constants/colors.dart';
+import 'package:NomAi/app/constants/constants.dart';
+import 'package:NomAi/app/models/Auth/user.dart';
+import 'package:NomAi/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
+import 'package:NomAi/app/modules/DashBoard/view/dashboard.dart';
+import 'package:NomAi/app/repo/firebase_user_repo.dart';
 
 class SignInScreen extends StatefulWidget {
   final UserBasicInfo? user;

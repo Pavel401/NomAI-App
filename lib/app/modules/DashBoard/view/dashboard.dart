@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:turfit/app/constants/colors.dart';
-import 'package:turfit/app/modules/Home/views/home_view.dart';
-import 'package:turfit/app/modules/Scanner/views/scan_view.dart';
+import 'package:NomAi/app/constants/colors.dart';
+import 'package:NomAi/app/modules/Home/views/home_view.dart';
+import 'package:NomAi/app/modules/Scanner/views/scan_view.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

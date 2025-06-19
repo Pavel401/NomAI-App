@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 
-import 'package:turfit/app/modules/Auth/blocs/my_user_bloc/my_user_event.dart';
-import 'package:turfit/app/modules/Auth/blocs/my_user_bloc/my_user_state.dart';
-import 'package:turfit/app/repo/firebase_user_repo.dart';
+import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_event.dart';
+import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_state.dart';
+import 'package:NomAi/app/repo/firebase_user_repo.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
   final FirebaseUserRepo userRepository;

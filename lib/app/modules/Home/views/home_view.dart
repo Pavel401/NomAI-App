@@ -6,21 +6,21 @@ import 'package:flutter_bounceable/flutter_bounceable.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:timeline_date_picker_plus/timeline_date_picker_plus.dart';
-import 'package:turfit/app/components/nutritionTrackerCard.dart'
+import 'package:NomAi/app/components/nutritionTrackerCard.dart'
     show NutritionTrackerCard;
-import 'package:turfit/app/constants/colors.dart';
-import 'package:turfit/app/models/AI/nutrition_record.dart';
-import 'package:turfit/app/models/Auth/user.dart';
-import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
-import 'package:turfit/app/modules/Auth/blocs/my_user_bloc/my_user_bloc.dart';
-import 'package:turfit/app/modules/Auth/blocs/my_user_bloc/my_user_event.dart';
-import 'package:turfit/app/modules/Auth/blocs/my_user_bloc/my_user_state.dart';
-import 'package:turfit/app/modules/Demo/views/bounce.dart';
-import 'package:turfit/app/modules/Home/component/nutrition_card.dart';
-import 'package:turfit/app/modules/Home/views/nutrition_view.dart';
-import 'package:turfit/app/modules/Scanner/controller/scanner_controller.dart';
-import 'package:turfit/app/modules/Settings/views/settings.dart';
-import 'package:turfit/app/repo/firebase_user_repo.dart';
+import 'package:NomAi/app/constants/colors.dart';
+import 'package:NomAi/app/models/AI/nutrition_record.dart';
+import 'package:NomAi/app/models/Auth/user.dart';
+import 'package:NomAi/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
+import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_bloc.dart';
+import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_event.dart';
+import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_state.dart';
+import 'package:NomAi/app/modules/Demo/views/bounce.dart';
+import 'package:NomAi/app/modules/Home/component/nutrition_card.dart';
+import 'package:NomAi/app/modules/Home/views/nutrition_view.dart';
+import 'package:NomAi/app/modules/Scanner/controller/scanner_controller.dart';
+import 'package:NomAi/app/modules/Settings/views/settings.dart';
+import 'package:NomAi/app/repo/firebase_user_repo.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);

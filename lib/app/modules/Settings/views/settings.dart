@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
-import 'package:turfit/app/models/Auth/user.dart';
-import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
-import 'package:turfit/app/modules/Scanner/controller/scanner_controller.dart';
-import 'package:turfit/app/modules/Settings/views/adjust_goals.dart';
-import 'package:turfit/app/repo/firebase_user_repo.dart';
+import 'package:NomAi/app/models/Auth/user.dart';
+import 'package:NomAi/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
+import 'package:NomAi/app/modules/Scanner/controller/scanner_controller.dart';
+import 'package:NomAi/app/modules/Settings/views/adjust_goals.dart';
+import 'package:NomAi/app/repo/firebase_user_repo.dart';
 
 import 'edit_profile.dart';
 

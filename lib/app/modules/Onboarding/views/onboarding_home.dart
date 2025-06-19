@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:turfit/app/components/buttons.dart';
-import 'package:turfit/app/constants/colors.dart';
-import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
-import 'package:turfit/app/modules/Onboarding/views/onboarding_progress_view.dart';
-import 'package:turfit/app/repo/firebase_user_repo.dart';
+import 'package:NomAi/app/components/buttons.dart';
+import 'package:NomAi/app/constants/colors.dart';
+import 'package:NomAi/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
+import 'package:NomAi/app/modules/Onboarding/views/onboarding_progress_view.dart';
+import 'package:NomAi/app/repo/firebase_user_repo.dart';
 
 class OnboardingHome extends StatefulWidget {
   const OnboardingHome({super.key});

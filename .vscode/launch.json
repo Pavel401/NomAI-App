@@ -6,18 +6,18 @@
     "configurations": [
         
         {
-            "name": "gymx",
+            "name": "NomAi",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "gymx (profile mode)",
+            "name": "NomAi (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "gymx (release mode)",
+            "name": "NomAi (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

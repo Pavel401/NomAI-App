@@ -5,7 +5,7 @@
 // import 'package:image_picker/image_picker.dart';
 // import 'package:material_symbols_icons/symbols.dart';
 // import 'package:sizer/sizer.dart';
-// import 'package:turfit/app/constants/colors.dart';
+// import 'package:NomAi/app/constants/colors.dart';
 
 // enum ScanMode { food, barcode, gallery }
 

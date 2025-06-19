@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:760266971868:android:294f9d9266ac1887ed7219",
+        "mobilesdk_app_id": "1:760266971868:android:e1343508a4bbe81fed7219",
         "android_client_info": {
-          "package_name": "com.mealai.app"
+          "package_name": "com.NomAi.app"
         }
       },
       "oauth_client": [
@@ -31,10 +31,10 @@
               "client_type": 3
             },
             {
-              "client_id": "760266971868-pcgg8ed4jti5umn0u0fonjoqobc6p7bn.apps.googleusercontent.com",
+              "client_id": "760266971868-fa0n62psp9vdnqvkugjshta6srh6hihv.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.gymx"
+                "bundle_id": "com.NomAi.app"
               }
             }
           ]

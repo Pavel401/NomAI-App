@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:turfit/app/constants/colors.dart';
-import 'package:turfit/app/models/Auth/user.dart';
-import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
-import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
-import 'package:turfit/app/modules/Auth/views/sign_in_screen.dart';
-import 'package:turfit/app/utility/user_utility.dart';
+import 'package:NomAi/app/constants/colors.dart';
+import 'package:NomAi/app/models/Auth/user.dart';
+import 'package:NomAi/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
+import 'package:NomAi/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
+import 'package:NomAi/app/modules/Auth/views/sign_in_screen.dart';
+import 'package:NomAi/app/utility/user_utility.dart';
 
 class DailyCalorieRequired extends StatefulWidget {
   final UserBasicInfo userBasicInfo;
