@@ -1,4 +1,4 @@
-package com.NomAi.app
+package com.nomai.app
 
 import io.flutter.embedding.android.FlutterActivity
 
