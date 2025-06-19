@@ -67,6 +67,6 @@ class DefaultFirebaseOptions {
         '760266971868-g5p2me45nc29md4tghblkt25p3op5irt.apps.googleusercontent.com',
     iosClientId:
         '760266971868-fa0n62psp9vdnqvkugjshta6srh6hihv.apps.googleusercontent.com',
-    iosBundleId: 'com.NomAi.app',
+    iosBundleId: 'com.nomai.app',
   );
 }

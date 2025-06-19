@@ -259,7 +259,7 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
       _selectedGender = Gender.male;
       birthday = DateTime(2002, 5, 5);
       currentHeight = "180 cm";
-      currentWeight = "108 kg";
+      currentWeight = "112 kg";
       desiredWeight = "80 kg";
       selectedHaveYouTriedApps = "Yes";
       selectedWorkoutOption = "3-5";
@@ -1147,8 +1147,8 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
                 tile:
                     _currentPage == _totalPages - 1 ? "Go to Sign Up" : "Next",
                 onPressed: () {
-                  // _populateDemoData();
-                  _onNext();
+                  _populateDemoData();
+                  // _onNext();
                 },
               ),
             ],

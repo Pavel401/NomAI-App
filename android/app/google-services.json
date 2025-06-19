@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:760266971868:android:e1343508a4bbe81fed7219",
         "android_client_info": {
-          "package_name": "com.NomAi.app"
+          "package_name": "com.nomai.app"
         }
       },
       "oauth_client": [
@@ -34,7 +34,7 @@
               "client_id": "760266971868-fa0n62psp9vdnqvkugjshta6srh6hihv.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.NomAi.app"
+                "bundle_id": "com.nomai.app"
               }
             }
           ]
