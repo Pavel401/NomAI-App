@@ -1,4 +1,4 @@
-# gymx
+# NomAi
 
 A new Flutter project.
 

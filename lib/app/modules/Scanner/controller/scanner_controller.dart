@@ -1,16 +1,16 @@
 import 'dart:io';
 
 import 'package:get/get.dart';
-import 'package:turfit/app/constants/enums.dart';
-import 'package:turfit/app/models/AI/nutrition_input.dart';
-import 'package:turfit/app/models/AI/nutrition_output.dart';
-import 'package:turfit/app/models/AI/nutrition_record.dart';
-import 'package:turfit/app/modules/Scanner/views/scan_view.dart';
-import 'package:turfit/app/repo/meal_ai_repo.dart';
-import 'package:turfit/app/repo/nutrition_record_repo.dart';
-import 'package:turfit/app/repo/storage_service.dart';
-import 'package:turfit/app/utility/image_utility.dart';
-import 'package:turfit/app/utility/registry_service.dart';
+import 'package:NomAi/app/constants/enums.dart';
+import 'package:NomAi/app/models/AI/nutrition_input.dart';
+import 'package:NomAi/app/models/AI/nutrition_output.dart';
+import 'package:NomAi/app/models/AI/nutrition_record.dart';
+import 'package:NomAi/app/modules/Scanner/views/scan_view.dart';
+import 'package:NomAi/app/repo/meal_ai_repo.dart';
+import 'package:NomAi/app/repo/nutrition_record_repo.dart';
+import 'package:NomAi/app/repo/storage_service.dart';
+import 'package:NomAi/app/utility/image_utility.dart';
+import 'package:NomAi/app/utility/registry_service.dart';
 
 class ScannerController extends GetxController {
   // Variables for NutritionTrackerCard as RxInt with default value 0

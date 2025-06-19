@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:turfit/app/models/Auth/user.dart';
+import 'package:NomAi/app/models/Auth/user.dart';
 
 abstract class UserState extends Equatable {
   const UserState();

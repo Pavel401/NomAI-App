@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:turfit/app/constants/enums.dart';
-import 'package:turfit/app/models/AI/nutrition_record.dart';
+import 'package:NomAi/app/constants/enums.dart';
+import 'package:NomAi/app/models/AI/nutrition_record.dart';
 
 class NutritionRecordRepo {
   final usersCollection = FirebaseFirestore.instance.collection('users');

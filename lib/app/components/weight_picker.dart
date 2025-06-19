@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
-import 'package:turfit/app/constants/colors.dart';
+import 'package:NomAi/app/constants/colors.dart';
 
 enum WeightUnit {
   KG,

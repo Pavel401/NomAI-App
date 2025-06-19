@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAXOcHJpHJhaXOsE-6qdyrt2UeXNE7ZYaU',
-    appId: '1:760266971868:android:294f9d9266ac1887ed7219',
+    appId: '1:760266971868:android:e1343508a4bbe81fed7219',
     messagingSenderId: '760266971868',
     projectId: 'mealai-f58b5',
     storageBucket: 'mealai-f58b5.firebasestorage.app',
@@ -59,12 +59,14 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDDA-sAvK9lMg_vS2MuxV1E_-GL3FOkTt8',
-    appId: '1:760266971868:ios:c97163f2e301c062ed7219',
+    appId: '1:760266971868:ios:c77c2ffe6cf6b560ed7219',
     messagingSenderId: '760266971868',
     projectId: 'mealai-f58b5',
     storageBucket: 'mealai-f58b5.firebasestorage.app',
-    iosClientId: '760266971868-ulv79u23l561pcm0knji9c9o199eqd8a.apps.googleusercontent.com',
-    iosBundleId: 'com.mealai.app',
+    androidClientId:
+        '760266971868-g5p2me45nc29md4tghblkt25p3op5irt.apps.googleusercontent.com',
+    iosClientId:
+        '760266971868-fa0n62psp9vdnqvkugjshta6srh6hihv.apps.googleusercontent.com',
+    iosBundleId: 'com.NomAi.app',
   );
-
 }

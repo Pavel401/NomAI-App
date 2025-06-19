@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:turfit/app/constants/colors.dart';
-import 'package:turfit/app/models/Auth/user.dart';
-import 'package:turfit/app/repo/firebase_user_repo.dart';
+import 'package:NomAi/app/constants/colors.dart';
+import 'package:NomAi/app/models/Auth/user.dart';
+import 'package:NomAi/app/repo/firebase_user_repo.dart';
 
 class EditUserBasicInfoView extends StatefulWidget {
   final UserBasicInfo userBasicInfo;

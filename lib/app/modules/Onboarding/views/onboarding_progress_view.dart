@@ -5,16 +5,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:linear_progress_bar/linear_progress_bar.dart';
 import 'package:sizer/sizer.dart';
-import 'package:turfit/app/components/buttons.dart';
-import 'package:turfit/app/components/height_picker.dart';
-import 'package:turfit/app/components/tiles.dart';
-import 'package:turfit/app/components/weight_picker.dart';
-import 'package:turfit/app/constants/colors.dart';
-import 'package:turfit/app/constants/constants.dart';
-import 'package:turfit/app/models/Auth/user.dart';
-import 'package:turfit/app/models/Onboarding/onboarding_model.dart';
-import 'package:turfit/app/modules/Onboarding/views/calorie_required.dart';
-import 'package:turfit/app/utility/user_utility.dart';
+import 'package:NomAi/app/components/buttons.dart';
+import 'package:NomAi/app/components/height_picker.dart';
+import 'package:NomAi/app/components/tiles.dart';
+import 'package:NomAi/app/components/weight_picker.dart';
+import 'package:NomAi/app/constants/colors.dart';
+import 'package:NomAi/app/constants/constants.dart';
+import 'package:NomAi/app/models/Auth/user.dart';
+import 'package:NomAi/app/models/Onboarding/onboarding_model.dart';
+import 'package:NomAi/app/modules/Onboarding/views/calorie_required.dart';
+import 'package:NomAi/app/utility/user_utility.dart';
 
 class OnboardingQuestionaries extends StatefulWidget {
   const OnboardingQuestionaries({super.key});

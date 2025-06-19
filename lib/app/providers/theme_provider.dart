@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:turfit/app/constants/colors.dart';
+import 'package:NomAi/app/constants/colors.dart';
 
 class ThemeProvider extends ChangeNotifier {
   ThemeProvider() {

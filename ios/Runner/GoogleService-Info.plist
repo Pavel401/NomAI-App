@@ -3,9 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>760266971868-ulv79u23l561pcm0knji9c9o199eqd8a.apps.googleusercontent.com</string>
+	<string>760266971868-fa0n62psp9vdnqvkugjshta6srh6hihv.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.760266971868-ulv79u23l561pcm0knji9c9o199eqd8a</string>
+	<string>com.googleusercontent.apps.760266971868-fa0n62psp9vdnqvkugjshta6srh6hihv</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>760266971868-g5p2me45nc29md4tghblkt25p3op5irt.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyDDA-sAvK9lMg_vS2MuxV1E_-GL3FOkTt8</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.mealai.app</string>
+	<string>com.NomAi.app</string>
 	<key>PROJECT_ID</key>
 	<string>mealai-f58b5</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:760266971868:ios:c97163f2e301c062ed7219</string>
+	<string>1:760266971868:ios:c77c2ffe6cf6b560ed7219</string>
 </dict>
 </plist>

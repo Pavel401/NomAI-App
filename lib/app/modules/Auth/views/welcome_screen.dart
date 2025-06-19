@@ -2,11 +2,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:turfit/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
-import 'package:turfit/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
-import 'package:turfit/app/modules/Auth/blocs/sign_up_bloc/sign_up_bloc.dart';
-import 'package:turfit/app/modules/Auth/views/sign_in_screen.dart';
-import 'package:turfit/app/modules/Auth/views/sign_up_screen.dart';
+import 'package:NomAi/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
+import 'package:NomAi/app/modules/Auth/blocs/sign_in_bloc/sign_in_bloc.dart';
+import 'package:NomAi/app/modules/Auth/blocs/sign_up_bloc/sign_up_bloc.dart';
+import 'package:NomAi/app/modules/Auth/views/sign_in_screen.dart';
+import 'package:NomAi/app/modules/Auth/views/sign_up_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -28,7 +28,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SingleChildScrollView(
         child: SizedBox(
           height: MediaQuery.of(context).size.height,
@@ -80,10 +80,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           controller: tabController,
                           unselectedLabelColor: Theme.of(context)
                               .colorScheme
-                              .onBackground
+                              .onSurface
                               .withOpacity(0.5),
-                          labelColor:
-                              Theme.of(context).colorScheme.onBackground,
+                          labelColor: Theme.of(context).colorScheme.onSurface,
                           tabs: const [
                             Padding(
                               padding: EdgeInsets.all(12.0),

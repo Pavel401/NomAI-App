@@ -1,4 +1,4 @@
-import 'package:turfit/app/models/Auth/user.dart';
+import 'package:NomAi/app/models/Auth/user.dart';
 
 class EnhancedUserNutrition {
   // Safety minimums based on biological sex
@@ -52,6 +52,7 @@ class EnhancedUserNutrition {
           case WeeklyPace.slow:
             adjustment = 250;
             break;
+
           case WeeklyPace.moderate:
             adjustment = 500;
             break;
