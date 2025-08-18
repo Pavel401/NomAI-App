@@ -21,11 +21,21 @@ class AgentService {
         final text = response.body.trim();
         if (text.isEmpty) return [];
 
-        return text
+        final messages = text
             .split('\n')
             .where((line) => line.trim().isNotEmpty)
             .map((line) => AgentResponse.fromJson(json.decode(line)))
             .toList();
+
+        // Sort messages by timestamp in ascending order (oldest first)
+        messages.sort((a, b) {
+          if (a.timestamp == null && b.timestamp == null) return 0;
+          if (a.timestamp == null) return -1;
+          if (b.timestamp == null) return 1;
+          return a.timestamp!.compareTo(b.timestamp!);
+        });
+
+        return messages;
       } else {
         throw Exception('Failed to load chat history: ${response.statusCode}');
       }

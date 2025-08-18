@@ -226,6 +226,7 @@ class ChatController extends GetxController {
       _messageSubscription = _agentService.sendMessage(message, userId).listen(
         (response) {
           _handleStreamedResponse(response);
+          // print('Received response: ${response.content}');
         },
         onError: (error) {
           _handleError(error);

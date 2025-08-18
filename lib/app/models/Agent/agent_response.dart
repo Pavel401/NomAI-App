@@ -123,7 +123,9 @@ class Content {
         response: json["response"] == null
             ? null
             : Response.fromJson(json["response"]),
-        status: json["status"],
+        status: json["status"] is double
+            ? (json["status"] as double).toInt()
+            : json["status"],
         message: json["message"],
         metadata: json["metadata"] == null
             ? null
@@ -154,9 +156,15 @@ class Metadata {
   });
 
   factory Metadata.fromJson(Map<String, dynamic> json) => Metadata(
-        inputTokenCount: json["input_token_count"],
-        outputTokenCount: json["output_token_count"],
-        totalTokenCount: json["total_token_count"],
+        inputTokenCount: json["input_token_count"] is double
+            ? (json["input_token_count"] as double).toInt()
+            : json["input_token_count"],
+        outputTokenCount: json["output_token_count"] is double
+            ? (json["output_token_count"] as double).toInt()
+            : json["output_token_count"],
+        totalTokenCount: json["total_token_count"] is double
+            ? (json["total_token_count"] as double).toInt()
+            : json["total_token_count"],
         estimatedCost: json["estimated_cost"]?.toDouble(),
         executionTimeSeconds: json["execution_time_seconds"]?.toDouble(),
       );
@@ -199,8 +207,12 @@ class Response {
         message: json["message"],
         foodName: json["foodName"],
         portion: json["portion"],
-        portionSize: json["portionSize"],
-        confidenceScore: json["confidenceScore"],
+        portionSize: json["portionSize"] is double
+            ? (json["portionSize"] as double).toInt()
+            : json["portionSize"],
+        confidenceScore: json["confidenceScore"] is double
+            ? (json["confidenceScore"] as double).toInt()
+            : json["confidenceScore"],
         ingredients: json["ingredients"] == null
             ? []
             : List<Ingredient>.from(
@@ -213,7 +225,9 @@ class Response {
             ? []
             : List<Ingredient>.from(json["suggestAlternatives"]!
                 .map((x) => Ingredient.fromJson(x))),
-        overallHealthScore: json["overallHealthScore"],
+        overallHealthScore: json["overallHealthScore"] is double
+            ? (json["overallHealthScore"] as double).toInt()
+            : json["overallHealthScore"],
         overallHealthComments: json["overallHealthComments"],
       );
 
@@ -260,12 +274,24 @@ class Ingredient {
 
   factory Ingredient.fromJson(Map<String, dynamic> json) => Ingredient(
         name: json["name"],
-        calories: json["calories"],
-        protein: json["protein"],
-        carbs: json["carbs"],
-        fiber: json["fiber"],
-        fat: json["fat"],
-        healthScore: json["healthScore"],
+        calories: json["calories"] is double
+            ? (json["calories"] as double).toInt()
+            : json["calories"],
+        protein: json["protein"] is double
+            ? (json["protein"] as double).toInt()
+            : json["protein"],
+        carbs: json["carbs"] is double
+            ? (json["carbs"] as double).toInt()
+            : json["carbs"],
+        fiber: json["fiber"] is double
+            ? (json["fiber"] as double).toInt()
+            : json["fiber"],
+        fat: json["fat"] is double
+            ? (json["fat"] as double).toInt()
+            : json["fat"],
+        healthScore: json["healthScore"] is double
+            ? (json["healthScore"] as double).toInt()
+            : json["healthScore"],
         healthComments: json["healthComments"],
       );
 
