@@ -15,7 +15,6 @@ import 'package:NomAi/app/modules/Auth/blocs/authentication_bloc/authentication_
 import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_bloc.dart';
 import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_event.dart';
 import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_state.dart';
-import 'package:NomAi/app/modules/Demo/views/bounce.dart';
 import 'package:NomAi/app/modules/Home/component/nutrition_card.dart';
 import 'package:NomAi/app/modules/Home/views/nutrition_view.dart';
 import 'package:NomAi/app/modules/Scanner/controller/scanner_controller.dart';
@@ -363,14 +362,19 @@ class _HomePageState extends State<HomePage> {
             }
 
             if (controller.dailyRecords.isEmpty) {
-              return Center(
-                child: Text(
-                  'No nutrition records found',
-                  style: TextStyle(
-                    color: MealAIColors.blackText,
-                    fontSize: 16,
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Center(
+                    child: Text(
+                      'No nutrition records found',
+                      style: TextStyle(
+                        color: MealAIColors.blackText,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               );
             }
 

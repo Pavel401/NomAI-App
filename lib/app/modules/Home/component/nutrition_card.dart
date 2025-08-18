@@ -240,7 +240,8 @@ class NutritionCard extends StatelessWidget {
               )
             else if (nutritionRecord.nutritionInputQuery?.imageUrl != null)
               CachedNetworkImage(
-                imageUrl: nutritionRecord.nutritionInputQuery!.imageUrl,
+                imageUrl:
+                    nutritionRecord.nutritionInputQuery!.imageUrl.toString(),
                 fit: BoxFit.cover,
                 placeholder: (context, url) => _buildImagePlaceholder(),
                 errorWidget: (context, url, error) => _buildImageError(),
