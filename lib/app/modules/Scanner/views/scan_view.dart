@@ -12,7 +12,7 @@ import 'package:NomAi/app/constants/colors.dart';
 import 'package:NomAi/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:NomAi/app/modules/Scanner/controller/scanner_controller.dart';
 
-enum ScanMode { food, barcode, gallery }
+enum ScanMode { food, barcode, gallery, description }
 
 class MealAiCamera extends StatefulWidget {
   MealAiCamera({super.key});
@@ -41,18 +41,17 @@ class _MealAiCameraState extends State<MealAiCamera> {
   Future<void> _openGallery() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
-      // Process the selected image
-      // You could navigate to a new screen passing the image file
       File imageFile = File(image.path);
 
       ScannerController scannerController = Get.put(ScannerController());
       final authBloc = context.read<AuthenticationBloc>();
 
       scannerController.processNutritionQueryRequest(
-          authBloc.state.user!.uid.toString(), imageFile, _selectedscanMode);
+          authBloc.state.user!.uid.toString(),
+          imageFile,
+          _selectedscanMode,
+          context);
       Navigator.pop(context);
-      // Example: Navigate to results screen with image
-      // Navigator.push(context, MaterialPageRoute(builder: (context) => ResultsScreen(imageFile: imageFile)));
     }
   }
 
@@ -62,33 +61,19 @@ class _MealAiCameraState extends State<MealAiCamera> {
         photoState.takePhoto().then((mediaCapture) async {
           print(mediaCapture.path);
 
-          // Navigator.push(
-          //     context,
-          //     MaterialPageRoute(
-          //         builder: (context) => ImageDownscaleDemo(
-          //               imagePath: mediaCapture.path!,
-          //             )));
-
           ScannerController scannerController = Get.put(ScannerController());
           final authBloc = context.read<AuthenticationBloc>();
 
           scannerController.processNutritionQueryRequest(
               authBloc.state.user!.uid.toString(),
               File(mediaCapture.path!),
-              _selectedscanMode);
+              _selectedscanMode,
+              context);
           Navigator.pop(context);
-
-          // Process the captured photo
-          // Example: Navigate to results screen with the photo
-          // Navigator.push(context, MaterialPageRoute(builder: (context) => ResultsScreen(photo: mediaCapture)));
         });
       },
-      onVideoMode: (_) {
-        // Not handling video mode in this example
-      },
-      onPreparingCamera: (s) {
-        // Camera is still preparing
-      },
+      onVideoMode: (_) {},
+      onPreparingCamera: (s) {},
     );
   }
 
@@ -190,27 +175,18 @@ class _MealAiCameraState extends State<MealAiCamera> {
         ),
         previewDecoratorBuilder: (state, preview) {
           return Container(
-            decoration: _selectedscanMode == ScanMode.food
-                ? ShapeDecoration(
-                    shape: FoodScannerOverlayShape(
-                      borderColor: MealAIColors.whiteText,
-                      overlayColor: Colors.black.withOpacity(0.3),
-                      borderRadius: 20,
-                      borderLength: 40,
-                      borderWidth: 10,
-                      cutOutSize: 80.w,
-                    ),
-                  )
-                : ShapeDecoration(
-                    shape: BarcodeScannerOverlayShape(
-                      borderColor: MealAIColors.whiteText,
-                      overlayColor: Colors.black.withOpacity(0.3),
-                      borderRadius: 10,
-                      borderLength: 15,
-                      borderWidth: 5,
-                    ),
-                  ),
-          );
+              decoration: _selectedscanMode == ScanMode.food
+                  ? ShapeDecoration(
+                      shape: FoodScannerOverlayShape(
+                        borderColor: MealAIColors.whiteText,
+                        overlayColor: Colors.black.withOpacity(0.3),
+                        borderRadius: 20,
+                        borderLength: 40,
+                        borderWidth: 10,
+                        cutOutSize: 80.w,
+                      ),
+                    )
+                  : null);
         },
         topActionsBuilder: (state) {
           return Padding(
@@ -315,26 +291,57 @@ class _MealAiCameraState extends State<MealAiCamera> {
                         ),
                       ),
                     ),
+                    // GestureDetector(
+                    //   onTap: () {
+                    //     setState(() {
+                    //       _selectedscanMode = ScanMode.barcode;
+                    //     });
+                    //   },
+                    //   child: Container(
+                    //     padding: const EdgeInsets.all(10),
+                    //     decoration: BoxDecoration(
+                    //       color: _selectedscanMode == ScanMode.barcode
+                    //           ? MealAIColors.switchWhiteColor
+                    //           : MealAIColors.greyLight.withOpacity(0.5),
+                    //       borderRadius: BorderRadius.circular(10),
+                    //     ),
+                    //     child: Column(
+                    //       children: [
+                    //         Icon(Symbols.barcode,
+                    //             color: MealAIColors.switchBlackColor, size: 28),
+                    //         Text(
+                    //           'Barcode',
+                    //           style: Theme.of(context)
+                    //               .textTheme
+                    //               .bodySmall!
+                    //               .copyWith(
+                    //                   color: MealAIColors.switchBlackColor),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+
                     GestureDetector(
                       onTap: () {
                         setState(() {
-                          _selectedscanMode = ScanMode.barcode;
+                          _selectedscanMode = ScanMode.description;
                         });
                       },
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: _selectedscanMode == ScanMode.barcode
+                          color: _selectedscanMode == ScanMode.description
                               ? MealAIColors.switchWhiteColor
                               : MealAIColors.greyLight.withOpacity(0.5),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Column(
                           children: [
-                            Icon(Symbols.barcode,
+                            Icon(Symbols.food_bank_rounded,
                                 color: MealAIColors.switchBlackColor, size: 28),
                             Text(
-                              'Barcode',
+                              'Explain Dish',
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall!

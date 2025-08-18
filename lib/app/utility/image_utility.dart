@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 import 'package:image/image.dart' as img;
 
@@ -31,22 +33,25 @@ class ImageUtility {
     }
   }
 
-  static String _getNewFileName(String path, ImageScale scale) {
-    final file = File(path);
-    final directory = file.parent.path;
-    final fileName = file.uri.pathSegments.last.split('.').first;
-    final extension = file.uri.pathSegments.last.split('.').last;
+  static Future<String> _getNewFileName(
+      String originalPath, ImageScale scale) async {
+    // Get the temporary directory for this app
+    final tempDir = await getTemporaryDirectory();
+    final fileName = path.basenameWithoutExtension(originalPath);
+    final extension = path.extension(originalPath);
 
     String scaleName = scale.toString().split('.').last;
-    return '$directory/${fileName}_$scaleName.$extension';
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    return path.join(
+        tempDir.path, '${fileName}_${scaleName}_$timestamp$extension');
   }
 
   static Future<File> downscaleImage(
-    String path, {
+    String filePath, {
     required ImageScale scale,
   }) async {
     // Read the image from the file
-    final bytes = await File(path).readAsBytes();
+    final bytes = await File(filePath).readAsBytes();
     final image = img.decodeImage(bytes);
 
     if (image == null) {
@@ -83,9 +88,15 @@ class ImageUtility {
     // Encode the image back to file
     final resizedBytes = img.encodeJpg(resizedImage, quality: 85);
 
-    // Generate a new file path based on scale
-    final newPath = _getNewFileName(path, scale);
-    final newFile = File(newPath)..writeAsBytesSync(resizedBytes);
+    // Generate a new file path based on scale in temp directory
+    final newPath = await _getNewFileName(filePath, scale);
+    final newFile = File(newPath);
+
+    // Ensure the directory exists
+    await newFile.parent.create(recursive: true);
+
+    // Write the file
+    await newFile.writeAsBytes(resizedBytes);
 
     return newFile;
   }

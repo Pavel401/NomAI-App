@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:NomAi/app/constants/urls.dart';
 import 'package:NomAi/app/models/AI/nutrition_input.dart';
@@ -31,12 +30,22 @@ class AiRepository {
       if (response.statusCode == 200) {
         return NutritionOutput.fromJson(json.decode(response.body));
       } else {
-        throw Exception(
-            "❌ Failed to fetch data - Status: ${response.statusCode}\nBody: ${response.body}");
+        // Return a failed NutritionOutput instead of throwing
+        return NutritionOutput(
+          status: response.statusCode,
+          message:
+              "API request failed with status ${response.statusCode}: ${response.body}",
+          response: null,
+        );
       }
     } catch (e) {
       print("🔥 [API Error] $e");
-      throw Exception("❌ Something went wrong: $e");
+      // Return a failed NutritionOutput instead of throwing
+      return NutritionOutput(
+        status: 500,
+        message: "Network error: ${e.toString()}",
+        response: null,
+      );
     }
   }
 }

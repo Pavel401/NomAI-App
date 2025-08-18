@@ -148,7 +148,8 @@ class NutritionView extends StatelessWidget {
           ),
           child: nutritionRecord.nutritionInputQuery?.imageUrl != null
               ? CachedNetworkImage(
-                  imageUrl: nutritionRecord.nutritionInputQuery!.imageUrl,
+                  imageUrl:
+                      nutritionRecord.nutritionInputQuery!.imageUrl.toString(),
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Container(
                     color: Colors.grey.shade200,
