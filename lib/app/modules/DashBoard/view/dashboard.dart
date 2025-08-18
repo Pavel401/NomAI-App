@@ -1,3 +1,4 @@
+import 'package:NomAi/app/modules/Chat/Views/chat_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -154,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Analytics',
+                      'Chat',
                       style: TextStyle(
                         fontSize: 11,
                         color: _selectedIndex == 2
@@ -181,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           HomePage(),
           Center(child: Text('📷 QR Scan Screen')),
-          Center(child: Text('📊 Analytics Screen')),
+          NomAiAgentView(),
         ],
       ),
     );
