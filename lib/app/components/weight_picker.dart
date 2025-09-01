@@ -36,7 +36,6 @@ class _WeightPickerState extends State<WeightPicker> {
           _selectedUnit = WeightUnit.LB;
         }
       } catch (e) {
-        // Fallback to default values
         _selectedKg = 70;
         _selectedLbs = 155;
       }
@@ -177,12 +176,10 @@ class _WeightPickerState extends State<WeightPicker> {
 }
 
 double convertWeightToKg(String weight) {
-  // Check if the weight is in pounds (like 155 lb)
   if (weight.contains("lb")) {
     try {
       double lbs = double.parse(weight.replaceAll(" lb", "").trim());
 
-      // Convert lbs to kg (1 lb = 0.453592 kg)
       double weightInKg = lbs * 0.453592;
       return double.parse(weightInKg.toStringAsFixed(2));
     } catch (e) {
@@ -190,7 +187,6 @@ double convertWeightToKg(String weight) {
     }
   }
 
-  // Check if the weight is already in kg (like 70 kg)
   if (weight.contains("kg")) {
     try {
       double kg = double.parse(weight.replaceAll(" kg", "").trim());

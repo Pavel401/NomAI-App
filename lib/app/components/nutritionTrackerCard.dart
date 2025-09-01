@@ -30,27 +30,21 @@ class NutritionTrackerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate net calories (consumed - burned)
     int netCalories = consumedCalories - burnedCalories;
 
-    // Calculate remaining calories, ensuring it doesn't go below 0
     int remainingCalories =
         (maximumCalories - netCalories).clamp(0, maximumCalories);
 
-    // Calculate actual remaining calories (can be negative) for better status indication
     int actualRemainingCalories = maximumCalories - netCalories;
 
-    // Calculate calorie percentage based on net calories vs maximum
     double caloriesPercent = (netCalories / maximumCalories).clamp(0.0, 1.0);
 
-    // Determine if user has exceeded their calorie limit
     bool exceededLimit = actualRemainingCalories < 0;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          // Enhanced Calories Card with Clear Max/Consumed/Exceeded Indicators
           Bounceable(
             onTap: () {},
             child: PhysicalModel(
@@ -60,7 +54,6 @@ class NutritionTrackerCard extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(14),
                 child: Container(
-                  // margin: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
                   decoration: BoxDecoration(
                     color: MealAIColors.whiteText,
                     borderRadius: BorderRadius.circular(14),
@@ -70,7 +63,6 @@ class NutritionTrackerCard extends StatelessWidget {
                         left: 4.w, right: 4.w, top: 2.h, bottom: 2.h),
                     child: Column(
                       children: [
-                        // Header with Title and Status Indicator
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -122,16 +114,13 @@ class NutritionTrackerCard extends StatelessWidget {
 
                         SizedBox(height: 2.h),
 
-                        // Main Calorie Information
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Left Column: Calorie Stats
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Calorie Counter Card
                                 Container(
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 12,
@@ -203,7 +192,6 @@ class NutritionTrackerCard extends StatelessWidget {
 
                                 SizedBox(height: 1.h),
 
-                                // Calories In/Out Row
                                 Row(
                                   children: [
                                     _buildCalorieInfoBox(
@@ -224,7 +212,6 @@ class NutritionTrackerCard extends StatelessWidget {
                               ],
                             ),
 
-                            // Right Column: Progress Circle
                             CircularPercentIndicator(
                               radius: 60,
                               lineWidth: 12.0,
@@ -268,12 +255,10 @@ class NutritionTrackerCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 1.h),
-          // Nutrients Row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             spacing: 2.w,
             children: [
-              // Proteins
               _buildNutrientBox(
                 "Proteins",
                 consumedProtein,
@@ -282,7 +267,6 @@ class NutritionTrackerCard extends StatelessWidget {
                 Icons.fitness_center,
               ),
 
-              // Carbs
               _buildNutrientBox(
                 "Carbs",
                 consumedCarb,
@@ -291,7 +275,6 @@ class NutritionTrackerCard extends StatelessWidget {
                 Icons.grain,
               ),
 
-              // Fats
               _buildNutrientBox(
                 "Fats",
                 consumedFat,
@@ -306,7 +289,6 @@ class NutritionTrackerCard extends StatelessWidget {
     );
   }
 
-  // Helper widget for calorie in/out information
   Widget _buildCalorieInfoBox(
       String label, int value, IconData icon, Color color) {
     return Container(
@@ -348,7 +330,6 @@ class NutritionTrackerCard extends StatelessWidget {
     );
   }
 
-  // Helper method to determine progress color based on percentage
   Color _getProgressColor(double percent, bool exceeded) {
     if (exceeded) return Colors.red;
     if (percent > 0.9) return Colors.orange;
@@ -371,7 +352,6 @@ class NutritionTrackerCard extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(14),
             child: Container(
-              // margin: EdgeInsets.symmetric(horizontal: 4),
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
                 color: MealAIColors.whiteText,

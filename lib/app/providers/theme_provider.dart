@@ -17,7 +17,6 @@ class ThemeProvider extends ChangeNotifier {
 
   void toggleTheme() async {
     setDarkMode(!isDarkMode);
-    // Save the theme preference to shared preferences
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('isDarkMode', isDarkMode);
   }
@@ -25,14 +24,11 @@ class ThemeProvider extends ChangeNotifier {
   void _loadTheme() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    // Get the stored preference value for dark mode
     bool? isDarkMode = prefs.getBool('isDarkMode');
 
-    // If `isDarkMode` is null, fallback to the system theme
     if (isDarkMode == null) {
       debugPrint('User has not set a theme preference');
       debugPrint('Falling back to the system theme');
-      // Fallback to the system's theme mode
       final Brightness brightness =
           WidgetsBinding.instance.window.platformBrightness;
       debugPrint('System theme mode: $brightness');
@@ -41,7 +37,6 @@ class ThemeProvider extends ChangeNotifier {
       debugPrint('User has set a theme preference: $isDarkMode');
     }
 
-    // Apply the theme based on the value of `isDarkMode`
     setDarkMode(isDarkMode);
   }
 

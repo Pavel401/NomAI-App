@@ -18,7 +18,6 @@ import 'package:NomAi/app/utility/image_utility.dart';
 import 'package:NomAi/app/utility/registry_service.dart';
 
 class ScannerController extends GetxController {
-  // Variables for NutritionTrackerCard as RxInt with default value 0
   RxInt maximumCalories = 0.obs;
   RxInt consumedCalories = 0.obs;
   RxInt burnedCalories = 0.obs;
@@ -28,7 +27,6 @@ class ScannerController extends GetxController {
   RxInt consumedProtein = 0.obs;
   RxInt maximumCarb = 0.obs;
   RxInt consumedCarb = 0.obs;
-  // Variables for state management
   List<NutritionRecord> dailyRecords = [];
   DateTime selectedDate = DateTime.now();
   bool isLoading = false;
@@ -82,7 +80,6 @@ class ScannerController extends GetxController {
 
       addRecord(nutritionRecord);
 
-      ///First We will downscale image
       File resizedFile;
       try {
         resizedFile = await ImageUtility.downscaleImage(
@@ -98,7 +95,6 @@ class ScannerController extends GetxController {
 
       print("--- Let's get the Base64 ----");
 
-      ///Convert image to base64 and upload
       final base64String =
           await ImageUtility.convertImageToBase64(resizedFile.path);
 
@@ -119,11 +115,9 @@ class ScannerController extends GetxController {
 
       print("We got the rawNutritionData: ${rawNutritionData.status}");
 
-      // Check if the API call was successful
       if (rawNutritionData.status != 200 || rawNutritionData.response == null) {
         print("❌ API call failed or returned no data");
 
-        // Update record to show failed status
         updateRecord(NutritionRecord(
           recordTime: time,
           nutritionInputQuery: NutritionInputQuery(
@@ -136,7 +130,6 @@ class ScannerController extends GetxController {
           nutritionOutput: rawNutritionData, // Include the error response
         ));
 
-        // Show error message to user but don't throw exception
         Get.snackbar(
           "Error",
           rawNutritionData.message ?? "Failed to analyze the image",
@@ -144,21 +137,17 @@ class ScannerController extends GetxController {
           colorText: Colors.white,
         );
 
-        // Exit early but gracefully
         return;
       }
 
       print("--- Now let's get the Image url");
 
-      // Debug the resized file before uploading
       print("Resized file path: ${resizedFile.path}");
       print("Resized file exists: ${resizedFile.existsSync()}");
 
-      // Use resized file if it exists, otherwise fall back to original
       File fileToUpload = resizedFile.existsSync() ? resizedFile : image;
       print("Using file for upload: ${fileToUpload.path}");
 
-      ///Upload the imageurl in the firebase
       final imageUrl = await storageService.uploadImage(fileToUpload);
 
       print("We got the image URL: $imageUrl");
@@ -168,18 +157,15 @@ class ScannerController extends GetxController {
         throw Exception("Failed to upload image");
       }
 
-      // Listen to user bloc state changes
       final userBloc = context.read<UserBloc>();
       final userState = userBloc.state;
 
-      // Extract user model from state
       UserModel? userModel;
       if (userState is UserLoaded) {
         userModel = userState.userModel;
       }
       print(userModel);
 
-      ///Prepare input data for AI (with imageData)
       final inputData = NutritionInputQuery(
         imageUrl: imageUrl,
         scanMode: scanMode,
@@ -189,8 +175,9 @@ class ScannerController extends GetxController {
         dietaryPreferences: userModel?.userInfo?.selectedDiet != null
             ? [userModel!.userInfo!.selectedDiet]
             : [],
-        allergies: userModel?.userInfo?.selectedAllergy != null
-            ? [userModel!.userInfo!.selectedAllergy]
+        allergies: userModel?.userInfo?.selectedAllergies != null &&
+                userModel!.userInfo!.selectedAllergies.isNotEmpty
+            ? userModel.userInfo!.selectedAllergies
             : [],
         selectedGoals: userModel?.userInfo?.selectedGoal != null
             ? [userModel!.userInfo!.selectedGoal.name]
@@ -208,7 +195,6 @@ class ScannerController extends GetxController {
         processingStatus: ProcessingStatus.COMPLETED,
       ));
 
-      // Calculate nutrition totals from ingredients
       int totalNutritionValue = 0;
       int totalProteinValue = 0;
       int totalFatValue = 0;
@@ -223,7 +209,6 @@ class ScannerController extends GetxController {
         }
       }
 
-      // Initialize a new record if we don't have one yet
       if (existingNutritionRecords == null) {
         existingNutritionRecords = DailyNutritionRecords(
           dailyRecords: [],
@@ -237,7 +222,6 @@ class ScannerController extends GetxController {
         );
       }
 
-      // Correctly calculate the totals with proper null safety
       int totalConsumedCalories =
           (existingNutritionRecords?.dailyConsumedCalories ?? 0) +
               totalNutritionValue;
@@ -267,19 +251,16 @@ class ScannerController extends GetxController {
 
       existingNutritionRecords = dailyNutritionRecords;
 
-      // Update reactive properties directly rather than via updateNutritionValues
       consumedCalories.value = totalConsumedCalories;
       burnedCalories.value = totalBurnedCalories;
       consumedFat.value = totalConsumedFat;
       consumedProtein.value = totalConsumedProtein;
       consumedCarb.value = totalConsumedCarb;
 
-      // Call update() to refresh non-reactive UI elements
       update();
     } catch (e) {
       print("🔥 [API Error] $e");
 
-      // Update the nutrition record to show failed status
       final failedRecord = dailyRecords.firstWhere(
         (record) => record.recordTime == time,
         orElse: () => NutritionRecord(
@@ -294,7 +275,6 @@ class ScannerController extends GetxController {
         ),
       );
 
-      // Update the record status to failed
       updateRecord(NutritionRecord(
         recordTime: failedRecord.recordTime,
         nutritionInputQuery: failedRecord.nutritionInputQuery,
@@ -302,7 +282,6 @@ class ScannerController extends GetxController {
         nutritionOutput: failedRecord.nutritionOutput,
       ));
 
-      // Show user-friendly error message
       Get.snackbar(
         "Processing Failed",
         "Unable to analyze the image. Please try again.",
@@ -311,7 +290,6 @@ class ScannerController extends GetxController {
         duration: Duration(seconds: 3),
       );
 
-      // Update UI to reflect the error state
       update();
     }
   }
@@ -320,29 +298,16 @@ class ScannerController extends GetxController {
     print("🔍 Fetching nutrition records for user: $userId on $selectedDate");
 
     try {
-      // Set loading state and update UI
       isLoading = true;
       update();
 
       final nutritionRecordRepo = serviceLocator<NutritionRecordRepo>();
 
-      // Fetch records
       final records =
           await nutritionRecordRepo.getNutritionData(userId, selectedDate);
 
-      // Update existing records and daily records
       existingNutritionRecords = records;
       dailyRecords = records.dailyRecords;
-
-      // int maximumCalories = 0;
-      // int consumedCalories = 0;
-      // int burnedCalories = 0;
-      // int maximumFat = 0;
-      // int consumedFat = 0;
-      // int maximumProtein = 0;
-      // int consumedProtein = 0;
-      // int maximumCarb = 0;
-      // int consumedCarb = 0;
 
       consumedCalories.value = records.dailyConsumedCalories;
       burnedCalories.value = records.dailyBurnedCalories;
@@ -354,12 +319,10 @@ class ScannerController extends GetxController {
     } catch (e) {
       print("🔥 [API Error] $e");
 
-      // Clear records on error
       dailyRecords.clear();
       existingNutritionRecords = null;
       throw Exception("❌ Something went wrong: $e");
     } finally {
-      // Always set loading to false
       isLoading = false;
       update();
     }
@@ -401,14 +364,12 @@ class ScannerController extends GetxController {
       return;
     }
 
-    // Update status to processing
     updateRecord(NutritionRecord(
       recordTime: failedRecord.recordTime,
       nutritionInputQuery: failedRecord.nutritionInputQuery,
       processingStatus: ProcessingStatus.PROCESSING,
     ));
 
-    // Retry the analysis
     final imageFile = File(failedRecord.nutritionInputQuery!.imageFilePath!);
     final scanMode =
         failedRecord.nutritionInputQuery!.scanMode ?? ScanMode.food;
@@ -421,7 +382,6 @@ class ScannerController extends GetxController {
         context,
       );
     } else {
-      // Image file doesn't exist anymore
       updateRecord(NutritionRecord(
         recordTime: failedRecord.recordTime,
         nutritionInputQuery: failedRecord.nutritionInputQuery,

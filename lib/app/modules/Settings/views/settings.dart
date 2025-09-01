@@ -18,7 +18,6 @@ class SettingsView extends StatefulWidget {
 }
 
 class _SettingsViewState extends State<SettingsView> {
-  // Toggle button state
   bool isCaloriesBurnedEnabled = false;
 
   late ScannerController _scannerController;
@@ -36,7 +35,6 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   void initState() {
     super.initState();
-    // Initialize scanner controller
     final authState = context.read<AuthenticationBloc>().state;
     if (authState.user == null) {
       setState(() {
@@ -84,7 +82,6 @@ class _SettingsViewState extends State<SettingsView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Personal stats section
                       _buildPersonalStat(
                           'Age', userModel.userInfo!.age.toString()),
                       const SizedBox(height: 16),
@@ -97,7 +94,6 @@ class _SettingsViewState extends State<SettingsView> {
 
                       const Divider(thickness: 1),
 
-                      // Customization section
                       SizedBox(height: 2.h),
                       const Text(
                         'Customization',
@@ -135,7 +131,6 @@ class _SettingsViewState extends State<SettingsView> {
 
                       const Divider(thickness: 1),
 
-                      // Preferences section
                       SizedBox(height: 2.h),
                       const Text(
                         'Preferences',
@@ -159,7 +154,6 @@ class _SettingsViewState extends State<SettingsView> {
                       const Divider(thickness: 1),
                       SizedBox(height: 2.h),
 
-                      // Legal section
                       const SizedBox(height: 16),
                       const Text(
                         'Legal',
@@ -177,7 +171,6 @@ class _SettingsViewState extends State<SettingsView> {
                       _buildNavigationItem('Delete Account?'),
                       const SizedBox(height: 16),
 
-                      // Version information
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 24.0),
                         child: Text(
@@ -189,7 +182,6 @@ class _SettingsViewState extends State<SettingsView> {
                         ),
                       ),
 
-                      // Space at the bottom for floating action button
                       const SizedBox(height: 60),
                     ],
                   ),
@@ -200,7 +192,6 @@ class _SettingsViewState extends State<SettingsView> {
         ));
   }
 
-  // Widget for personal stats like height, weight, age
   Widget _buildPersonalStat(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -264,7 +255,6 @@ class _SettingsViewState extends State<SettingsView> {
     );
   }
 
-  // Widget for toggle switch items
   Widget _buildToggleItem(
       String title, String subtitle, bool value, Function(bool) onChanged) {
     return Row(

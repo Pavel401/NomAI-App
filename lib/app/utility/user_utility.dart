@@ -1,12 +1,10 @@
 import 'package:NomAi/app/models/Auth/user.dart';
 
 class EnhancedUserNutrition {
-  // Safety minimums based on biological sex
   static const double MIN_CALORIES_FEMALE = 1200;
   static const double MIN_CALORIES_MALE = 1500;
   static const double MIN_CALORIES_OTHER = 1350;
 
-  // Improved LBM calculation with better coefficients
   static double calculateEnhancedLBM(
       Gender gender, double weightKg, double heightCm) {
     if (gender == Gender.male) {
@@ -24,14 +22,12 @@ class EnhancedUserNutrition {
     }
   }
 
-  // Katch-McArdle BMR formula
   static double calculatePreciseBMR(
       Gender gender, double weightKg, double heightCm, int age) {
     double lbm = calculateEnhancedLBM(gender, weightKg, heightCm);
     return 370 + (21.6 * lbm);
   }
 
-  // Calorie adjustment based on goal
   static double adjustCaloriesForGoal(
       double baseCalories,
       HealthMode goal,
@@ -84,7 +80,6 @@ class EnhancedUserNutrition {
     return baseCalories < minCalories ? minCalories : baseCalories;
   }
 
-  // Macro breakdown based on calories and goal
   static UserMacros calculateScientificMacros(
       double calories, HealthMode goal, double bodyWeight) {
     double proteinPerKg;
@@ -133,7 +128,6 @@ class EnhancedUserNutrition {
     );
   }
 
-  // New method that ignores activity level
   static UserMacros calculateNutritionWithoutActivityLevel(
       Gender gender,
       DateTime birthDate,
@@ -145,14 +139,12 @@ class EnhancedUserNutrition {
     int age = calculateAccurateAge(birthDate);
 
     double bmr = calculatePreciseBMR(gender, weight, height, age);
-    // No TDEE multiplier applied
     double adjustedCalories = adjustCaloriesForGoal(
         bmr, healthMode, weeklyPace, gender, weight, targetWeight);
 
     return calculateScientificMacros(adjustedCalories, healthMode, weight);
   }
 
-  // Existing method using activity level (for reference)
   static UserMacros calculateScientificNutrition(
       Gender gender,
       DateTime birthDate,
@@ -172,7 +164,6 @@ class EnhancedUserNutrition {
     return calculateScientificMacros(adjustedCalories, healthMode, weight);
   }
 
-  // Original activity-based TDEE calculation
   static double calculateAccurateTDEE(double bmr, ActivityLevel activityLevel) {
     switch (activityLevel) {
       case ActivityLevel.sedentary:

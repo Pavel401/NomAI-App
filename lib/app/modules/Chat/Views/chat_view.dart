@@ -1,5 +1,9 @@
+import 'package:NomAi/app/models/Auth/user.dart';
+import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_bloc.dart';
+import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
@@ -42,24 +46,33 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     super.dispose();
   }
 
+  UserModel? user;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFB),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: _buildResponsiveAppBarTitle(),
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(child: _buildMessagesList()),
-            _buildInputArea(),
-          ],
-        ),
-      ),
+    return BlocBuilder<UserBloc, UserState>(
+      builder: (context, state) {
+        if (state is UserLoaded) {
+          user = state.userModel;
+        }
+
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8FAFB),
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            title: _buildResponsiveAppBarTitle(),
+            systemOverlayStyle: SystemUiOverlayStyle.dark,
+          ),
+          body: SafeArea(
+            child: Column(
+              children: [
+                Expanded(child: _buildMessagesList()),
+                _buildInputArea(),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -68,10 +81,9 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
         final bool isNarrow = availableWidth < 350;
-        
+
         return Row(
           children: [
-            // App Icon
             Container(
               width: isNarrow ? 32 : 8.w,
               height: isNarrow ? 32 : 8.w,
@@ -86,8 +98,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
               ),
             ),
             SizedBox(width: isNarrow ? 8 : 3.w),
-            
-            // App Title
             Text(
               'NomAI',
               style: TextStyle(
@@ -96,11 +106,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                 fontWeight: FontWeight.w600,
               ),
             ),
-            
-            // Spacer to push user controls to the right
             const Spacer(),
-            
-            // User Controls - Stack them vertically on very narrow screens
             if (isNarrow) ...[
               _buildCompactUserControls(),
             ] else ...[
@@ -145,7 +151,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // User ID display/edit
         GestureDetector(
           onTap: () => _showUserIdDialog(context),
           child: GetBuilder<ChatController>(
@@ -191,8 +196,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
           ),
         ),
         SizedBox(width: 2.w),
-        
-        // Demo Mode Badge
         Obx(() => controller.isDemoMode.value
             ? Container(
                 padding: EdgeInsets.symmetric(
@@ -264,8 +267,14 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
         if (controller.errorMessage.value.isNotEmpty) {
           return Center(
-            child: _buildErrorWidget(controller.errorMessage.value),
-          );
+              child: Text(
+            controller.errorMessage.value,
+            style: const TextStyle(
+              color: Colors.red,
+              fontSize: 16,
+            ),
+            textAlign: TextAlign.center,
+          ));
         }
 
         if (controller.messages.isEmpty) {
@@ -312,58 +321,10 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 3.h),
-            Obx(() => controller.isDemoMode.value
-                ? _buildDemoModeSection()
-                : _buildRegularModeSection()),
+            _buildRegularModeSection(),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildDemoModeSection() {
-    return Column(
-      children: [
-        Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: 4.w,
-            vertical: 2.h,
-          ),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFEF3C7),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Text(
-            '🔧 Demo Mode - Try these examples:',
-            style: TextStyle(
-              fontSize: 14.sp.clamp(13.0, 16.0),
-              color: const Color(0xD92400E),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        SizedBox(height: 4.h),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            // Responsive spacing for demo chips
-            final width = constraints.maxWidth;
-            final spacing = width < 300 ? 8.0 : width < 500 ? 12.0 : 16.0;
-            
-            return Wrap(
-              alignment: WrapAlignment.center,
-              spacing: spacing,
-              runSpacing: spacing,
-              children: [
-                _buildDemoChip('🍕 Pizza nutrition'),
-                _buildDemoChip('🥗 Healthy salad'),
-                _buildDemoChip('🍔 Burger calories'),
-                _buildDemoChip('🍎 Apple benefits'),
-                _buildDemoChip('🍌 Banana nutrition'),
-              ],
-            );
-          },
-        ),
-      ],
     );
   }
 
@@ -382,161 +343,9 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildDemoChip(String text) {
-    return GestureDetector(
-      onTap: () {
-        controller.messageController.text =
-            text.replaceAll(RegExp(r'[🍕🥗🍔🍎🍌] '), '');
-        controller.sendMessage();
-      },
-      child: Container(
-        constraints: BoxConstraints(
-          minWidth: 120,
-          maxWidth: MediaQuery.of(context).size.width * 0.8,
-        ),
-        padding: EdgeInsets.symmetric(
-          horizontal: 4.w.clamp(12.0, 16.0),
-          vertical: 2.5.w.clamp(8.0, 12.0),
-        ),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: const Color(0xFFE5E7EB),
-            width: 1,
-          ),
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: const Color(0xFF374151),
-            fontSize: 14.sp.clamp(12.0, 16.0),
-            fontWeight: FontWeight.w500,
-          ),
-          textAlign: TextAlign.center,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildErrorWidget(String error) {
-    return Padding(
-      padding: EdgeInsets.all(6.w.clamp(16.0, 24.0)),
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(4.w.clamp(12.0, 20.0)),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFEE2E2),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: const Color(0xFFEF4444).withOpacity(0.2),
-          ),
-        ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isNarrow = constraints.maxWidth < 300;
-            
-            if (isNarrow) {
-              // Stack layout for narrow screens
-              return Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFEF4444),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.error_outline,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          'Error',
-                          style: TextStyle(
-                            color: const Color(0xFFEF4444),
-                            fontSize: 16.sp.clamp(14.0, 18.0),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: controller.loadChatHistory,
-                        icon: const Icon(
-                          Icons.refresh,
-                          color: Color(0xFFEF4444),
-                          size: 24,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    error,
-                    style: TextStyle(
-                      color: const Color(0xFFEF4444),
-                      fontSize: 14.sp.clamp(12.0, 16.0),
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              );
-            }
-            
-            // Row layout for wider screens
-            return Row(
-              children: [
-                Container(
-                  width: 6.w.clamp(24.0, 32.0),
-                  height: 6.w.clamp(24.0, 32.0),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFEF4444),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.error_outline,
-                    color: Colors.white,
-                    size: 4.w.clamp(16.0, 20.0),
-                  ),
-                ),
-                SizedBox(width: 3.w.clamp(8.0, 12.0)),
-                Expanded(
-                  child: Text(
-                    error,
-                    style: TextStyle(
-                      color: const Color(0xFFEF4444),
-                      fontSize: 16.sp.clamp(14.0, 18.0),
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: controller.loadChatHistory,
-                  icon: Icon(
-                    Icons.refresh,
-                    color: const Color(0xFFEF4444),
-                    size: 6.w.clamp(20.0, 28.0),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-
   Widget _buildMessageItem(AgentResponse message, int index) {
     final isUser = message.role == 'user';
 
-    // Handle empty message content
     if (message.content?.trim().isEmpty == true &&
         (message.toolReturns == null || message.toolReturns!.isEmpty)) {
       return const SizedBox.shrink();
@@ -549,11 +358,10 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
           final maxWidth = constraints.maxWidth;
           final avatarSize = maxWidth < 350 ? 28.0 : 7.w.clamp(28.0, 40.0);
           final spacing = maxWidth < 350 ? 8.0 : 3.w.clamp(8.0, 16.0);
-          
+
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar for AI messages
               if (!isUser) ...[
                 Container(
                   width: avatarSize,
@@ -570,8 +378,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                 ),
                 SizedBox(width: spacing),
               ],
-
-              // Message content - flexible width based on available space
               Expanded(
                 child: Container(
                   constraints: BoxConstraints(
@@ -582,7 +388,9 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                     vertical: maxWidth < 350 ? 10 : 3.w.clamp(10.0, 16.0),
                   ),
                   decoration: BoxDecoration(
-                    color: isUser ? const Color(0xFF10B981) : const Color(0xFFF9FAFB),
+                    color: isUser
+                        ? const Color(0xFF10B981)
+                        : const Color(0xFFF9FAFB),
                     borderRadius: BorderRadius.circular(18).copyWith(
                       bottomLeft: !isUser ? const Radius.circular(4) : null,
                       bottomRight: isUser ? const Radius.circular(4) : null,
@@ -602,8 +410,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                         ),
                 ),
               ),
-
-              // Avatar for user messages
               if (isUser) ...[
                 SizedBox(width: spacing),
                 Container(
@@ -628,7 +434,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
   }
 
   Widget _buildNutritionResponse(AgentResponse message) {
-    // Extract nutrition data from tool returns
     final nutritionData = _extractNutritionData(message.toolReturns!);
 
     return Column(
@@ -658,7 +463,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       selectable: true,
       onTapLink: (text, href, title) {
         if (href != null) {
-          // Handle link taps here - you could open in browser or show in app
           debugPrint('Link tapped: $href');
         }
       },
@@ -700,36 +504,30 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         fontStyle: FontStyle.italic,
       ),
       code: TextStyle(
-        backgroundColor: isUser 
-            ? Colors.white.withOpacity(0.2) 
-            : const Color(0xFFF3F4F6),
+        backgroundColor:
+            isUser ? Colors.white.withOpacity(0.2) : const Color(0xFFF3F4F6),
         color: isUser ? Colors.white : const Color(0xFFDC2626),
         fontSize: maxWidth < 350 ? 13 : 14.sp.clamp(13.0, 15.0),
         fontFamily: 'monospace',
       ),
       codeblockDecoration: BoxDecoration(
-        color: isUser 
-            ? Colors.white.withOpacity(0.1) 
-            : const Color(0xFFF9FAFB),
+        color: isUser ? Colors.white.withOpacity(0.1) : const Color(0xFFF9FAFB),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isUser 
-              ? Colors.white.withOpacity(0.3) 
-              : const Color(0xFFE5E7EB),
+          color:
+              isUser ? Colors.white.withOpacity(0.3) : const Color(0xFFE5E7EB),
         ),
       ),
       codeblockPadding: const EdgeInsets.all(12),
       blockquote: TextStyle(
-        color: isUser 
-            ? Colors.white.withOpacity(0.9) 
-            : const Color(0xFF6B7280),
+        color: isUser ? Colors.white.withOpacity(0.9) : const Color(0xFF6B7280),
         fontStyle: FontStyle.italic,
       ),
       blockquoteDecoration: BoxDecoration(
         border: Border(
           left: BorderSide(
-            color: isUser 
-                ? Colors.white.withOpacity(0.5) 
+            color: isUser
+                ? Colors.white.withOpacity(0.5)
                 : const Color(0xFFD1D5DB),
             width: 4,
           ),
@@ -746,9 +544,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         color: isUser ? Colors.white : const Color(0xFF111827),
       ),
       tableBorder: TableBorder.all(
-        color: isUser 
-            ? Colors.white.withOpacity(0.3) 
-            : const Color(0xFFE5E7EB),
+        color: isUser ? Colors.white.withOpacity(0.3) : const Color(0xFFE5E7EB),
       ),
     );
   }
@@ -761,7 +557,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: const Color(0xFF10b981), width: 2),
+        border: Border.all(color: const Color(0xFF10b981), width: 1),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -774,21 +570,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header bar
-          Container(
-            height: 4,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF10b981), Color(0xFF047857)],
-              ),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(14),
-                topRight: Radius.circular(14),
-              ),
-            ),
-          ),
           Padding(
-            padding: EdgeInsets.all(4.w.clamp(12.0, 20.0)),
+            padding: EdgeInsets.all(4.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -896,7 +679,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         Row(
           children: [
             Container(
-              padding: EdgeInsets.all(2.w.clamp(6.0, 10.0)),
+              padding: EdgeInsets.all(2),
               decoration: BoxDecoration(
                 color: const Color(0xFF6366F1).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
@@ -924,10 +707,9 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         LayoutBuilder(
           builder: (context, constraints) {
             final width = constraints.maxWidth;
-            // Responsive grid: 1 column for very narrow screens, 2 for others
             final crossAxisCount = width < 250 ? 1 : 2;
             final childAspectRatio = width < 250 ? 3.5 : 2.5;
-            
+
             return GridView.count(
               crossAxisCount: crossAxisCount,
               shrinkWrap: true,
@@ -942,7 +724,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                     '${total['protein']}g', 'Protein', Icons.fitness_center),
                 _buildNutritionValueCard(
                     '${total['carbs']}g', 'Carbs', Icons.grain),
-                _buildNutritionValueCard('${total['fat']}g', 'Fat', Icons.opacity),
+                _buildNutritionValueCard(
+                    '${total['fat']}g', 'Fat', Icons.opacity),
               ],
             );
           },
@@ -953,13 +736,16 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
   Widget _buildNutritionValueCard(String value, String label, IconData icon) {
     return Container(
-      padding: EdgeInsets.all(3.w.clamp(8.0, 16.0)),
+      padding: EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: const Color(0xFFF9FAFB),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             icon,
@@ -1460,7 +1246,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
           final maxWidth = constraints.maxWidth;
           final avatarSize = maxWidth < 350 ? 28.0 : 7.w.clamp(28.0, 40.0);
           final spacing = maxWidth < 350 ? 8.0 : 3.w.clamp(8.0, 16.0);
-          
+
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1489,7 +1275,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                     borderRadius: BorderRadius.circular(18).copyWith(
                       bottomLeft: const Radius.circular(4),
                     ),
-                    border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+                    border:
+                        Border.all(color: const Color(0xFFE5E7EB), width: 1),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -1498,7 +1285,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                         'NomAI is thinking',
                         style: TextStyle(
                           color: const Color(0xFF6B7280),
-                          fontSize: maxWidth < 350 ? 14 : 15.sp.clamp(14.0, 16.0),
+                          fontSize:
+                              maxWidth < 350 ? 14 : 15.sp.clamp(14.0, 16.0),
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -1508,8 +1296,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                         height: maxWidth < 350 ? 16 : 4.w,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children:
-                              List.generate(3, (index) => _buildTypingDot(index)),
+                          children: List.generate(
+                              3, (index) => _buildTypingDot(index)),
                         ),
                       ),
                     ],
@@ -1553,14 +1341,15 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
           builder: (context, constraints) {
             final maxWidth = constraints.maxWidth;
             final buttonSize = maxWidth < 350 ? 44.0 : 11.w.clamp(44.0, 52.0);
-            
+
             return Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
                   child: Container(
                     constraints: BoxConstraints(
-                      maxHeight: maxWidth < 350 ? 120 : 30.w.clamp(100.0, 150.0),
+                      maxHeight:
+                          maxWidth < 350 ? 120 : 30.w.clamp(100.0, 150.0),
                     ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF9FAFB),
@@ -1574,16 +1363,19 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                       controller: controller.messageController,
                       maxLines: null,
                       textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => controller.sendMessage(),
+                      onSubmitted: (_) => controller.sendMessage(user!),
                       decoration: InputDecoration(
                         hintText: 'Message NomAI...',
                         hintStyle: TextStyle(
                           color: const Color(0xFF9CA3AF),
-                          fontSize: maxWidth < 350 ? 14 : 16.sp.clamp(14.0, 18.0),
+                          fontSize:
+                              maxWidth < 350 ? 14 : 16.sp.clamp(14.0, 18.0),
                         ),
                         contentPadding: EdgeInsets.symmetric(
-                          horizontal: maxWidth < 350 ? 16 : 5.w.clamp(16.0, 24.0),
-                          vertical: maxWidth < 350 ? 12 : 3.5.w.clamp(12.0, 18.0),
+                          horizontal:
+                              maxWidth < 350 ? 16 : 5.w.clamp(16.0, 24.0),
+                          vertical:
+                              maxWidth < 350 ? 12 : 3.5.w.clamp(12.0, 18.0),
                         ),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
@@ -1601,7 +1393,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                 Obx(() => GestureDetector(
                       onTap: () {
                         if (!controller.isTyping.value) {
-                          controller.sendMessage();
+                          controller.sendMessage(user!);
                         }
                       },
                       child: Container(
@@ -1634,7 +1426,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     for (final toolReturn in toolReturns) {
       if (toolReturn.toolName == 'calculate_nutrition_by_food_description' &&
           toolReturn.content != null) {
-        // Convert Content object to Map
         final content = toolReturn.content!;
         final response = content.response;
         if (response != null) {

@@ -11,7 +11,6 @@ class AiRepository {
       NutritionInputQuery inputQuery) async {
     String remoteConfigUrl = RemoteConfigService.getImageProcessingBackendURL();
 
-    // String baseUrl = kDebugMode ? BaseUrl.baseUrl : remoteConfigUrl;
     String baseUrl = remoteConfigUrl + ApiPath.getNutritionData;
 
     print("🌐 [API Request] Base URL: $baseUrl");
@@ -23,14 +22,12 @@ class AiRepository {
         headers: {"Content-Type": "application/json"},
       );
 
-      // ✅ Log the full response body (even if it's an error)
       print("📡 [API Response] Status Code: ${response.statusCode}");
       print("📜 [API Response] Body: ${response.body}");
 
       if (response.statusCode == 200) {
         return NutritionOutput.fromJson(json.decode(response.body));
       } else {
-        // Return a failed NutritionOutput instead of throwing
         return NutritionOutput(
           status: response.statusCode,
           message:
@@ -40,7 +37,6 @@ class AiRepository {
       }
     } catch (e) {
       print("🔥 [API Error] $e");
-      // Return a failed NutritionOutput instead of throwing
       return NutritionOutput(
         status: 500,
         message: "Network error: ${e.toString()}",

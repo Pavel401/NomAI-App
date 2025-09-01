@@ -118,7 +118,6 @@ class FoodScannerOverlayShape extends ShapeBorder {
         rect,
         backgroundPaint,
       )
-      // Draw top right corner
       ..drawRRect(
         RRect.fromLTRBAndCorners(
           cutOutRect.right - mBorderLength,
@@ -129,7 +128,6 @@ class FoodScannerOverlayShape extends ShapeBorder {
         ),
         borderPaint,
       )
-      // Draw top left corner
       ..drawRRect(
         RRect.fromLTRBAndCorners(
           cutOutRect.left,
@@ -140,7 +138,6 @@ class FoodScannerOverlayShape extends ShapeBorder {
         ),
         borderPaint,
       )
-      // Draw bottom right corner
       ..drawRRect(
         RRect.fromLTRBAndCorners(
           cutOutRect.right - mBorderLength,
@@ -151,7 +148,6 @@ class FoodScannerOverlayShape extends ShapeBorder {
         ),
         borderPaint,
       )
-      // Draw bottom left corner
       ..drawRRect(
         RRect.fromLTRBAndCorners(
           cutOutRect.left,
@@ -293,7 +289,6 @@ class BarcodeScannerOverlayShape extends ShapeBorder {
         rect,
         backgroundPaint,
       )
-      // Draw top right corner
       ..drawRRect(
         RRect.fromLTRBAndCorners(
           cutOutRect.right - mBorderLength,
@@ -304,7 +299,6 @@ class BarcodeScannerOverlayShape extends ShapeBorder {
         ),
         borderPaint,
       )
-      // Draw top left corner
       ..drawRRect(
         RRect.fromLTRBAndCorners(
           cutOutRect.left,
@@ -315,7 +309,6 @@ class BarcodeScannerOverlayShape extends ShapeBorder {
         ),
         borderPaint,
       )
-      // Draw bottom right corner
       ..drawRRect(
         RRect.fromLTRBAndCorners(
           cutOutRect.right - mBorderLength,
@@ -326,7 +319,6 @@ class BarcodeScannerOverlayShape extends ShapeBorder {
         ),
         borderPaint,
       )
-      // Draw bottom left corner
       ..drawRRect(
         RRect.fromLTRBAndCorners(
           cutOutRect.left,
@@ -403,13 +395,11 @@ class _AnimatedScannerOverlayState extends State<AnimatedScannerOverlay>
   void initState() {
     super.initState();
 
-    // Initialize animation controller
     _animationController = AnimationController(
       vsync: this,
       duration: widget.animationDuration,
     );
 
-    // Create color animation (from original color to a brighter variant and back)
     _colorAnimation = ColorTween(
       begin: widget.borderColor,
       end: widget.borderColor.withOpacity(0.3),
@@ -420,7 +410,6 @@ class _AnimatedScannerOverlayState extends State<AnimatedScannerOverlay>
       ),
     );
 
-    // Create border width animation (slightly pulsing effect)
     _borderWidthAnimation = TweenSequence<double>([
       TweenSequenceItem(
         tween: Tween<double>(
@@ -439,7 +428,6 @@ class _AnimatedScannerOverlayState extends State<AnimatedScannerOverlay>
       ),
     );
 
-    // Start the animation and make it repeat
     _animationController.repeat(reverse: true);
   }
 

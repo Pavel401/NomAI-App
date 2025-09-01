@@ -18,43 +18,28 @@ import 'package:NomAi/app/repo/firebase_user_repo.dart';
 import 'package:NomAi/app/utility/registry_service.dart';
 import 'package:NomAi/app/utility/simple_bloc_observer.dart';
 
-// Pre-initialize repository for faster startup
 final FirebaseUserRepo _userRepository = FirebaseUserRepo();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+
   var remoteConfigService = await RemoteConfigService.getInstance();
   await remoteConfigService!.initialise();
   debugPrint("Initialized Remote Config");
   configLoading();
   setupRegistry();
 
-  // Configure Bloc observer in release mode only if needed
-  // This reduces startup overhead
   Bloc.observer = SimpleBlocObserver();
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        // Pre-create the AuthenticationBloc at app startup
         BlocProvider<AuthenticationBloc>(
             create: (context) =>
                 AuthenticationBloc(userRepository: _userRepository)),
-        // BlocProvider<UserBloc>(
-        //   create: (context) {
-        //     final userBloc = UserBloc(userRepository: _userRepository);
-        //     // Listen to auth state changes to load user data when authenticated
-        //     context.read<AuthenticationBloc>().stream.listen((authState) {
-        //       if (authState.status == AuthenticationStatus.authenticated &&
-        //           authState.user != null) {
-        //         userBloc.add(LoadUserModel(authState.user!.uid));
-        //       }
-        //     });
-        //     return userBloc;
-        //   },
-        // ),
       ],
       child: const MyApp(),
     ),
@@ -99,20 +84,14 @@ class MyAppView extends StatelessWidget {
 
           title: 'Firebase Auth',
 
-          defaultTransition: getx.Transition
-              .fadeIn, // You can change this to fade, zoom, downToUp, etc.
-          transitionDuration: const Duration(milliseconds: 300), // Optional
-          debugShowCheckedModeBanner: false, // Remove banner for performance
+          defaultTransition: getx.Transition.fadeIn,
+          transitionDuration: const Duration(milliseconds: 300),
+          debugShowCheckedModeBanner: false,
           theme: themeProvider.lightTheme,
-          // darkTheme: themeProvider.darkTheme,
-          // themeMode:
-          //     themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
           home: BlocBuilder<AuthenticationBloc, AuthenticationState>(
-            // Add buildWhen to only rebuild when authentication status changes
             buildWhen: (previous, current) => previous.status != current.status,
             builder: (context, state) {
               if (state.status == AuthenticationStatus.authenticated) {
-                // Lazily provide SignInBloc only when needed
                 return MultiBlocProvider(
                   providers: [
                     BlocProvider<SignInBloc>(
@@ -126,7 +105,6 @@ class MyAppView extends StatelessWidget {
                       )..add(LoadUserModel(state.user!.uid)),
                     ),
                   ],
-                  // Remove the BlocListener which is causing an extra rendering cycle
                   child: const HomeScreen(),
                 );
               }

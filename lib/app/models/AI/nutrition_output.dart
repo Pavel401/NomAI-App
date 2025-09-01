@@ -1,6 +1,3 @@
-// To parse this JSON data, do
-//
-//     final nutritionOutput = nutritionOutputFromJson(jsonString);
 
 import 'dart:convert';
 

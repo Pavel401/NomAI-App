@@ -51,13 +51,12 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
   TimeOfDay? secondMealOfDay = TimeOfDay(hour: 12, minute: 0);
   TimeOfDay? thirdMealOfDay = TimeOfDay(hour: 18, minute: 0);
   String selectedMacronutrientKnowledge = "";
-  String selectedAllergy = "";
+  List<String> selectedAllergies = [];
   String selectedEatOut = "";
   String selectedHomeCooked = "";
   ActivityLevel selectedActivityLevel = ActivityLevel.none;
   String selectedSleepPattern = "";
 
-  // Confetti controller
   late ConfettiController _controllerCenter;
 
   @override
@@ -83,12 +82,7 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
           _currentPage++;
         });
       } else {
-        // Trigger confetti animation on the last page
         int age = EnhancedUserNutrition.calculateAccurateAge(birthday);
-
-        // print("The height is $currentHeight");
-        // print("The weight is $currentWeight");
-        // print("The desired weight is $desiredWeight");
 
         double heightInCm = convertHeightToCm(currentHeight!);
 
@@ -96,16 +90,8 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
 
         double desiredWeightInKg = convertWeightToKg(desiredWeight!);
 
-        // print("The height in cm is $heightInCm");
-        // print("The weight in kg is $weightInKg");
-        // print("The desired weight in kg is $desiredWeightInKg");
-
         UserBasicInfo info = UserBasicInfo(
           selectedGender: _selectedGender,
-          // dailyCarbs: 0,
-          // dailyFat: 0,
-          // dailyProtein: 0,
-
           userMacros: UserMacros(calories: 0, protein: 0, carbs: 0, fat: 0),
           birthDate: birthday,
           age: age,
@@ -116,7 +102,6 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
           selectedWorkoutOption: selectedWorkoutOption,
           selectedGoal: selectedGoal,
           selectedPace: selectedPace,
-          // dailyCalories: 0,
           selectedObstacle: selectedObstacle,
           selectedDietKnowledge: selectedDietKnowledge,
           selectedMeals: selectedMeals,
@@ -127,7 +112,7 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
           secondMealOfDay: secondMealOfDay,
           thirdMealOfDay: thirdMealOfDay,
           selectedMacronutrientKnowledge: selectedMacronutrientKnowledge,
-          selectedAllergy: selectedAllergy,
+          selectedAllergies: selectedAllergies,
           selectedEatOut: selectedEatOut,
           selectedHomeCooked: selectedHomeCooked,
           selectedActivityLevel: selectedActivityLevel,
@@ -144,20 +129,6 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
             createdAt: DateTime.now(),
             updatedAt: DateTime.now());
 
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => BlocProvider<SignInBloc>(
-        //       create: (context) => SignInBloc(
-        //           userRepository:
-        //               context.read<AuthenticationBloc>().userRepository),
-        //       child: SignInScreen(
-        //         user: info,
-        //       ),
-        //     ),
-        //   ),
-        // );
-
         Navigator.push(context, MaterialPageRoute(
           builder: (context) {
             return DailyCalorieRequired(
@@ -165,8 +136,6 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
             );
           },
         ));
-
-        // _controllerCenter.play();
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -196,7 +165,7 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
       case 3:
         return currentWeight != null && currentWeight!.isNotEmpty;
       case 4:
-        return true; // Fun facts page, no validation needed
+        return true;
       case 5:
         return selectedHaveYouTriedApps.isNotEmpty;
       case 6:
@@ -237,7 +206,7 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
         return true; // Track what you eat page, no validation needed
 
       case 18:
-        return selectedAllergy.isNotEmpty;
+        return selectedAllergies.isNotEmpty;
 
       case 19:
         return selectedEatOut.isNotEmpty;
@@ -255,7 +224,6 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
 
   void _populateDemoData() {
     setState(() {
-      // Set default values for all variables
       _selectedGender = Gender.male;
       birthday = DateTime(2002, 5, 5);
       currentHeight = "180 cm";
@@ -276,13 +244,12 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
       secondMealOfDay = TimeOfDay(hour: 12, minute: 0);
       thirdMealOfDay = TimeOfDay(hour: 18, minute: 0);
       selectedMacronutrientKnowledge = "Yes - I know the macronutrient values";
-      selectedAllergy = "None";
+      selectedAllergies = ["None"];
       selectedEatOut = "Rarely";
       selectedHomeCooked = "Yes";
       selectedActivityLevel = ActivityLevel.moderatelyActive;
       selectedSleepPattern = "6-8 hours";
 
-      // Move to the last page
       _currentPage = _totalPages - 1;
       _pageController.jumpToPage(_currentPage);
 
@@ -591,21 +558,6 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
                   ),
                 ),
               ),
-
-              // ...paces.map(
-              //   (pace) => Padding(
-              //     padding: const EdgeInsets.symmetric(vertical: 8.0),
-              //     child: PrimaryTile(
-              //       title: pace,
-              //       isSelected: selectedPace == pace,
-              //       onTap: () {
-              //         setState(() {
-              //           selectedPace = pace;
-              //         });
-              //       },
-              //     ),
-              //   ),
-              // ),
             ],
           );
         },
@@ -779,10 +731,6 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
                     checkmarkColor:
                         MealAIColors.whiteText, // Color of the checkmark
                     onSelected: (selected) {
-                      // setState(() {
-                      //   selectedDiet = diet;
-                      // });
-
                       if (selected) {
                         setState(() {
                           selectedDiet = diet;
@@ -896,31 +844,66 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
       ),
       OnboardingModel(
         title: "Do you have any food allergies?",
-        description: "Let us know about any food allergies.",
+        description: "Select all that apply to you.",
         widgetBuilder: (context) {
           List<String> allergies = [
             "None",
             "Gluten",
             "Lactose",
             "Nuts",
+            "Eggs",
+            "Shellfish",
+            "Soy",
+            "Fish",
             "Other"
           ];
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ...allergies.map(
-                (allergy) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: PrimaryTile(
-                    title: allergy,
-                    isSelected: selectedAllergy == allergy,
-                    onTap: () {
+              Wrap(
+                spacing: 8.0, // Space between chips
+                runSpacing: 8.0, // Space between lines
+                alignment: WrapAlignment.center,
+                children: allergies.map((allergy) {
+                  return FilterChip(
+                    label: Text(
+                      allergy,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: selectedAllergies.contains(allergy)
+                                ? MealAIColors.whiteText
+                                : MealAIColors.blackText,
+                          ),
+                    ),
+                    selected: selectedAllergies.contains(allergy),
+                    selectedColor: MealAIColors.selectedTile,
+                    checkmarkColor: MealAIColors.whiteText,
+                    onSelected: (selected) {
                       setState(() {
-                        selectedAllergy = allergy;
+                        if (allergy == "None") {
+                          if (selectedAllergies.contains("None")) {
+                            selectedAllergies.remove("None");
+                          } else {
+                            selectedAllergies.clear();
+                            selectedAllergies.add("None");
+                          }
+                        } else {
+                          if (selectedAllergies.contains("None")) {
+                            selectedAllergies.remove("None");
+                          }
+                          if (selectedAllergies.contains(allergy)) {
+                            selectedAllergies.remove(allergy);
+                          } else {
+                            selectedAllergies.add(allergy);
+                          }
+                          if (selectedAllergies.isEmpty) {
+                            selectedAllergies.add("None");
+                          }
+                        }
                       });
                     },
-                  ),
-                ),
+                  );
+                }).toList(),
               ),
             ],
           );
@@ -1044,14 +1027,12 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
           );
         },
       ),
-      //
     ];
   }
 
   @override
   Widget build(BuildContext context) {
     List<OnboardingModel> onboardingModels = getOnboardingModels();
-    // print("TOTAL PAGES: ${onboardingModels.length}");
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -1060,7 +1041,6 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
             children: [
               Row(
                 children: [
-                  // Back Button (Now it will work)
                   GestureDetector(
                     onTap: () {
                       if (_currentPage == 0) {
@@ -1089,7 +1069,6 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
                     ),
                   ),
                   SizedBox(width: 2.w),
-
                   Expanded(
                     child: LinearProgressBar(
                       maxSteps: _totalPages,
@@ -1103,7 +1082,6 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
                 ],
               ),
               const SizedBox(height: 24),
-              // Onboarding Text
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1123,7 +1101,6 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
                 ],
               ),
               const SizedBox(height: 40),
-              // PageView
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
@@ -1142,13 +1119,12 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
                 ),
               ),
               const SizedBox(height: 20),
-              // Next Button
               PrimaryButton(
                 tile:
                     _currentPage == _totalPages - 1 ? "Go to Sign Up" : "Next",
                 onPressed: () {
-                  _populateDemoData();
-                  // _onNext();
+                  // _populateDemoData();
+                  _onNext();
                 },
               ),
             ],
@@ -1160,7 +1136,6 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
 }
 
 Path drawStar(Size size) {
-  // Method to create a star path
   double degToRad(double deg) => deg * (3.1415926535897932 / 180.0);
 
   const numberOfPoints = 5;

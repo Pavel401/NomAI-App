@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_bounceable/flutter_bounceable.dart';
@@ -44,10 +42,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // Initialize scanner controller
     _scannerController = Get.put(ScannerController());
 
-    // Defer the initialization to ensure the context is available
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeData();
     });
@@ -60,7 +56,6 @@ class _HomePageState extends State<HomePage> {
         _errorMessage = null;
       });
 
-      // Get user ID from authentication bloc
       final authState = context.read<AuthenticationBloc>().state;
       if (authState.user == null) {
         setState(() {
@@ -72,12 +67,21 @@ class _HomePageState extends State<HomePage> {
 
       _userId = authState.user!.uid;
 
-      // Listen to user bloc state changes
-      final userBloc = context.read<UserBloc>();
+      UserBloc? userBloc;
+      try {
+        userBloc = context.read<UserBloc>();
+      } catch (e) {
+        setState(() {
+          _errorMessage =
+              'UserBloc not found in context. Please restart the app.';
+          _isLoading = false;
+        });
+        return;
+      }
+
       final userState = userBloc.state;
 
       if (userState is UserLoaded) {
-        // User already loaded
         setState(() {
           userModel = userState.userModel;
           _isLoading = false;
@@ -85,10 +89,8 @@ class _HomePageState extends State<HomePage> {
         _updateNutritionValues(userState.userModel);
         _fetchRecords();
       } else {
-        // Load user data
         userBloc.add(LoadUserModel(_userId));
 
-        // Wait for user data to be loaded
         await for (final state in userBloc.stream) {
           if (state is UserLoaded) {
             setState(() {
@@ -121,14 +123,13 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Update nutrition values when user data changes
   void _updateNutritionValues(UserModel? userModel) {
     if (userModel != null && userModel.userInfo != null) {
       _scannerController.updateNutritionValues(
-        maxCalories: userModel.userInfo!.userMacros.calories ?? 0,
-        maxFat: userModel.userInfo!.userMacros.fat ?? 0,
-        maxProtein: userModel.userInfo!.userMacros.protein ?? 0,
-        maxCarb: userModel.userInfo!.userMacros.carbs ?? 0,
+        maxCalories: userModel.userInfo!.userMacros.calories,
+        maxFat: userModel.userInfo!.userMacros.fat,
+        maxProtein: userModel.userInfo!.userMacros.protein,
+        maxCarb: userModel.userInfo!.userMacros.carbs,
       );
     }
   }
@@ -175,7 +176,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildContent() {
-    // Show loading state
     if (_isLoading) {
       return Center(
         child: CircularProgressIndicator(
@@ -184,7 +184,6 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    // Show error state
     if (_errorMessage != null) {
       return Center(
         child: Column(
@@ -211,7 +210,6 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    // Show main content when data is loaded
     if (userModel == null) {
       return Center(
         child: Text(
@@ -224,7 +222,6 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    // Main content
     return ListView(
       physics: BouncingScrollPhysics(),
       children: [
@@ -270,13 +267,6 @@ class _HomePageState extends State<HomePage> {
               backgroundColor: const Color(0xFF817C88),
               child:
                   Icon(Icons.settings_outlined, color: MealAIColors.whiteText),
-              // child: IconButton(
-              //   icon: const Icon(Icons.settings_outlined),
-              //   color: MealAIColors.whiteText,
-              //   onPressed: () {
-
-              //   },
-              // ),
             ),
           ),
         ),

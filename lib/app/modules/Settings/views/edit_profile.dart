@@ -21,13 +21,11 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
 
-  // Controllers for text fields
   late TextEditingController _heightController;
   late TextEditingController _currentWeightController;
   late TextEditingController _desiredWeightController;
   late TextEditingController _ageController;
 
-  // Form values
   late Gender _selectedGender;
   late DateTime _birthDate;
   late WeeklyPace _selectedPace;
@@ -45,7 +43,7 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
   late TimeOfDay? _secondMealOfDay;
   late TimeOfDay? _thirdMealOfDay;
   late String _selectedMacronutrientKnowledge;
-  late String _selectedAllergy;
+  late List<String> _selectedAllergies;
   late String _selectedEatOut;
   late String _selectedHomeCooked;
   late String _selectedSleepPattern;
@@ -91,7 +89,7 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
     _secondMealOfDay = info.secondMealOfDay;
     _thirdMealOfDay = info.thirdMealOfDay;
     _selectedMacronutrientKnowledge = info.selectedMacronutrientKnowledge;
-    _selectedAllergy = info.selectedAllergy;
+    _selectedAllergies = info.selectedAllergies;
     _selectedEatOut = info.selectedEatOut;
     _selectedHomeCooked = info.selectedHomeCooked;
     _selectedSleepPattern = info.selectedSleepPattern;
@@ -359,7 +357,8 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
         secondMealOfDay: _secondMealOfDay,
         thirdMealOfDay: _thirdMealOfDay,
         selectedMacronutrientKnowledge: _selectedMacronutrientKnowledge,
-        selectedAllergy: _selectedAllergy,
+        // selectedAllergy: _selectedAllergy,
+        selectedAllergies: _selectedAllergies,
         selectedEatOut: _selectedEatOut,
         selectedHomeCooked: _selectedHomeCooked,
         selectedSleepPattern: _selectedSleepPattern,

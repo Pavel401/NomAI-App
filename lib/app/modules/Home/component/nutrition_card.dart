@@ -21,7 +21,6 @@ class NutritionCard extends StatelessWidget {
     required this.onTap,
   }) : super(key: key);
 
-  // Calculate total nutritional values from the entire nutritionData list
   Map<String, int> get _totalNutrition {
     int totalCalories = 0;
     int totalProtein = 0;
@@ -60,13 +59,6 @@ class NutritionCard extends StatelessWidget {
         margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          // boxShadow: [
-          //   BoxShadow(
-          //     color: Colors.black.withOpacity(0.08),
-          //     blurRadius: 10,
-          //     offset: Offset(0, 4),
-          //   ),
-          // ],
         ),
         child: Material(
           color: Colors.white,
@@ -125,14 +117,12 @@ class NutritionCard extends StatelessWidget {
               ),
             ),
           ),
-          // _buildChevron(context),
         ],
       ),
     );
   }
 
   Widget _buildCompletedCard(BuildContext context, Map<String, int> totals) {
-    // Fetching food name from the first item in the list
     final foodName = nutritionRecord.nutritionOutput?.response!.foodName != null
         ? nutritionRecord.nutritionOutput?.response!.foodName
         : "Unknown Food";
@@ -206,13 +196,11 @@ class NutritionCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // Nutrition badges row
                   _buildNutritionBadgesRow(context, totals),
                 ],
               ),
             ),
           ),
-          // _buildChevron(context),
         ],
       ),
     );
@@ -230,7 +218,6 @@ class NutritionCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Image or placeholder
             if (nutritionRecord.nutritionInputQuery?.imageFilePath != null)
               Image.file(
                 File(nutritionRecord.nutritionInputQuery!.imageFilePath!),
@@ -249,7 +236,6 @@ class NutritionCard extends StatelessWidget {
             else
               _buildImagePlaceholder(),
 
-            // Optional: Add a subtle gradient overlay for better text contrast
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(

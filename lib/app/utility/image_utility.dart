@@ -13,10 +13,8 @@ enum ImageScale {
 
 class ImageUtility {
   static Future<String> convertImageToBase64(String path) async {
-    // Read the image file as bytes
     final bytes = await File(path).readAsBytes();
 
-    // Convert the bytes to a Base64 string
     final base64String = base64Encode(bytes);
 
     return base64String;
@@ -35,7 +33,6 @@ class ImageUtility {
 
   static Future<String> _getNewFileName(
       String originalPath, ImageScale scale) async {
-    // Get the temporary directory for this app
     final tempDir = await getTemporaryDirectory();
     final fileName = path.basenameWithoutExtension(originalPath);
     final extension = path.extension(originalPath);
@@ -50,7 +47,6 @@ class ImageUtility {
     String filePath, {
     required ImageScale scale,
   }) async {
-    // Read the image from the file
     final bytes = await File(filePath).readAsBytes();
     final image = img.decodeImage(bytes);
 
@@ -58,10 +54,8 @@ class ImageUtility {
       throw Exception("Failed to decode image");
     }
 
-    // Get max size based on scale
     int maxSize = _getMaxSize(scale);
 
-    // Calculate the new dimensions while maintaining aspect ratio
     int width = image.width;
     int height = image.height;
 
@@ -77,7 +71,6 @@ class ImageUtility {
       }
     }
 
-    // Resize the image
     final resizedImage = img.copyResize(
       image,
       width: width,
@@ -85,17 +78,13 @@ class ImageUtility {
       maintainAspect: true,
     );
 
-    // Encode the image back to file
     final resizedBytes = img.encodeJpg(resizedImage, quality: 85);
 
-    // Generate a new file path based on scale in temp directory
     final newPath = await _getNewFileName(filePath, scale);
     final newFile = File(newPath);
 
-    // Ensure the directory exists
     await newFile.parent.create(recursive: true);
 
-    // Write the file
     await newFile.writeAsBytes(resizedBytes);
 
     return newFile;

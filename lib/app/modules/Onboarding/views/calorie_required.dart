@@ -190,7 +190,6 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
             ),
             const SizedBox(height: 40),
 
-            // Daily calorie container
             _buildInfoCard(
               title: "Daily Calories",
               value: "${macros.calories}",
@@ -199,7 +198,6 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
 
             const SizedBox(height: 30),
 
-            // Macronutrient breakdown
             Text(
               "Macronutrients",
               style: TextStyle(
@@ -242,7 +240,6 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
 
             const SizedBox(height: 30),
 
-            // Additional recommendations
             Text(
               "Recommendations",
               style: TextStyle(
@@ -274,15 +271,10 @@ class _DailyCalorieRequiredState extends State<DailyCalorieRequired>
 
             const Spacer(),
 
-            // Next button
             Center(
               child: ElevatedButton(
                 onPressed: () async {
-                  //     FirebaseUserRepo userRepository = FirebaseUserRepo();
 
-                  //  await   userRepository.updateUserData(
-                  //         context.read<AuthenticationBloc>().state.user!.uid,
-                  //         widget.userBasicInfo);
 
                   UserBasicInfo updatedUserBasicInfo =
                       widget.userBasicInfo.copyWith(
