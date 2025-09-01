@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class MealAIColors {
-  // Dark Theme Colors
   static const Color darkPrimary = Color(0xFF000000); // #000000
   static const Color lightPrimaryVariant = Color(0xFFB0BEC5); // #B0BEC5
   static const Color darkPrimaryVariant = Color(0xFF383838); // #383838
@@ -48,7 +47,6 @@ class MealAIColors {
   static const Color lightOnSurface = Color(0xFF000000); // #000000
   static const Color lightOnBackground = Color(0xFF000000); // #000000
 
-  ///Static colors
 
   static Color lightGreyTile = "#F9F8FD".toColor();
 

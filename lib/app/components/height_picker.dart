@@ -40,7 +40,6 @@ class _HeightPickerState extends State<HeightPicker> {
           _selectedUnit = HeightUnit.FEET;
         }
       } catch (e) {
-        // Fallback to default height
         _selectedCm = 170;
         _selectedFeet = 5;
         _selectedInches = 7;
@@ -276,14 +275,12 @@ class _HeightPickerState extends State<HeightPicker> {
 }
 
 double convertHeightToCm(String height) {
-  // Check if the height is in feet and inches (like 6' 0")
   if (height.contains("'")) {
     try {
       List<String> parts = height.split("' ");
       int feet = int.parse(parts[0].trim());
       int inches = int.parse(parts[1].replaceAll('"', '').trim());
 
-      // Convert feet and inches to cm (accurate to 2 decimal places)
       double heightInCm = ((feet * 12) + inches) * 2.54;
       return double.parse(heightInCm.toStringAsFixed(2));
     } catch (e) {
@@ -291,7 +288,6 @@ double convertHeightToCm(String height) {
     }
   }
 
-  // Check if the height is in cm (like 183 cm)
   if (height.contains("cm")) {
     try {
       double heightInCm = double.parse(height.replaceAll(" cm", "").trim());

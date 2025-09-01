@@ -22,7 +22,6 @@ class AuthenticationBloc
     on<AuthenticationUserChanged>((event, emit) {
       if (event.user != null) {
         emit(AuthenticationState.authenticated(event.user!));
-        // Navigate to HomeScreen
       } else {
         emit(const AuthenticationState.unauthenticated());
       }

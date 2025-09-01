@@ -47,11 +47,9 @@ class NutritionInputQuery {
         'imageUrl': imageUrl,
         'scanMode': scanMode!.name,
 
-        // 'imageData' is intentionally excluded
       };
 
   Map<String, dynamic> toJsonForMealAIBackend() => {
-        // 'imageData' is intentionally excluded
 
         "imageData": imageData,
         "food_description": food_description,

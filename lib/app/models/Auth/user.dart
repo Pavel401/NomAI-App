@@ -24,7 +24,6 @@ enum Goal { loseWeight, maintainWeight, gainMuscle }
 
 enum DietPreference { none, vegetarian, vegan, keto, paleo }
 
-// Extension methods for all enums
 extension GenderExtension on Gender {
   String toSimpleText() {
     switch (this) {
@@ -292,7 +291,6 @@ class UserModel extends Equatable {
     this.userInfo,
   });
 
-  /// **Convert User to Firestore Entity**
   Map<String, dynamic> toEntity() {
     return {
       "user_id": userId,
@@ -306,7 +304,6 @@ class UserModel extends Equatable {
     };
   }
 
-  /// **Create User from Firestore Entity**
   static UserModel fromEntity(Map<String, dynamic> entity) {
     return UserModel(
       userId: entity["user_id"] ?? '',
@@ -391,7 +388,7 @@ class UserBasicInfo {
   final TimeOfDay? secondMealOfDay;
   final TimeOfDay? thirdMealOfDay;
   final String selectedMacronutrientKnowledge;
-  final String selectedAllergy;
+  final List<String> selectedAllergies;
   final String selectedEatOut;
   final String selectedHomeCooked;
   final ActivityLevel selectedActivityLevel;
@@ -418,7 +415,7 @@ class UserBasicInfo {
     required this.secondMealOfDay,
     required this.thirdMealOfDay,
     required this.selectedMacronutrientKnowledge,
-    required this.selectedAllergy,
+    required this.selectedAllergies,
     required this.selectedEatOut,
     required this.selectedHomeCooked,
     required this.selectedActivityLevel,
@@ -448,7 +445,7 @@ class UserBasicInfo {
       'second_meal_time': _timeOfDayToString(secondMealOfDay),
       'third_meal_time': _timeOfDayToString(thirdMealOfDay),
       'macro_knowledge_level': selectedMacronutrientKnowledge,
-      'allergies': selectedAllergy,
+      'allergies': selectedAllergies,
       'eating_out_frequency': selectedEatOut,
       'home_cooking_frequency': selectedHomeCooked,
       'activity_level': selectedActivityLevel.toJson(),
@@ -498,7 +495,11 @@ class UserBasicInfo {
           _timeOfDayFromString(map['third_meal_time'] ?? map['thirdMealOfDay']),
       selectedMacronutrientKnowledge:
           map['macro_knowledge_level'] ?? map['selectedMacronutrientKnowledge'],
-      selectedAllergy: map['allergies'] ?? map['selectedAllergy'],
+      selectedAllergies: map['allergies'] != null
+          ? (map['allergies'] is List
+              ? List<String>.from(map['allergies'])
+              : [map['allergies'].toString()])
+          : (map['selectedAllergy'] != null ? [map['selectedAllergy']] : []),
       selectedEatOut: map['eating_out_frequency'] ?? map['selectedEatOut'],
       selectedHomeCooked:
           map['home_cooking_frequency'] ?? map['selectedHomeCooked'],
@@ -545,7 +546,7 @@ class UserBasicInfo {
     TimeOfDay? secondMealOfDay,
     TimeOfDay? thirdMealOfDay,
     String? selectedMacronutrientKnowledge,
-    String? selectedAllergy,
+    List<String>? selectedAllergies,
     String? selectedEatOut,
     String? selectedHomeCooked,
     ActivityLevel? selectedActivityLevel,
@@ -578,7 +579,7 @@ class UserBasicInfo {
       thirdMealOfDay: thirdMealOfDay ?? this.thirdMealOfDay,
       selectedMacronutrientKnowledge:
           selectedMacronutrientKnowledge ?? this.selectedMacronutrientKnowledge,
-      selectedAllergy: selectedAllergy ?? this.selectedAllergy,
+      selectedAllergies: selectedAllergies ?? this.selectedAllergies,
       selectedEatOut: selectedEatOut ?? this.selectedEatOut,
       selectedHomeCooked: selectedHomeCooked ?? this.selectedHomeCooked,
       selectedActivityLevel:

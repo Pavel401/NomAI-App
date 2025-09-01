@@ -1,33 +1,68 @@
 import 'dart:convert';
 import 'dart:async';
+import 'package:NomAi/app/models/Auth/user.dart';
 import 'package:http/http.dart' as http;
 import 'package:NomAi/app/models/Agent/agent_response.dart';
+import 'package:NomAi/app/models/Agent/chat_message_request.dart';
 
 class AgentService {
   static const String _baseUrl =
       'https://nomai-production.up.railway.app'; // Adjust to your API URL
 
   Future<List<AgentResponse>> getChatHistory(String userId) async {
+    print('Loading chat history for user: $userId');
+
     try {
+      final uri = Uri.parse('$_baseUrl/chat/messages?user_id=$userId');
+      print('Making GET request to: $uri');
+
+      final stopwatch = Stopwatch()..start();
+
       final response = await http.get(
-        Uri.parse('$_baseUrl/chat/messages?user_id=$userId'),
+        uri,
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
         },
       );
 
+      stopwatch.stop();
+      print('Request completed in ${stopwatch.elapsedMilliseconds}ms');
+      print('Response status: ${response.statusCode}');
+      print('Response body length: ${response.body.length} characters');
+
       if (response.statusCode == 200) {
         final text = response.body.trim();
-        if (text.isEmpty) return [];
+        if (text.isEmpty) {
+          print('Empty response body - returning empty list');
+          return [];
+        }
 
-        final messages = text
-            .split('\n')
-            .where((line) => line.trim().isNotEmpty)
-            .map((line) => AgentResponse.fromJson(json.decode(line)))
-            .toList();
+        print('Parsing response body into messages');
+        final lines =
+            text.split('\n').where((line) => line.trim().isNotEmpty).toList();
+        print('Found ${lines.length} message lines to parse');
 
-        // Sort messages by timestamp in ascending order (oldest first)
+        final messages = <AgentResponse>[];
+        int parseErrors = 0;
+
+        for (int i = 0; i < lines.length; i++) {
+          try {
+            final message = AgentResponse.fromJson(json.decode(lines[i]));
+            messages.add(message);
+          } catch (parseError) {
+            parseErrors++;
+            print('Failed to parse message line ${i + 1}: $parseError');
+            print('Problematic line: ${lines[i]}');
+          }
+        }
+
+        if (parseErrors > 0) {
+          print(
+              '$parseErrors message(s) failed to parse out of ${lines.length}');
+        }
+
+        print('Sorting ${messages.length} messages by timestamp');
         messages.sort((a, b) {
           if (a.timestamp == null && b.timestamp == null) return 0;
           if (a.timestamp == null) return -1;
@@ -35,49 +70,76 @@ class AgentService {
           return a.timestamp!.compareTo(b.timestamp!);
         });
 
+        print(
+            'Successfully loaded ${messages.length} messages for user: $userId');
         return messages;
       } else {
+        print('HTTP error: ${response.statusCode} - ${response.reasonPhrase}');
+        print('Response body: ${response.body}');
         throw Exception('Failed to load chat history: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error loading chat history: $e');
+      print('Error loading chat history for user $userId: $e');
       return []; // Return empty list instead of throwing
     }
   }
 
-  Stream<AgentResponse> sendMessage(String message, String userId) async* {
+  Stream<AgentResponse> sendMessage(
+      String message, String userId, UserModel user,
+      {String? foodImage}) async* {
+    print('Sending message from user: $userId');
     try {
-      final formData = <String, String>{
-        'prompt': message,
-        'user_id': userId,
-      };
+      final uri = Uri.parse('$_baseUrl/chat/messages');
 
-      final request =
-          http.MultipartRequest('POST', Uri.parse('$_baseUrl/chat/messages'));
-      formData.forEach((key, value) {
-        request.fields[key] = value;
-      });
-      request.headers['Accept'] = 'text/plain';
+      // Create structured request using ChatMessageRequest model
+      final chatRequest = ChatMessageRequest(
+        prompt: message,
+        userId: userId,
+        localTime: DateTime.now().toIso8601String(),
+        dietaryPreferences: user.userInfo?.selectedDiet != null
+            ? [user.userInfo!.selectedDiet]
+            : null,
+        allergies: user.userInfo?.selectedAllergies,
+        selectedGoals: user.userInfo?.selectedGoal != null
+            ? [user.userInfo!.selectedGoal.toSimpleText()]
+            : null,
+        foodImage: foodImage,
+      );
 
-      final streamedResponse = await request.send();
+      final jsonPayload = chatRequest.toJson();
 
-      if (streamedResponse.statusCode == 200) {
-        await for (final chunk
-            in streamedResponse.stream.transform(utf8.decoder)) {
-          final lines =
-              chunk.split('\n').where((line) => line.trim().isNotEmpty);
+      jsonPayload.removeWhere((key, value) => value == null);
 
-          for (final line in lines) {
-            try {
-              final messageData = json.decode(line);
-              yield AgentResponse.fromJson(messageData);
-            } catch (parseError) {
-              print('Error parsing message: $parseError');
-            }
+      final response = await http.post(
+        uri,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(jsonPayload),
+      );
+
+      print('Response status: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final lines =
+            response.body.split('\n').where((line) => line.trim().isNotEmpty);
+        for (final line in lines) {
+          try {
+            final messageData = json.decode(line);
+            yield AgentResponse.fromJson(messageData);
+          } catch (e) {
+            print('Failed to parse message: $e');
           }
         }
       } else {
-        throw Exception('HTTP error: ${streamedResponse.statusCode}');
+        print('HTTP error: ${response.statusCode} - ${response.reasonPhrase}');
+        yield AgentResponse(
+          role: 'model',
+          timestamp: DateTime.now(),
+          content:
+              'Sorry, I encountered an error while processing your request. Please try again.',
+          isFinal: true,
+        );
       }
     } catch (e) {
       print('Error sending message: $e');
@@ -89,5 +151,35 @@ class AgentService {
         isFinal: true,
       );
     }
+  }
+
+  static Future<bool> healthCheck() async {
+    print('Performing health check...');
+    try {
+      final stopwatch = Stopwatch()..start();
+      final response = await http.get(
+        Uri.parse('$_baseUrl/health'),
+        headers: {'Accept': 'application/json'},
+      ).timeout(const Duration(seconds: 10));
+
+      stopwatch.stop();
+
+      if (response.statusCode == 200) {
+        print('Health check passed in ${stopwatch.elapsedMilliseconds}ms');
+        return true;
+      } else {
+        print('Health check failed: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      print('Health check error: $e');
+      return false;
+    }
+  }
+
+  static void logServiceInfo() {
+    print('AgentService Configuration:');
+    print('Base URL: $_baseUrl');
+    print('Current Time: ${DateTime.now().toIso8601String()}');
   }
 }

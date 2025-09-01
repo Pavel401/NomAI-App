@@ -1,6 +1,3 @@
-// To parse this JSON data, do
-//
-//     final agentResponse = agentResponseFromJson(jsonString);
 
 import 'dart:convert';
 

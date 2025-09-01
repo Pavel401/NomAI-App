@@ -292,7 +292,6 @@ class _AdjustGoalsViewState extends State<AdjustGoalsView> {
       updatedUserModel,
     );
 
-    // TODO: Save to database or state management
     Navigator.pop(context, updatedMacros);
   }
 

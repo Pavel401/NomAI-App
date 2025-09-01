@@ -1,7 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:NomAi/app/models/Agent/agent_response.dart';
+import 'package:NomAi/app/models/Auth/user.dart';
+import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_bloc.dart';
+import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_state.dart';
 import 'package:NomAi/app/repo/agent_service.dart';
 
 class ChatController extends GetxController {
@@ -19,6 +23,11 @@ class ChatController extends GetxController {
 
   AgentResponse? currentStreamingMessage;
   StreamSubscription? _messageSubscription;
+
+  List<String> dietaryPreferences = [];
+  List<String> allergies = [];
+
+  List<String> selectedGoals = [];
 
   @override
   void onInit() {
@@ -60,7 +69,6 @@ class ChatController extends GetxController {
     } catch (e) {
       errorMessage.value = 'Failed to load chat history: $e';
       isDemoMode.value = true;
-      // Add demo messages for offline/development mode
       _addDemoMessages();
     } finally {
       isLoading.value = false;
@@ -68,7 +76,6 @@ class ChatController extends GetxController {
   }
 
   void _addDemoMessages() {
-    // Add a system message to explain demo mode
     final demoNotification = AgentResponse(
       role: 'model',
       timestamp: DateTime.now().subtract(const Duration(minutes: 6)),
@@ -197,15 +204,17 @@ class ChatController extends GetxController {
     _scrollToBottom();
   }
 
-  Future<void> sendMessage() async {
+  Future<void> sendMessage(UserModel user) async {
+    print('Sending message: ${messageController.text}');
     final message = messageController.text.trim();
     if (message.isEmpty || isTyping.value) return;
+
+    print('User ID: ${userIdController.text.trim()}');
 
     final userId = userIdController.text.trim().isNotEmpty
         ? userIdController.text.trim()
         : 'Guest';
 
-    // Add user message immediately
     final userMessage = AgentResponse(
       role: 'user',
       timestamp: DateTime.now(),
@@ -213,6 +222,7 @@ class ChatController extends GetxController {
       isFinal: true,
     );
 
+    print('Adding user message: ${userMessage.content}');
     messages.add(userMessage);
     messageController.clear();
 
@@ -223,10 +233,12 @@ class ChatController extends GetxController {
 
     try {
       _messageSubscription?.cancel();
-      _messageSubscription = _agentService.sendMessage(message, userId).listen(
+      print('Starting message subscription for user ID: $userId');
+      _messageSubscription =
+          _agentService.sendMessage(message, userId, user).listen(
         (response) {
           _handleStreamedResponse(response);
-          // print('Received response: ${response.content}');
+          print('Received response: ${response.content}');
         },
         onError: (error) {
           _handleError(error);
@@ -245,7 +257,6 @@ class ChatController extends GetxController {
     if (response.role == 'user') return;
 
     if (response.isFinal == true) {
-      // Replace streaming message with final message
       if (currentStreamingMessage != null) {
         final index = messages.indexOf(currentStreamingMessage!);
         if (index != -1) {
@@ -257,12 +268,10 @@ class ChatController extends GetxController {
       currentStreamingMessage = null;
       isTyping.value = false;
     } else {
-      // Handle streaming message
       if (currentStreamingMessage == null) {
         currentStreamingMessage = response;
         messages.add(response);
       } else {
-        // Update existing streaming message
         final index = messages.indexOf(currentStreamingMessage!);
         if (index != -1) {
           currentStreamingMessage = response;
@@ -280,18 +289,15 @@ class ChatController extends GetxController {
 
     print('Error sending message: $error');
 
-    // Check if it's a connection error (API not available)
     if (error.toString().contains('Connection refused') ||
         error.toString().contains('SocketException') ||
         error.toString().contains('ClientException')) {
       isDemoMode.value = true;
-      // Generate a demo response based on the user's message
       final lastUserMessage =
           messages.isNotEmpty ? messages.last.content?.toLowerCase() ?? '' : '';
       final demoResponse = _generateDemoResponse(lastUserMessage);
       messages.add(demoResponse);
     } else {
-      // For other errors, show a generic error message
       final errorResponse = AgentResponse(
         role: 'model',
         timestamp: DateTime.now(),
@@ -306,7 +312,6 @@ class ChatController extends GetxController {
   }
 
   AgentResponse _generateDemoResponse(String userMessage) {
-    // Check what kind of food the user is asking about
     if (userMessage.contains('pizza') || userMessage.contains('🍕')) {
       return _generatePizzaNutritionResponse();
     } else if (userMessage.contains('burger') || userMessage.contains('🍔')) {
@@ -742,13 +747,5 @@ class ChatController extends GetxController {
   void clearMessages() {
     messages.clear();
     errorMessage.value = '';
-  }
-
-  void retryLastMessage() {
-    if (messages.isNotEmpty && messages.last.role == 'user') {
-      final lastUserMessage = messages.last.content ?? '';
-      messageController.text = lastUserMessage;
-      sendMessage();
-    }
   }
 }

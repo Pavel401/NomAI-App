@@ -22,9 +22,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
-  /// ----------------------
-  /// Handle Page Changes
-  /// ----------------------
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -42,9 +39,6 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: MealAIColors.lightBackground,
       extendBody: true,
 
-      /// ----------------------
-      /// Floating Action Button (QR Code Scan)
-      /// ----------------------
       floatingActionButton: Container(
         height: 60,
         width: 60,
@@ -64,8 +58,6 @@ class _HomeScreenState extends State<HomeScreen> {
           elevation: 0,
           shape: const CircleBorder(),
           onPressed: () {
-            /// Move to QR Scan Page (index 1)
-            // _onItemTapped(1);
 
             Get.to(() => MealAiCamera());
           },
@@ -81,9 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
-      /// ----------------------
-      /// Bottom Navigation Bar
-      /// ----------------------
       bottomNavigationBar: BottomAppBar(
         height: 65,
         color: MealAIColors.switchWhiteColor,
@@ -94,9 +83,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            /// ----------------------
-            /// Home Item - Left side
-            /// ----------------------
             Expanded(
               child: GestureDetector(
                 onTap: () {
@@ -131,14 +117,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            /// ----------------------
-            /// Spacer for FAB
-            /// ----------------------
             Expanded(child: Container()),
 
-            /// ----------------------
-            /// Analytics Item - Right side
-            /// ----------------------
             Expanded(
               child: GestureDetector(
                 onTap: () => _onItemTapped(2),
@@ -174,9 +154,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
-      /// ----------------------
-      /// PageView Controller (for smooth navigation)
-      /// ----------------------
       body: IndexedStack(
         index: _selectedIndex,
         children: [

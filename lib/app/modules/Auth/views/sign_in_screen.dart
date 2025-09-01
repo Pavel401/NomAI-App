@@ -33,7 +33,6 @@ class _SignInScreenState extends State<SignInScreen> {
           });
           final FirebaseUserRepo _userRepository = FirebaseUserRepo();
 
-          // Replace pushReplacement with pushAndRemoveUntil to clear the entire stack
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (context) => BlocProvider(
@@ -56,7 +55,6 @@ class _SignInScreenState extends State<SignInScreen> {
             _errorMsg = 'Sign in failed';
           });
 
-          // Show error snackbar
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(_errorMsg ?? 'Sign in failed'),
@@ -79,7 +77,6 @@ class _SignInScreenState extends State<SignInScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Logo or App Name
                 Container(
                   height: 120,
                   width: 120,
@@ -96,7 +93,6 @@ class _SignInScreenState extends State<SignInScreen> {
 
                 SizedBox(height: 40),
 
-                // Welcome Text
                 Text(
                   'Welcome to ${AppInfo.appName}',
                   style: TextStyle(
@@ -119,7 +115,6 @@ class _SignInScreenState extends State<SignInScreen> {
 
                 SizedBox(height: 70),
 
-                // Google Sign In Button
                 !signInRequired
                     ? Container(
                         width: double.infinity,

@@ -44,18 +44,6 @@ class _OnboardingHomeState extends State<OnboardingHome> {
       body: SafeArea(
         child: Column(
           children: [
-            // Align(
-            //   alignment: Alignment.topRight,
-            //   child: TextButton(
-            //     onPressed: () => context.go('/home'),
-            //     child: Text(
-            //       'Skip',
-            //       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            //             color: MealAI.darkPrimary,
-            //           ),
-            //     ),
-            //   ),
-            // ),
             Expanded(
               child: PageView(
                 controller: _pageController,

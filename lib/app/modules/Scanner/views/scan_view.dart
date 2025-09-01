@@ -116,8 +116,6 @@ class _MealAiCameraState extends State<MealAiCamera> {
           sensor: Sensor.position(SensorPosition.back),
           zoom: 0.0,
         ),
-        // previewFit: CameraPreviewFit.cover,
-        // onMediaTap: (mediaCapture) {},
 
         bottomActionsBuilder: (state) {
           return AwesomeBottomActions(
@@ -136,10 +134,6 @@ class _MealAiCameraState extends State<MealAiCamera> {
                 child: CustomPaint(
                   painter: state.when(
                     onPhotoMode: (_) => CameraButtonPainter(),
-                    // onPreparingCamera: (_) => CameraButtonPainter(),
-                    // onVideoMode: (_) => VideoButtonPainter(),
-                    // onVideoRecordingMode: (_) =>
-                    //     VideoButtonPainter(isRecording: true),
                   ),
                 ),
               ),
@@ -212,46 +206,6 @@ class _MealAiCameraState extends State<MealAiCamera> {
             ),
           );
         },
-        // bottomActionsBuilder: (state) => Padding(
-        //   padding: const EdgeInsets.only(bottom: 20),
-        //   child: Row(
-        //     mainAxisAlignment: MainAxisAlignment.center,
-        //     children: [
-        //       Row(
-        //         children: [
-        //           // GestureDetector(
-        //           //   onTap: _toggleFlashMode,
-        //           //   child: CircleAvatar(
-        //           //     backgroundColor: Colors.white,
-        //           //     radius: 25,
-        //           //     child: Icon(
-        //           //       _currentFlashMode == FlashMode.auto
-        //           //           ? Icons.flash_auto
-        //           //           : _currentFlashMode == FlashMode.on
-        //           //               ? Icons.flash_on
-        //           //               : Icons.flash_off,
-        //           //       color: Colors.black,
-        //           //     ),
-        //           //   ),
-        //           // ),
-        //           // const SizedBox(width: 40),
-        //           GestureDetector(
-        //             onTap: () => _captureImage(state),
-        //             child: Container(
-        //               width: 70,
-        //               height: 70,
-        //               decoration: BoxDecoration(
-        //                 color: Colors.white,
-        //                 shape: BoxShape.circle,
-        //                 border: Border.all(color: Colors.black, width: 4),
-        //               ),
-        //             ),
-        //           ),
-        //         ],
-        //       ),
-        //     ],
-        //   ),
-        // ),
         middleContentBuilder: (state) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -291,36 +245,6 @@ class _MealAiCameraState extends State<MealAiCamera> {
                         ),
                       ),
                     ),
-                    // GestureDetector(
-                    //   onTap: () {
-                    //     setState(() {
-                    //       _selectedscanMode = ScanMode.barcode;
-                    //     });
-                    //   },
-                    //   child: Container(
-                    //     padding: const EdgeInsets.all(10),
-                    //     decoration: BoxDecoration(
-                    //       color: _selectedscanMode == ScanMode.barcode
-                    //           ? MealAIColors.switchWhiteColor
-                    //           : MealAIColors.greyLight.withOpacity(0.5),
-                    //       borderRadius: BorderRadius.circular(10),
-                    //     ),
-                    //     child: Column(
-                    //       children: [
-                    //         Icon(Symbols.barcode,
-                    //             color: MealAIColors.switchBlackColor, size: 28),
-                    //         Text(
-                    //           'Barcode',
-                    //           style: Theme.of(context)
-                    //               .textTheme
-                    //               .bodySmall!
-                    //               .copyWith(
-                    //                   color: MealAIColors.switchBlackColor),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
 
                     GestureDetector(
                       onTap: () {
@@ -357,7 +281,6 @@ class _MealAiCameraState extends State<MealAiCamera> {
                         setState(() {
                           _selectedscanMode = ScanMode.gallery;
                         });
-                        // Directly open gallery when gallery mode is selected
                         _openGallery();
                       },
                       child: Container(

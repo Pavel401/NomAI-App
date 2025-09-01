@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:sizer/sizer.dart';
 
-// Assuming these are defined elsewhere in your codebase
 import 'package:NomAi/app/constants/colors.dart';
 import 'package:NomAi/app/models/AI/nutrition_output.dart';
 import 'package:NomAi/app/models/AI/nutrition_record.dart';
@@ -24,35 +23,27 @@ class NutritionView extends StatelessWidget {
       backgroundColor: Colors.grey.shade50,
       body: CustomScrollView(
         slivers: [
-          // Enhanced App Bar with Image
           _buildSliverAppBar(context),
 
-          // Content
           SliverToBoxAdapter(
             child: Column(
               children: [
-                // Food Header Card
                 _buildFoodHeaderCard(context, response),
 
-                // Nutrition Summary Card
                 _buildNutritionSummaryCard(context, response),
 
-                // Health Insights Card
                 if (response.overallHealthComments != null &&
                     response.overallHealthComments!.isNotEmpty)
                   _buildHealthInsightsCard(context, response),
 
-                // Ingredients Card
                 if (response.ingredients != null &&
                     response.ingredients!.isNotEmpty)
                   _buildIngredientsCard(context, response),
 
-                // Primary Concerns Card
                 if (response.primaryConcerns != null &&
                     response.primaryConcerns!.isNotEmpty)
                   _buildPrimaryConcernsCard(context, response),
 
-                // Alternatives Card
                 if (response.suggestAlternatives != null &&
                     response.suggestAlternatives!.isNotEmpty)
                   _buildAlternativesCard(context, response),
@@ -283,7 +274,6 @@ class NutritionView extends StatelessWidget {
             ],
           ),
           SizedBox(height: 3.h),
-          // Calories Card
           Container(
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
             decoration: BoxDecoration(
@@ -315,7 +305,6 @@ class NutritionView extends StatelessWidget {
             ),
           ),
           SizedBox(height: 2.h),
-          // Macronutrients
           Row(
             children: [
               Expanded(
@@ -864,7 +853,6 @@ class EnhancedHealthScoreWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Time Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -890,7 +878,6 @@ class EnhancedHealthScoreWidget extends StatelessWidget {
             ),
           ),
 
-          // Health Score
           Column(
             children: [
               CircularPercentIndicator(
