@@ -3,7 +3,6 @@ import 'package:NomAi/app/modules/Scanner/views/scan_view.dart';
 class NutritionInputQuery {
   final String? imageUrl;
   final ScanMode? scanMode;
-  String? imageData;
   String? food_description;
 
   String? imageFilePath;
@@ -16,7 +15,6 @@ class NutritionInputQuery {
   NutritionInputQuery({
     this.imageUrl,
     required this.scanMode,
-    this.imageData,
     this.food_description,
     this.imageFilePath,
     this.dietaryPreferences,
@@ -30,7 +28,6 @@ class NutritionInputQuery {
       scanMode: json['scanMode'] == null
           ? ScanMode.food
           : ScanMode.values.byName(json['scanMode']),
-      imageData: json['imageData'] ?? '',
       food_description: json['food_description'] ?? '',
       dietaryPreferences: json['dietaryPreferences'] != null
           ? List<String>.from(json['dietaryPreferences'])
@@ -46,12 +43,10 @@ class NutritionInputQuery {
   Map<String, dynamic> toJson() => {
         'imageUrl': imageUrl,
         'scanMode': scanMode!.name,
-
       };
 
   Map<String, dynamic> toJsonForMealAIBackend() => {
-
-        "imageData": imageData,
+        "imageUrl": imageUrl,
         "food_description": food_description,
         "dietaryPreferences": dietaryPreferences,
         "allergies": allergies,
