@@ -59,6 +59,24 @@ class ScannerController extends GetxController {
       ScanMode scanMode, BuildContext context) async {
     DateTime time = DateTime.now(); // Declare time at method level
 
+    // Get user preferences early before any async operations to avoid context issues
+    UserModel? userModel;
+    try {
+      if (context.mounted) {
+        final userBloc = context.read<UserBloc>();
+        final userState = userBloc.state;
+
+        if (userState is UserLoaded) {
+          userModel = userState.userModel;
+        }
+        print("User model obtained: $userModel");
+      } else {
+        print("Context not mounted, proceeding without user preferences");
+      }
+    } catch (e) {
+      print("Error getting user preferences: $e, proceeding without them");
+    }
+
     try {
       print(
           "--- processNutritionQueryRequest --- UserId: $userId --- ScanMode: $scanMode");
@@ -72,7 +90,6 @@ class ScannerController extends GetxController {
         nutritionInputQuery: NutritionInputQuery(
           imageUrl: "",
           scanMode: scanMode,
-          imageData: "",
           imageFilePath: image.path,
         ),
         processingStatus: ProcessingStatus.PROCESSING,
@@ -93,23 +110,39 @@ class ScannerController extends GetxController {
         resizedFile = image;
       }
 
-      print("--- Let's get the Base64 ----");
+      print("--- Now let's upload the image first to get URL ----");
 
-      final base64String =
-          await ImageUtility.convertImageToBase64(resizedFile.path);
+      print("Resized file path: ${resizedFile.path}");
+      print("Resized file exists: ${resizedFile.existsSync()}");
 
-      print("The Image Base64 is ${base64String.length}");
+      File fileToUpload = resizedFile.existsSync() ? resizedFile : image;
+      print("Using file for upload: ${fileToUpload.path}");
 
-      print("--- Lets get the nutrition data from Meal AI backend");
+      final imageUrl = await storageService.uploadImage(fileToUpload);
+      print("We got the image URL: $imageUrl");
+
+      if (imageUrl == null) {
+        print("Failed to upload image.");
+        throw Exception("Failed to upload image");
+      }
+
+      print("--- Now lets get the nutrition data from Meal AI backend");
 
       NutritionOutput rawNutritionData = await aiRepository.getNutritionData(
         NutritionInputQuery(
+          imageUrl: imageUrl,
           scanMode: scanMode,
-          imageData: base64String,
-          allergies: [],
-          dietaryPreferences: [],
-          selectedGoals: [],
           food_description: "",
+          dietaryPreferences: userModel?.userInfo?.selectedDiet != null
+              ? [userModel!.userInfo!.selectedDiet]
+              : [],
+          allergies: userModel?.userInfo?.selectedAllergies != null &&
+                  userModel!.userInfo!.selectedAllergies.isNotEmpty
+              ? userModel.userInfo!.selectedAllergies
+              : [],
+          selectedGoals: userModel?.userInfo?.selectedGoal != null
+              ? [userModel!.userInfo!.selectedGoal.name]
+              : [],
         ),
       );
 
@@ -121,9 +154,8 @@ class ScannerController extends GetxController {
         updateRecord(NutritionRecord(
           recordTime: time,
           nutritionInputQuery: NutritionInputQuery(
-            imageUrl: "",
+            imageUrl: imageUrl,
             scanMode: scanMode,
-            imageData: base64String,
             imageFilePath: image.path,
           ),
           processingStatus: ProcessingStatus.FAILED,
@@ -140,36 +172,9 @@ class ScannerController extends GetxController {
         return;
       }
 
-      print("--- Now let's get the Image url");
-
-      print("Resized file path: ${resizedFile.path}");
-      print("Resized file exists: ${resizedFile.existsSync()}");
-
-      File fileToUpload = resizedFile.existsSync() ? resizedFile : image;
-      print("Using file for upload: ${fileToUpload.path}");
-
-      final imageUrl = await storageService.uploadImage(fileToUpload);
-
-      print("We got the image URL: $imageUrl");
-
-      if (imageUrl == null) {
-        print("Failed to upload image.");
-        throw Exception("Failed to upload image");
-      }
-
-      final userBloc = context.read<UserBloc>();
-      final userState = userBloc.state;
-
-      UserModel? userModel;
-      if (userState is UserLoaded) {
-        userModel = userState.userModel;
-      }
-      print(userModel);
-
       final inputData = NutritionInputQuery(
         imageUrl: imageUrl,
         scanMode: scanMode,
-        imageData: base64String,
         imageFilePath: image.path,
         food_description: "",
         dietaryPreferences: userModel?.userInfo?.selectedDiet != null
@@ -268,7 +273,6 @@ class ScannerController extends GetxController {
           nutritionInputQuery: NutritionInputQuery(
             imageUrl: "",
             scanMode: scanMode,
-            imageData: "",
             imageFilePath: image.path,
           ),
           processingStatus: ProcessingStatus.FAILED,
@@ -358,6 +362,18 @@ class ScannerController extends GetxController {
       Get.snackbar(
         "Cannot Retry",
         "Original image file not found",
+        backgroundColor: Colors.orange.withOpacity(0.7),
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    // Check if context is still valid before proceeding
+    if (!context.mounted) {
+      print("Context not mounted, cannot retry nutrition analysis");
+      Get.snackbar(
+        "Cannot Retry",
+        "Screen context is no longer available",
         backgroundColor: Colors.orange.withOpacity(0.7),
         colorText: Colors.white,
       );

@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 NutritionOutput nutritionOutputFromJson(String str) =>
@@ -11,6 +10,7 @@ class NutritionOutput {
   NutritionResponse? response;
   int? status;
   String? message;
+  Metadata? metadata;
   int? inputTokenCount;
   int? outputTokenCount;
   int? totalTokenCount;
@@ -21,6 +21,7 @@ class NutritionOutput {
     this.response,
     this.status,
     this.message,
+    this.metadata,
     this.inputTokenCount,
     this.outputTokenCount,
     this.totalTokenCount,
@@ -35,6 +36,9 @@ class NutritionOutput {
             : NutritionResponse.fromJson(json["response"]),
         status: json["status"],
         message: json["message"],
+        metadata: json["metadata"] == null
+            ? null
+            : Metadata.fromJson(json["metadata"]),
         inputTokenCount: json["input_token_count"],
         outputTokenCount: json["output_token_count"],
         totalTokenCount: json["total_token_count"],
@@ -46,6 +50,7 @@ class NutritionOutput {
         "response": response?.toJson(),
         "status": status,
         "message": message,
+        "metadata": metadata?.toJson(),
         "input_token_count": inputTokenCount,
         "output_token_count": outputTokenCount,
         "total_token_count": totalTokenCount,
@@ -224,5 +229,37 @@ class Recommendation {
         "food": food,
         "quantity": quantity,
         "reasoning": reasoning,
+      };
+}
+
+class Metadata {
+  int? inputTokenCount;
+  int? outputTokenCount;
+  int? totalTokenCount;
+  double? estimatedCost;
+  double? executionTimeSeconds;
+
+  Metadata({
+    this.inputTokenCount,
+    this.outputTokenCount,
+    this.totalTokenCount,
+    this.estimatedCost,
+    this.executionTimeSeconds,
+  });
+
+  factory Metadata.fromJson(Map<String, dynamic> json) => Metadata(
+        inputTokenCount: json["input_token_count"],
+        outputTokenCount: json["output_token_count"],
+        totalTokenCount: json["total_token_count"],
+        estimatedCost: json["estimated_cost"]?.toDouble(),
+        executionTimeSeconds: json["execution_time_seconds"]?.toDouble(),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "input_token_count": inputTokenCount,
+        "output_token_count": outputTokenCount,
+        "total_token_count": totalTokenCount,
+        "estimated_cost": estimatedCost,
+        "execution_time_seconds": executionTimeSeconds,
       };
 }
