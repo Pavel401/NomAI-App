@@ -332,12 +332,14 @@ class _HomePageState extends State<HomePage> {
           padding: EdgeInsets.only(left: 4.w, right: 4.w),
           child: Row(
             children: [
-              Text("Recently Eaten",
-                  style: TextStyle(
-                    color: MealAIColors.blackText,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  )),
+              Text(
+                "Recently Eaten",
+                style: TextStyle(
+                  color: MealAIColors.blackText,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
         ),
@@ -377,9 +379,6 @@ class _HomePageState extends State<HomePage> {
                 NutritionRecord record = controller.dailyRecords[index];
                 return NutritionCard(
                   nutritionRecord: record,
-                  onTap: () {
-                    Get.to(() => NutritionView(nutritionRecord: record));
-                  },
                 );
               },
             );
