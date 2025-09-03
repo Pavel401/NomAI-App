@@ -7,9 +7,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
-import 'package:NomAi/app/models/Agent/agent_response.dart';
+import 'package:NomAi/app/models/Agent/agent_response.dart' as AgentResponse;
 import 'package:NomAi/app/modules/Chat/controller/chat_controller.dart';
 import 'package:NomAi/app/constants/colors.dart';
+import 'package:NomAi/app/services/nutrition_service.dart';
 
 class NomAiAgentView extends StatefulWidget {
   const NomAiAgentView({super.key});
@@ -352,7 +353,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildMessageItem(AgentResponse message, int index) {
+  Widget _buildMessageItem(AgentResponse.AgentResponse message, int index) {
     final isUser = message.role == 'user';
 
     if (message.content?.trim().isEmpty == true &&
@@ -436,8 +437,9 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildNutritionResponse(AgentResponse message) {
-    final nutritionData = _extractNutritionData(message.toolReturns!);
+  Widget _buildNutritionResponse(AgentResponse.AgentResponse message) {
+    final nutritionResponse =
+        NutritionService.extractNutritionResponse(message.toolReturns!);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,7 +453,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
           ),
           SizedBox(height: 4.w),
         ],
-        if (nutritionData != null) _buildNutritionCard(nutritionData),
+        if (nutritionResponse != null) _buildNutritionCard(nutritionResponse),
       ],
     );
   }
@@ -562,10 +564,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildNutritionCard(Map<String, dynamic> nutritionData) {
-    final response = nutritionData['response'] as Map<String, dynamic>?;
-    if (response == null) return const SizedBox.shrink();
-
+  Widget _buildNutritionCard(AgentResponse.Response response) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -589,21 +588,24 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildNutritionHeader(response),
-                if (response['ingredients'] != null) ...[
+                if (response.ingredients != null &&
+                    response.ingredients!.isNotEmpty) ...[
                   SizedBox(height: 4.w.clamp(12.0, 20.0)),
-                  _buildNutritionOverview(response['ingredients'] as List),
+                  _buildNutritionOverview(response.ingredients!),
                   SizedBox(height: 4.w.clamp(12.0, 20.0)),
-                  _buildIngredientsBreakdown(response['ingredients'] as List),
+                  _buildIngredientsBreakdown(response.ingredients!),
                 ],
                 SizedBox(height: 4.w.clamp(12.0, 20.0)),
                 _buildHealthAssessment(response),
-                if (response['primaryConcerns'] != null) ...[
+                if (response.primaryConcerns != null &&
+                    response.primaryConcerns!.isNotEmpty) ...[
                   SizedBox(height: 4.w.clamp(12.0, 20.0)),
-                  _buildHealthConcerns(response['primaryConcerns'] as List),
+                  _buildHealthConcerns(response.primaryConcerns!),
                 ],
-                if (response['suggestAlternatives'] != null) ...[
+                if (response.suggestAlternatives != null &&
+                    response.suggestAlternatives!.isNotEmpty) ...[
                   SizedBox(height: 4.w.clamp(12.0, 20.0)),
-                  _buildAlternatives(response['suggestAlternatives'] as List),
+                  _buildAlternatives(response.suggestAlternatives!),
                 ],
               ],
             ),
@@ -613,7 +615,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildNutritionHeader(Map<String, dynamic> response) {
+  Widget _buildNutritionHeader(AgentResponse.Response response) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -634,7 +636,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             SizedBox(width: 3.w.clamp(8.0, 12.0)),
             Expanded(
               child: Text(
-                response['foodName']?.toString() ?? 'Food Analysis',
+                response.foodName ?? 'Food Analysis',
                 style: TextStyle(
                   fontSize: 18.sp.clamp(16.0, 20.0),
                   fontWeight: FontWeight.w600,
@@ -652,8 +654,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
           runSpacing: 2.w.clamp(6.0, 8.0),
           children: [
             _buildInfoChip(
-                'Portion', '${response['portionSize']} ${response['portion']}'),
-            _buildInfoChip('Confidence', '${response['confidenceScore']}/10'),
+                'Portion', '${response.portionSize} ${response.portion}'),
+            _buildInfoChip('Confidence', '${response.confidenceScore}/10'),
           ],
         ),
       ],
@@ -683,8 +685,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildNutritionOverview(List ingredients) {
-    final total = _calculateTotalNutrition(ingredients);
+  Widget _buildNutritionOverview(List<AgentResponse.Ingredient> ingredients) {
+    final total = NutritionService.calculateTotalNutrition(ingredients);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -731,14 +733,13 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
               crossAxisSpacing: 3.w.clamp(8.0, 12.0),
               mainAxisSpacing: 3.w.clamp(8.0, 12.0),
               children: [
-                _buildNutritionValueCard('${total['calories']}', 'Calories',
+                _buildNutritionValueCard('${total.calories}', 'Calories',
                     Icons.local_fire_department),
                 _buildNutritionValueCard(
-                    '${total['protein']}g', 'Protein', Icons.fitness_center),
+                    '${total.protein}g', 'Protein', Icons.fitness_center),
                 _buildNutritionValueCard(
-                    '${total['carbs']}g', 'Carbs', Icons.grain),
-                _buildNutritionValueCard(
-                    '${total['fat']}g', 'Fat', Icons.opacity),
+                    '${total.carbs}g', 'Carbs', Icons.grain),
+                _buildNutritionValueCard('${total.fat}g', 'Fat', Icons.opacity),
               ],
             );
           },
@@ -801,7 +802,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildIngredientsBreakdown(List ingredients) {
+  Widget _buildIngredientsBreakdown(
+      List<AgentResponse.Ingredient> ingredients) {
     if (ingredients.length <= 1) return const SizedBox.shrink();
 
     return Column(
@@ -841,8 +843,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildIngredientItem(dynamic ingredient) {
-    final healthScore = ingredient['healthScore'] as int? ?? 0;
+  Widget _buildIngredientItem(AgentResponse.Ingredient ingredient) {
+    final healthScore = ingredient.healthScore ?? 0;
     final color = _getHealthScoreColor(healthScore);
 
     return Container(
@@ -861,7 +863,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             children: [
               Expanded(
                 child: Text(
-                  ingredient['name']?.toString() ?? 'Unknown',
+                  ingredient.name ?? 'Unknown',
                   style: TextStyle(
                     fontSize: 14.sp.clamp(13.0, 16.0),
                     fontWeight: FontWeight.w600,
@@ -902,17 +904,17 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
           ),
           SizedBox(height: 2.w.clamp(6.0, 8.0)),
           Text(
-            'Cal: ${ingredient['calories']} | Protein: ${ingredient['protein']}g | Carbs: ${ingredient['carbs']}g | Fat: ${ingredient['fat']}g',
+            'Cal: ${ingredient.calories} | Protein: ${ingredient.protein}g | Carbs: ${ingredient.carbs}g | Fat: ${ingredient.fat}g',
             style: TextStyle(
               fontSize: 12.sp.clamp(11.0, 14.0),
               color: MealAIColors.grey,
               fontStyle: FontStyle.italic,
             ),
           ),
-          if (ingredient['healthComments']?.toString().isNotEmpty == true) ...[
+          if (ingredient.healthComments?.isNotEmpty == true) ...[
             SizedBox(height: 2.w.clamp(6.0, 8.0)),
             Text(
-              ingredient['healthComments'].toString(),
+              ingredient.healthComments!,
               style: TextStyle(
                 fontSize: 12.sp.clamp(11.0, 14.0),
                 color: MealAIColors.blackText,
@@ -925,8 +927,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildHealthAssessment(Map<String, dynamic> response) {
-    final overallScore = response['overallHealthScore'] as int? ?? 0;
+  Widget _buildHealthAssessment(AgentResponse.Response response) {
+    final overallScore = response.overallHealthScore ?? 0;
     final color = _getHealthScoreColor(overallScore);
 
     return Column(
@@ -1004,11 +1006,10 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                   ),
                 ],
               ),
-              if (response['overallHealthComments']?.toString().isNotEmpty ==
-                  true) ...[
+              if (response.overallHealthComments?.isNotEmpty == true) ...[
                 SizedBox(height: 3.w.clamp(8.0, 12.0)),
                 Text(
-                  response['overallHealthComments'].toString(),
+                  response.overallHealthComments!,
                   style: TextStyle(
                     fontSize: 14.sp.clamp(12.0, 16.0),
                     color: MealAIColors.blackText,
@@ -1023,7 +1024,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildHealthConcerns(List concerns) {
+  Widget _buildHealthConcerns(List<AgentResponse.PrimaryConcern> concerns) {
     if (concerns.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -1062,7 +1063,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildConcernItem(dynamic concern) {
+  Widget _buildConcernItem(AgentResponse.PrimaryConcern concern) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -1076,17 +1077,17 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            concern['issue']?.toString() ?? 'Health Concern',
+            concern.issue ?? 'Health Concern',
             style: TextStyle(
               fontSize: 14.sp.clamp(13.0, 16.0),
               fontWeight: FontWeight.w600,
               color: MealAIColors.blackText,
             ),
           ),
-          if (concern['explanation']?.toString().isNotEmpty == true) ...[
+          if (concern.explanation?.isNotEmpty == true) ...[
             const SizedBox(height: 8),
             Text(
-              concern['explanation'].toString(),
+              concern.explanation!,
               style: TextStyle(
                 fontSize: 13.sp.clamp(12.0, 15.0),
                 color: MealAIColors.grey,
@@ -1094,8 +1095,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
               ),
             ),
           ],
-          if (concern['recommendations'] is List &&
-              (concern['recommendations'] as List).isNotEmpty) ...[
+          if (concern.recommendations != null &&
+              concern.recommendations!.isNotEmpty) ...[
             const SizedBox(height: 12),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1119,18 +1120,17 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                         ),
                       ),
                       const SizedBox(height: 6),
-                      ...(concern['recommendations'] as List)
-                          .map<Widget>((rec) => Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Text(
-                                  '• ${rec['food']} (${rec['quantity']}): ${rec['reasoning']}',
-                                  style: TextStyle(
-                                    fontSize: 12.sp.clamp(11.0, 14.0),
-                                    color: const Color(0xFF78350F),
-                                    height: 1.3,
-                                  ),
-                                ),
-                              )),
+                      ...concern.recommendations!.map<Widget>((rec) => Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              '• ${rec.food} (${rec.quantity}): ${rec.reasoning}',
+                              style: TextStyle(
+                                fontSize: 12.sp.clamp(11.0, 14.0),
+                                color: const Color(0xFF78350F),
+                                height: 1.3,
+                              ),
+                            ),
+                          )),
                     ],
                   ),
                 ),
@@ -1142,7 +1142,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildAlternatives(List alternatives) {
+  Widget _buildAlternatives(List<AgentResponse.Ingredient> alternatives) {
     if (alternatives.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -1181,8 +1181,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildAlternativeItem(dynamic alternative) {
-    final healthScore = alternative['healthScore'] as int? ?? 0;
+  Widget _buildAlternativeItem(AgentResponse.Ingredient alternative) {
+    final healthScore = alternative.healthScore ?? 0;
     final color = _getHealthScoreColor(healthScore);
 
     return Container(
@@ -1201,7 +1201,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             children: [
               Expanded(
                 child: Text(
-                  alternative['name']?.toString() ?? 'Alternative',
+                  alternative.name ?? 'Alternative',
                   style: TextStyle(
                     fontSize: 14.sp.clamp(13.0, 16.0),
                     fontWeight: FontWeight.w600,
@@ -1228,17 +1228,17 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
           ),
           const SizedBox(height: 8),
           Text(
-            'Cal: ${alternative['calories']} | Protein: ${alternative['protein']}g | Carbs: ${alternative['carbs']}g | Fat: ${alternative['fat']}g',
+            'Cal: ${alternative.calories} | Protein: ${alternative.protein}g | Carbs: ${alternative.carbs}g | Fat: ${alternative.fat}g',
             style: TextStyle(
               fontSize: 12.sp.clamp(11.0, 14.0),
               color: MealAIColors.grey,
               fontStyle: FontStyle.italic,
             ),
           ),
-          if (alternative['healthComments']?.toString().isNotEmpty == true) ...[
+          if (alternative.healthComments?.isNotEmpty == true) ...[
             const SizedBox(height: 8),
             Text(
-              alternative['healthComments'].toString(),
+              alternative.healthComments!,
               style: TextStyle(
                 fontSize: 12.sp.clamp(11.0, 14.0),
                 color: MealAIColors.blackText,
@@ -1414,87 +1414,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         ),
       ),
     );
-  }
-
-  Map<String, dynamic>? _extractNutritionData(List<ToolReturn> toolReturns) {
-    for (final toolReturn in toolReturns) {
-      if (toolReturn.toolName == 'calculate_nutrition_by_food_description' &&
-          toolReturn.content != null) {
-        final content = toolReturn.content!;
-        final response = content.response;
-        if (response != null) {
-          return {
-            'response': {
-              'foodName': response.foodName,
-              'portion': response.portion,
-              'portionSize': response.portionSize,
-              'confidenceScore': response.confidenceScore,
-              'ingredients': response.ingredients
-                  ?.map((ing) => {
-                        'name': ing.name,
-                        'calories': ing.calories,
-                        'protein': ing.protein,
-                        'carbs': ing.carbs,
-                        'fiber': ing.fiber,
-                        'fat': ing.fat,
-                        'healthScore': ing.healthScore,
-                        'healthComments': ing.healthComments,
-                      })
-                  .toList(),
-              'primaryConcerns': response.primaryConcerns
-                  ?.map((concern) => {
-                        'issue': concern.issue,
-                        'explanation': concern.explanation,
-                        'recommendations': concern.recommendations
-                            ?.map((rec) => {
-                                  'food': rec.food,
-                                  'quantity': rec.quantity,
-                                  'reasoning': rec.reasoning,
-                                })
-                            .toList(),
-                      })
-                  .toList(),
-              'suggestAlternatives': response.suggestAlternatives
-                  ?.map((alt) => {
-                        'name': alt.name,
-                        'calories': alt.calories,
-                        'protein': alt.protein,
-                        'carbs': alt.carbs,
-                        'fiber': alt.fiber,
-                        'fat': alt.fat,
-                        'healthScore': alt.healthScore,
-                        'healthComments': alt.healthComments,
-                      })
-                  .toList(),
-              'overallHealthScore': response.overallHealthScore,
-              'overallHealthComments': response.overallHealthComments,
-            }
-          };
-        }
-      }
-    }
-    return null;
-  }
-
-  Map<String, int> _calculateTotalNutrition(List ingredients) {
-    int totalCalories = 0;
-    int totalProtein = 0;
-    int totalCarbs = 0;
-    int totalFat = 0;
-
-    for (final ingredient in ingredients) {
-      totalCalories += (ingredient['calories'] as int? ?? 0);
-      totalProtein += (ingredient['protein'] as int? ?? 0);
-      totalCarbs += (ingredient['carbs'] as int? ?? 0);
-      totalFat += (ingredient['fat'] as int? ?? 0);
-    }
-
-    return {
-      'calories': totalCalories,
-      'protein': totalProtein,
-      'carbs': totalCarbs,
-      'fat': totalFat,
-    };
   }
 
   Color _getHealthScoreColor(int score) {
