@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:NomAi/app/models/Agent/agent_response.dart';
 import 'package:NomAi/app/modules/Chat/controller/chat_controller.dart';
+import 'package:NomAi/app/constants/colors.dart';
 
 class NomAiAgentView extends StatefulWidget {
   const NomAiAgentView({super.key});
@@ -56,9 +57,9 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         }
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF8FAFB),
+          backgroundColor: MealAIColors.whiteText,
           appBar: AppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: MealAIColors.whiteText,
             elevation: 0,
             title: _buildResponsiveAppBarTitle(),
             systemOverlayStyle: SystemUiOverlayStyle.dark,
@@ -87,13 +88,13 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             Container(
               width: isNarrow ? 32 : 8.w,
               height: isNarrow ? 32 : 8.w,
-              decoration: const BoxDecoration(
-                color: Color(0xFF10B981),
+              decoration: BoxDecoration(
+                color: MealAIColors.blackText,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.restaurant_menu,
-                color: Colors.white,
+                color: MealAIColors.whiteText,
                 size: isNarrow ? 18 : 5.w,
               ),
             ),
@@ -101,7 +102,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             Text(
               'NomAI',
               style: TextStyle(
-                color: const Color(0xFF1F2937),
+                color: MealAIColors.blackText,
                 fontSize: isNarrow ? 18 : 18.sp,
                 fontWeight: FontWeight.w600,
               ),
@@ -120,7 +121,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
   Widget _buildCompactUserControls() {
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert, color: Color(0xFF6B7280)),
+      icon: Icon(Icons.more_vert, color: MealAIColors.grey),
       onSelected: (value) {
         if (value == 'user_id') {
           _showUserIdDialog(context);
@@ -161,10 +162,10 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                 vertical: 1.h,
               ),
               decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
+                color: MealAIColors.greyLight,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: const Color(0xFFE5E7EB),
+                  color: MealAIColors.grey.withOpacity(0.3),
                   width: 1,
                 ),
               ),
@@ -174,7 +175,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                   Icon(
                     Icons.person,
                     size: 16,
-                    color: const Color(0xFF6B7280),
+                    color: MealAIColors.blackText,
                   ),
                   SizedBox(width: 1.5.w),
                   Flexible(
@@ -183,7 +184,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                           ? 'Guest'
                           : controller.userIdController.text,
                       style: TextStyle(
-                        color: const Color(0xFF374151),
+                        color: MealAIColors.blackText,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
                       ),
@@ -203,17 +204,17 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                   vertical: 0.8.h,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF3C7),
+                  color: MealAIColors.greyLight,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: const Color(0xFFF59E0B),
+                    color: MealAIColors.grey,
                     width: 1,
                   ),
                 ),
                 child: Text(
                   'Demo',
                   style: TextStyle(
-                    color: const Color(0xD92400E),
+                    color: MealAIColors.blackText,
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
                   ),
@@ -255,12 +256,12 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
   Widget _buildMessagesList() {
     return Container(
-      color: Colors.white, // Clean white background like ChatGPT
+      color: MealAIColors.whiteText,
       child: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(
+          return Center(
             child: CircularProgressIndicator(
-              color: Color(0xFF10B981),
+              color: MealAIColors.blackText,
             ),
           );
         }
@@ -269,8 +270,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
           return Center(
               child: Text(
             controller.errorMessage.value,
-            style: const TextStyle(
-              color: Colors.red,
+            style: TextStyle(
+              color: MealAIColors.red,
               fontSize: 16,
             ),
             textAlign: TextAlign.center,
@@ -283,7 +284,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
         return ListView.builder(
           controller: controller.scrollController,
-          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
           itemCount:
               controller.messages.length + (controller.isTyping.value ? 1 : 0),
           itemBuilder: (context, index) {
@@ -305,10 +306,18 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(height: 8.h),
-            Icon(
-              Icons.restaurant_menu,
-              size: 16.w.clamp(60.0, 80.0),
-              color: const Color(0xFF9CA3AF),
+            Container(
+              width: 16.w.clamp(60.0, 80.0),
+              height: 16.w.clamp(60.0, 80.0),
+              decoration: BoxDecoration(
+                color: MealAIColors.blackText,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.restaurant_menu,
+                size: 10.w.clamp(30.0, 40.0),
+                color: MealAIColors.whiteText,
+              ),
             ),
             SizedBox(height: 4.h),
             Text(
@@ -316,7 +325,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
               style: TextStyle(
                 fontSize: 20.sp.clamp(18.0, 24.0),
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF111827),
+                color: MealAIColors.blackText,
               ),
               textAlign: TextAlign.center,
             ),
@@ -335,7 +344,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         'Ask about nutrition, meal analysis, or health advice',
         style: TextStyle(
           fontSize: 16.sp.clamp(14.0, 18.0),
-          color: const Color(0xFF6B7280),
+          color: MealAIColors.grey,
           height: 1.5,
         ),
         textAlign: TextAlign.center,
@@ -352,83 +361,77 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     }
 
     return Container(
-      margin: EdgeInsets.only(bottom: 4.w),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final maxWidth = constraints.maxWidth;
-          final avatarSize = maxWidth < 350 ? 28.0 : 7.w.clamp(28.0, 40.0);
-          final spacing = maxWidth < 350 ? 8.0 : 3.w.clamp(8.0, 16.0);
-
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (!isUser) ...[
-                Container(
-                  width: avatarSize,
-                  height: avatarSize,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF10B981),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.smart_toy,
-                    color: Colors.white,
-                    size: avatarSize * 0.6,
-                  ),
-                ),
-                SizedBox(width: spacing),
-              ],
-              Expanded(
-                child: Container(
-                  constraints: BoxConstraints(
-                    maxWidth: isUser ? maxWidth * 0.8 : maxWidth * 0.85,
-                  ),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: maxWidth < 350 ? 12 : 4.w.clamp(12.0, 20.0),
-                    vertical: maxWidth < 350 ? 10 : 3.w.clamp(10.0, 16.0),
-                  ),
-                  decoration: BoxDecoration(
-                    color: isUser
-                        ? const Color(0xFF10B981)
-                        : const Color(0xFFF9FAFB),
-                    borderRadius: BorderRadius.circular(18).copyWith(
-                      bottomLeft: !isUser ? const Radius.circular(4) : null,
-                      bottomRight: isUser ? const Radius.circular(4) : null,
-                    ),
-                    border: !isUser
-                        ? Border.all(color: const Color(0xFFE5E7EB), width: 1)
-                        : null,
-                  ),
-                  child: message.role == 'model' &&
-                          message.toolReturns != null &&
-                          message.toolReturns!.isNotEmpty
-                      ? _buildNutritionResponse(message)
-                      : _buildMarkdownContent(
-                          message.content?.trim() ?? '',
-                          isUser,
-                          maxWidth,
-                        ),
-                ),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        children: [
+          if (!isUser) ...[
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: MealAIColors.blackText,
+                shape: BoxShape.circle,
               ),
-              if (isUser) ...[
-                SizedBox(width: spacing),
-                Container(
-                  width: avatarSize,
-                  height: avatarSize,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF6B7280),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.person,
-                    color: Colors.white,
-                    size: avatarSize * 0.6,
-                  ),
+              child: Icon(
+                Icons.smart_toy,
+                color: MealAIColors.whiteText,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
+          Flexible(
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.75,
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              decoration: BoxDecoration(
+                color: isUser ? MealAIColors.blackText : MealAIColors.greyLight,
+                borderRadius: BorderRadius.circular(20).copyWith(
+                  bottomLeft: !isUser ? const Radius.circular(4) : null,
+                  bottomRight: isUser ? const Radius.circular(4) : null,
                 ),
-              ],
-            ],
-          );
-        },
+                border: !isUser
+                    ? Border.all(
+                        color: MealAIColors.grey.withOpacity(0.2), width: 1)
+                    : null,
+              ),
+              child: message.role == 'model' &&
+                      message.toolReturns != null &&
+                      message.toolReturns!.isNotEmpty
+                  ? _buildNutritionResponse(message)
+                  : _buildMarkdownContent(
+                      message.content?.trim() ?? '',
+                      isUser,
+                      MediaQuery.of(context).size.width * 0.75,
+                    ),
+            ),
+          ),
+          if (isUser) ...[
+            const SizedBox(width: 12),
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: MealAIColors.grey,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.person,
+                color: MealAIColors.whiteText,
+                size: 18,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -472,79 +475,89 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
   MarkdownStyleSheet _getMarkdownStyleSheet(bool isUser, double maxWidth) {
     return MarkdownStyleSheet(
       p: TextStyle(
-        color: isUser ? Colors.white : const Color(0xFF111827),
-        fontSize: maxWidth < 350 ? 14 : 15.sp.clamp(14.0, 16.0),
+        color: isUser ? MealAIColors.whiteText : MealAIColors.blackText,
+        fontSize: 15,
         fontWeight: FontWeight.w400,
         height: 1.5,
       ),
       h1: TextStyle(
-        color: isUser ? Colors.white : const Color(0xFF111827),
-        fontSize: maxWidth < 350 ? 20 : 22.sp.clamp(20.0, 24.0),
+        color: isUser ? MealAIColors.whiteText : MealAIColors.blackText,
+        fontSize: 22,
         fontWeight: FontWeight.w700,
         height: 1.3,
       ),
       h2: TextStyle(
-        color: isUser ? Colors.white : const Color(0xFF111827),
-        fontSize: maxWidth < 350 ? 18 : 20.sp.clamp(18.0, 22.0),
+        color: isUser ? MealAIColors.whiteText : MealAIColors.blackText,
+        fontSize: 20,
         fontWeight: FontWeight.w600,
         height: 1.3,
       ),
       h3: TextStyle(
-        color: isUser ? Colors.white : const Color(0xFF111827),
-        fontSize: maxWidth < 350 ? 16 : 18.sp.clamp(16.0, 20.0),
+        color: isUser ? MealAIColors.whiteText : MealAIColors.blackText,
+        fontSize: 18,
         fontWeight: FontWeight.w600,
         height: 1.3,
       ),
       strong: TextStyle(
-        color: isUser ? Colors.white : const Color(0xFF111827),
+        color: isUser ? MealAIColors.whiteText : MealAIColors.blackText,
         fontWeight: FontWeight.w700,
       ),
       em: TextStyle(
-        color: isUser ? Colors.white.withOpacity(0.9) : const Color(0xFF374151),
+        color: isUser
+            ? MealAIColors.whiteText.withOpacity(0.9)
+            : MealAIColors.grey,
         fontStyle: FontStyle.italic,
       ),
       code: TextStyle(
-        backgroundColor:
-            isUser ? Colors.white.withOpacity(0.2) : const Color(0xFFF3F4F6),
-        color: isUser ? Colors.white : const Color(0xFFDC2626),
-        fontSize: maxWidth < 350 ? 13 : 14.sp.clamp(13.0, 15.0),
+        backgroundColor: isUser
+            ? MealAIColors.whiteText.withOpacity(0.2)
+            : MealAIColors.greyLight,
+        color: isUser ? MealAIColors.whiteText : MealAIColors.blackText,
+        fontSize: 14,
         fontFamily: 'monospace',
       ),
       codeblockDecoration: BoxDecoration(
-        color: isUser ? Colors.white.withOpacity(0.1) : const Color(0xFFF9FAFB),
+        color: isUser
+            ? MealAIColors.whiteText.withOpacity(0.1)
+            : MealAIColors.greyLight,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color:
-              isUser ? Colors.white.withOpacity(0.3) : const Color(0xFFE5E7EB),
+          color: isUser
+              ? MealAIColors.whiteText.withOpacity(0.3)
+              : MealAIColors.grey.withOpacity(0.3),
         ),
       ),
       codeblockPadding: const EdgeInsets.all(12),
       blockquote: TextStyle(
-        color: isUser ? Colors.white.withOpacity(0.9) : const Color(0xFF6B7280),
+        color: isUser
+            ? MealAIColors.whiteText.withOpacity(0.9)
+            : MealAIColors.grey,
         fontStyle: FontStyle.italic,
       ),
       blockquoteDecoration: BoxDecoration(
         border: Border(
           left: BorderSide(
             color: isUser
-                ? Colors.white.withOpacity(0.5)
-                : const Color(0xFFD1D5DB),
+                ? MealAIColors.whiteText.withOpacity(0.5)
+                : MealAIColors.grey,
             width: 4,
           ),
         ),
       ),
       listBullet: TextStyle(
-        color: isUser ? Colors.white : const Color(0xFF111827),
+        color: isUser ? MealAIColors.whiteText : MealAIColors.blackText,
       ),
       tableHead: TextStyle(
         fontWeight: FontWeight.w600,
-        color: isUser ? Colors.white : const Color(0xFF111827),
+        color: isUser ? MealAIColors.whiteText : MealAIColors.blackText,
       ),
       tableBody: TextStyle(
-        color: isUser ? Colors.white : const Color(0xFF111827),
+        color: isUser ? MealAIColors.whiteText : MealAIColors.blackText,
       ),
       tableBorder: TableBorder.all(
-        color: isUser ? Colors.white.withOpacity(0.3) : const Color(0xFFE5E7EB),
+        color: isUser
+            ? MealAIColors.whiteText.withOpacity(0.3)
+            : MealAIColors.grey.withOpacity(0.3),
       ),
     );
   }
@@ -556,12 +569,12 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: const Color(0xFF10b981), width: 1),
+        color: MealAIColors.whiteText,
+        border: Border.all(color: MealAIColors.blackText, width: 1),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: MealAIColors.blackText.withOpacity(0.05),
             offset: const Offset(0, 2),
             blurRadius: 8,
           ),
@@ -609,12 +622,12 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             Container(
               padding: EdgeInsets.all(2.w.clamp(6.0, 10.0)),
               decoration: BoxDecoration(
-                color: const Color(0xFF6366F1).withOpacity(0.1),
+                color: MealAIColors.blackText.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 Icons.analytics,
-                color: const Color(0xFF6366F1),
+                color: MealAIColors.blackText,
                 size: 5.w.clamp(18.0, 24.0),
               ),
             ),
@@ -625,7 +638,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                 style: TextStyle(
                   fontSize: 18.sp.clamp(16.0, 20.0),
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF111827),
+                  color: MealAIColors.blackText,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -655,7 +668,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         vertical: 1.5.w.clamp(4.0, 8.0),
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+        color: MealAIColors.greyLight,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -663,7 +676,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         style: TextStyle(
           fontSize: 12.sp.clamp(11.0, 14.0),
           fontWeight: FontWeight.w500,
-          color: const Color(0xFF6B7280),
+          color: MealAIColors.grey,
         ),
         overflow: TextOverflow.ellipsis,
       ),
@@ -681,12 +694,12 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             Container(
               padding: EdgeInsets.all(2),
               decoration: BoxDecoration(
-                color: const Color(0xFF6366F1).withOpacity(0.1),
+                color: MealAIColors.blackText.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 Icons.pie_chart,
-                color: const Color(0xFF6366F1),
+                color: MealAIColors.blackText,
                 size: 5.w.clamp(18.0, 24.0),
               ),
             ),
@@ -697,7 +710,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                 style: TextStyle(
                   fontSize: 16.sp.clamp(14.0, 18.0),
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF111827),
+                  color: MealAIColors.blackText,
                 ),
               ),
             ),
@@ -738,9 +751,9 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     return Container(
       padding: EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
+        color: MealAIColors.greyLight,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: MealAIColors.grey.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -749,7 +762,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         children: [
           Icon(
             icon,
-            color: const Color(0xFF6366F1),
+            color: MealAIColors.blackText,
             size: 5.w.clamp(16.0, 24.0),
           ),
           SizedBox(width: 2.w.clamp(6.0, 8.0)),
@@ -765,7 +778,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                     style: TextStyle(
                       fontSize: 14.sp.clamp(12.0, 16.0),
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF6366F1),
+                      color: MealAIColors.blackText,
                     ),
                   ),
                 ),
@@ -776,7 +789,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                     style: TextStyle(
                       fontSize: 11.sp.clamp(10.0, 13.0),
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF6B7280),
+                      color: MealAIColors.grey,
                     ),
                   ),
                 ),
@@ -799,12 +812,12 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             Container(
               padding: EdgeInsets.all(2.w),
               decoration: BoxDecoration(
-                color: const Color(0xFF6366F1).withOpacity(0.1),
+                color: MealAIColors.blackText.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 Icons.search,
-                color: const Color(0xFF6366F1),
+                color: MealAIColors.blackText,
                 size: 5.w,
               ),
             ),
@@ -815,7 +828,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF111827),
+                  color: MealAIColors.blackText,
                 ),
               ),
             ),
@@ -837,7 +850,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       padding: EdgeInsets.all(4.w.clamp(12.0, 16.0)),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
+        color: MealAIColors.greyLight,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withOpacity(0.3)),
       ),
@@ -852,7 +865,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                   style: TextStyle(
                     fontSize: 14.sp.clamp(13.0, 16.0),
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
+                    color: MealAIColors.blackText,
                   ),
                 ),
               ),
@@ -879,7 +892,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                       style: TextStyle(
                         fontSize: 12.sp.clamp(11.0, 14.0),
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        color: MealAIColors.whiteText,
                       ),
                     ),
                   ],
@@ -892,7 +905,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             'Cal: ${ingredient['calories']} | Protein: ${ingredient['protein']}g | Carbs: ${ingredient['carbs']}g | Fat: ${ingredient['fat']}g',
             style: TextStyle(
               fontSize: 12.sp.clamp(11.0, 14.0),
-              color: const Color(0xFF6B7280),
+              color: MealAIColors.grey,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -902,7 +915,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
               ingredient['healthComments'].toString(),
               style: TextStyle(
                 fontSize: 12.sp.clamp(11.0, 14.0),
-                color: const Color(0xFF374151),
+                color: MealAIColors.blackText,
                 height: 1.4,
               ),
             ),
@@ -924,12 +937,12 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             Container(
               padding: EdgeInsets.all(2.w.clamp(6.0, 10.0)),
               decoration: BoxDecoration(
-                color: const Color(0xFF6366F1).withOpacity(0.1),
+                color: MealAIColors.blackText.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 Icons.health_and_safety,
-                color: const Color(0xFF6366F1),
+                color: MealAIColors.blackText,
                 size: 5.w.clamp(18.0, 24.0),
               ),
             ),
@@ -940,7 +953,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                 style: TextStyle(
                   fontSize: 16.sp.clamp(14.0, 18.0),
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF111827),
+                  color: MealAIColors.blackText,
                 ),
               ),
             ),
@@ -983,7 +996,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                           style: TextStyle(
                             fontSize: 14.sp.clamp(12.0, 16.0),
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: MealAIColors.whiteText,
                           ),
                         ),
                       ],
@@ -998,7 +1011,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                   response['overallHealthComments'].toString(),
                   style: TextStyle(
                     fontSize: 14.sp.clamp(12.0, 16.0),
-                    color: const Color(0xFF374151),
+                    color: MealAIColors.blackText,
                     height: 1.5,
                   ),
                 ),
@@ -1021,12 +1034,12 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFFF59E0B).withOpacity(0.1),
+                color: MealAIColors.grey.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.warning,
-                color: Color(0xFFF59E0B),
+                color: MealAIColors.grey,
                 size: 20,
               ),
             ),
@@ -1037,7 +1050,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                 style: TextStyle(
                   fontSize: 16.sp.clamp(14.0, 18.0),
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF111827),
+                  color: MealAIColors.blackText,
                 ),
               ),
             ),
@@ -1055,9 +1068,9 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       padding: const EdgeInsets.all(16),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF3C7),
+        color: MealAIColors.greyLight,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFF59E0B).withOpacity(0.3)),
+        border: Border.all(color: MealAIColors.grey.withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1067,7 +1080,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             style: TextStyle(
               fontSize: 14.sp.clamp(13.0, 16.0),
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF92400E),
+              color: MealAIColors.blackText,
             ),
           ),
           if (concern['explanation']?.toString().isNotEmpty == true) ...[
@@ -1076,7 +1089,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
               concern['explanation'].toString(),
               style: TextStyle(
                 fontSize: 13.sp.clamp(12.0, 15.0),
-                color: const Color(0xFF78350F),
+                color: MealAIColors.grey,
                 height: 1.4,
               ),
             ),
@@ -1089,7 +1102,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
               children: [
                 const Icon(
                   Icons.lightbulb,
-                  color: Color(0xFF92400E),
+                  color: MealAIColors.blackText,
                   size: 16,
                 ),
                 const SizedBox(width: 6),
@@ -1102,7 +1115,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                         style: TextStyle(
                           fontSize: 13.sp.clamp(12.0, 15.0),
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF92400E),
+                          color: MealAIColors.blackText,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -1140,12 +1153,12 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF6366F1).withOpacity(0.1),
+                color: MealAIColors.blackText.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.swap_horiz,
-                color: Color(0xFF6366F1),
+                color: MealAIColors.blackText,
                 size: 20,
               ),
             ),
@@ -1156,7 +1169,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                 style: TextStyle(
                   fontSize: 16.sp.clamp(14.0, 18.0),
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF111827),
+                  color: MealAIColors.blackText,
                 ),
               ),
             ),
@@ -1177,9 +1190,9 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       padding: const EdgeInsets.all(16),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFF6366F1).withOpacity(0.05),
+        color: MealAIColors.greyLight,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF6366F1).withOpacity(0.2)),
+        border: Border.all(color: MealAIColors.blackText.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1192,7 +1205,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                   style: TextStyle(
                     fontSize: 14.sp.clamp(13.0, 16.0),
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
+                    color: MealAIColors.blackText,
                   ),
                 ),
               ),
@@ -1218,7 +1231,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             'Cal: ${alternative['calories']} | Protein: ${alternative['protein']}g | Carbs: ${alternative['carbs']}g | Fat: ${alternative['fat']}g',
             style: TextStyle(
               fontSize: 12.sp.clamp(11.0, 14.0),
-              color: const Color(0xFF6B7280),
+              color: MealAIColors.grey,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -1228,7 +1241,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
               alternative['healthComments'].toString(),
               style: TextStyle(
                 fontSize: 12.sp.clamp(11.0, 14.0),
-                color: const Color(0xFF374151),
+                color: MealAIColors.blackText,
                 height: 1.4,
               ),
             ),
@@ -1240,73 +1253,65 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
   Widget _buildTypingIndicator() {
     return Container(
-      margin: EdgeInsets.only(bottom: 4.w),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final maxWidth = constraints.maxWidth;
-          final avatarSize = maxWidth < 350 ? 28.0 : 7.w.clamp(28.0, 40.0);
-          final spacing = maxWidth < 350 ? 8.0 : 3.w.clamp(8.0, 16.0);
-
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: avatarSize,
-                height: avatarSize,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF10B981),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.smart_toy,
-                  color: Colors.white,
-                  size: avatarSize * 0.6,
-                ),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: MealAIColors.blackText,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.smart_toy,
+              color: MealAIColors.whiteText,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
               ),
-              SizedBox(width: spacing),
-              Flexible(
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: maxWidth < 350 ? 12 : 4.w.clamp(12.0, 20.0),
-                    vertical: maxWidth < 350 ? 10 : 3.w.clamp(10.0, 16.0),
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF9FAFB),
-                    borderRadius: BorderRadius.circular(18).copyWith(
-                      bottomLeft: const Radius.circular(4),
+              decoration: BoxDecoration(
+                color: MealAIColors.greyLight,
+                borderRadius: BorderRadius.circular(20).copyWith(
+                  bottomLeft: const Radius.circular(4),
+                ),
+                border: Border.all(
+                    color: MealAIColors.grey.withOpacity(0.3), width: 1),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'NomAI is thinking',
+                    style: TextStyle(
+                      color: MealAIColors.grey,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
                     ),
-                    border:
-                        Border.all(color: const Color(0xFFE5E7EB), width: 1),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'NomAI is thinking',
-                        style: TextStyle(
-                          color: const Color(0xFF6B7280),
-                          fontSize:
-                              maxWidth < 350 ? 14 : 15.sp.clamp(14.0, 16.0),
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      SizedBox(width: maxWidth < 350 ? 6 : 2.w),
-                      SizedBox(
-                        width: maxWidth < 350 ? 20 : 5.w,
-                        height: maxWidth < 350 ? 16 : 4.w,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: List.generate(
-                              3, (index) => _buildTypingDot(index)),
-                        ),
-                      ),
-                    ],
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: 24,
+                    height: 16,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children:
+                          List.generate(3, (index) => _buildTypingDot(index)),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          );
-        },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1333,90 +1338,79 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
   Widget _buildInputArea() {
     return Container(
-      color: Colors.white,
-      padding: EdgeInsets.all(4.w.clamp(12.0, 20.0)),
+      color: MealAIColors.whiteText,
+      padding: const EdgeInsets.all(16),
       child: SafeArea(
         top: false,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final maxWidth = constraints.maxWidth;
-            final buttonSize = maxWidth < 350 ? 44.0 : 11.w.clamp(44.0, 52.0);
-
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Container(
-                    constraints: BoxConstraints(
-                      maxHeight:
-                          maxWidth < 350 ? 120 : 30.w.clamp(100.0, 150.0),
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF9FAFB),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: const Color(0xFFE5E7EB),
-                        width: 1,
-                      ),
-                    ),
-                    child: TextField(
-                      controller: controller.messageController,
-                      maxLines: null,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => controller.sendMessage(user!),
-                      decoration: InputDecoration(
-                        hintText: 'Message NomAI...',
-                        hintStyle: TextStyle(
-                          color: const Color(0xFF9CA3AF),
-                          fontSize:
-                              maxWidth < 350 ? 14 : 16.sp.clamp(14.0, 18.0),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal:
-                              maxWidth < 350 ? 16 : 5.w.clamp(16.0, 24.0),
-                          vertical:
-                              maxWidth < 350 ? 12 : 3.5.w.clamp(12.0, 18.0),
-                        ),
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                      ),
-                      style: TextStyle(
-                        fontSize: maxWidth < 350 ? 14 : 16.sp.clamp(14.0, 18.0),
-                        height: 1.4,
-                        color: const Color(0xFF111827),
-                      ),
-                    ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: Container(
+                constraints: const BoxConstraints(
+                  maxHeight: 120,
+                ),
+                decoration: BoxDecoration(
+                  color: MealAIColors.greyLight,
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: MealAIColors.grey.withOpacity(0.3),
+                    width: 1,
                   ),
                 ),
-                SizedBox(width: maxWidth < 350 ? 8 : 3.w.clamp(8.0, 12.0)),
-                Obx(() => GestureDetector(
-                      onTap: () {
-                        if (!controller.isTyping.value) {
-                          controller.sendMessage(user!);
-                        }
-                      },
-                      child: Container(
-                        width: buttonSize,
-                        height: buttonSize,
-                        decoration: BoxDecoration(
-                          color: controller.isTyping.value
-                              ? const Color(0xFFE5E7EB)
-                              : const Color(0xFF10B981),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.send,
-                          color: controller.isTyping.value
-                              ? const Color(0xFF9CA3AF)
-                              : Colors.white,
-                          size: buttonSize * 0.5,
-                        ),
-                      ),
-                    )),
-              ],
-            );
-          },
+                child: TextField(
+                  controller: controller.messageController,
+                  maxLines: null,
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) => controller.sendMessage(user!),
+                  decoration: InputDecoration(
+                    hintText: 'Message NomAI...',
+                    hintStyle: TextStyle(
+                      color: MealAIColors.grey,
+                      fontSize: 16,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 14,
+                    ),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                  ),
+                  style: TextStyle(
+                    fontSize: 16,
+                    height: 1.4,
+                    color: MealAIColors.blackText,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Obx(() => GestureDetector(
+                  onTap: () {
+                    if (!controller.isTyping.value) {
+                      controller.sendMessage(user!);
+                    }
+                  },
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: controller.isTyping.value
+                          ? MealAIColors.grey
+                          : MealAIColors.blackText,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.send,
+                      color: controller.isTyping.value
+                          ? MealAIColors.greyLight
+                          : MealAIColors.whiteText,
+                      size: 24,
+                    ),
+                  ),
+                )),
+          ],
         ),
       ),
     );
@@ -1504,9 +1498,9 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
   }
 
   Color _getHealthScoreColor(int score) {
-    if (score >= 7) return const Color(0xFF10B981);
-    if (score >= 5) return const Color(0xFFF59E0B);
-    return const Color(0xFFEF4444);
+    if (score >= 7) return MealAIColors.blackText;
+    if (score >= 5) return MealAIColors.grey;
+    return MealAIColors.grey.withOpacity(0.7);
   }
 
   IconData _getHealthScoreIcon(int score) {
