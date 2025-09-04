@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 AgentResponse agentResponseFromJson(String str) =>
@@ -11,16 +10,26 @@ class AgentResponse {
   final DateTime? timestamp;
   final String? content;
   final bool? isFinal;
+  final bool? isPartial;
+  final bool? isToolCall;
+  final bool? isToolResult;
+  final bool? isSystem;
   final List<ToolCall>? toolCalls;
   final List<ToolReturn>? toolReturns;
+  final String? imageUrl;
 
   AgentResponse({
     this.role,
     this.timestamp,
     this.content,
     this.isFinal,
+    this.isPartial,
+    this.isToolCall,
+    this.isToolResult,
+    this.isSystem,
     this.toolCalls,
     this.toolReturns,
+    this.imageUrl,
   });
 
   factory AgentResponse.fromJson(Map<String, dynamic> json) => AgentResponse(
@@ -29,7 +38,11 @@ class AgentResponse {
             ? null
             : DateTime.parse(json["timestamp"]),
         content: json["content"],
-        isFinal: json["is_final"],
+        isFinal: json["is_final"] ?? json["isFinal"],
+        isPartial: json["is_partial"],
+        isToolCall: json["is_tool_call"],
+        isToolResult: json["is_tool_result"],
+        isSystem: json["is_system"],
         toolCalls: json["tool_calls"] == null
             ? []
             : List<ToolCall>.from(
@@ -38,6 +51,9 @@ class AgentResponse {
             ? []
             : List<ToolReturn>.from(
                 json["tool_returns"]!.map((x) => ToolReturn.fromJson(x))),
+        imageUrl: (json["imageUrl"] == null || json["imageUrl"] == "null")
+            ? null
+            : json["imageUrl"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -45,12 +61,17 @@ class AgentResponse {
         "timestamp": timestamp?.toIso8601String(),
         "content": content,
         "is_final": isFinal,
+        "is_partial": isPartial,
+        "is_tool_call": isToolCall,
+        "is_tool_result": isToolResult,
+        "is_system": isSystem,
         "tool_calls": toolCalls == null
             ? []
             : List<dynamic>.from(toolCalls!.map((x) => x.toJson())),
         "tool_returns": toolReturns == null
             ? []
             : List<dynamic>.from(toolReturns!.map((x) => x.toJson())),
+        "imageUrl": imageUrl,
       };
 }
 
