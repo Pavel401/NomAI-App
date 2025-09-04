@@ -13,7 +13,8 @@ class AgentService {
     print('Loading chat history for user: $userId');
 
     try {
-      final uri = Uri.parse('$_baseUrl/chat/messages?user_id=$userId');
+      final uri = Uri.parse(
+          '$_baseUrl/chat/messages?user_id=${Uri.encodeComponent(userId)}');
       print('Making GET request to: $uri');
 
       final stopwatch = Stopwatch()..start();
@@ -39,8 +40,12 @@ class AgentService {
         }
 
         print('Parsing response body into messages');
-        final lines =
-            text.split('\n').where((line) => line.trim().isNotEmpty).toList();
+        // Follow web implementation: split by newlines and filter empty lines
+        final lines = text
+            .split('\n')
+            .map((line) => line.trim())
+            .where((line) => line.isNotEmpty)
+            .toList();
         print('Found ${lines.length} message lines to parse');
 
         final messages = <AgentResponse>[];
@@ -48,8 +53,23 @@ class AgentService {
 
         for (int i = 0; i < lines.length; i++) {
           try {
-            final message = AgentResponse.fromJson(json.decode(lines[i]));
-            messages.add(message);
+            final jsonData = json.decode(lines[i]);
+
+            // Handle both single messages and arrays (like web implementation)
+            if (jsonData is List) {
+              for (final item in jsonData) {
+                if (item is Map<String, dynamic>) {
+                  final message = AgentResponse.fromJson(item);
+                  messages.add(message);
+                }
+              }
+            } else if (jsonData is Map<String, dynamic>) {
+              final message = AgentResponse.fromJson(jsonData);
+              messages.add(message);
+            } else {
+              print(
+                  'Unexpected message format at line ${i + 1}: ${jsonData.runtimeType}');
+            }
           } catch (parseError) {
             parseErrors++;
             print('Failed to parse message line ${i + 1}: $parseError');
@@ -62,7 +82,7 @@ class AgentService {
               '$parseErrors message(s) failed to parse out of ${lines.length}');
         }
 
-        print('Sorting ${messages.length} messages by timestamp');
+        // Sort messages by timestamp to ensure correct order (like web implementation)
         messages.sort((a, b) {
           if (a.timestamp == null && b.timestamp == null) return 0;
           if (a.timestamp == null) return -1;
@@ -108,7 +128,13 @@ class AgentService {
 
       final jsonPayload = chatRequest.toJson();
 
-      jsonPayload.removeWhere((key, value) => value == null);
+      print('DEBUG: Prepared JSON payload: $jsonPayload');
+
+      // Remove null and empty values
+      jsonPayload.removeWhere((key, value) =>
+          value == null ||
+          (value is String && value.isEmpty) ||
+          (value is List && value.isEmpty));
 
       final response = await http.post(
         uri,
@@ -121,14 +147,50 @@ class AgentService {
 
       print('Response status: ${response.statusCode}');
       if (response.statusCode == 200) {
-        final lines =
-            response.body.split('\n').where((line) => line.trim().isNotEmpty);
+        final lines = response.body
+            .split('\n')
+            .map((line) => line.trim())
+            .where((line) => line.isNotEmpty);
+
         for (final line in lines) {
           try {
             final messageData = json.decode(line);
-            yield AgentResponse.fromJson(messageData);
+            print('DEBUG: Raw message data: $messageData');
+            print('DEBUG: Message data type: ${messageData.runtimeType}');
+
+            // Handle both arrays and objects (like web implementation)
+            if (messageData is List) {
+              for (final item in messageData) {
+                if (item is Map<String, dynamic>) {
+                  yield AgentResponse.fromJson(item);
+                }
+              }
+            } else if (messageData is Map<String, dynamic>) {
+              // Handle special message types like web implementation
+              final agentResponse = AgentResponse.fromJson(messageData);
+
+              // Log different types of messages for debugging
+              if (messageData.containsKey('is_tool_call') &&
+                  messageData['is_tool_call'] == true) {
+                print('DEBUG: Tool call message detected');
+              } else if (messageData.containsKey('is_tool_result') &&
+                  messageData['is_tool_result'] == true) {
+                print('DEBUG: Tool result message detected');
+              } else if (messageData.containsKey('is_partial') &&
+                  messageData['is_partial'] == true) {
+                print('DEBUG: Partial message detected');
+              } else if (messageData.containsKey('is_final') &&
+                  messageData['is_final'] == true) {
+                print('DEBUG: Final message detected');
+              }
+
+              yield agentResponse;
+            } else {
+              print('Unexpected message format: ${messageData.runtimeType}');
+            }
           } catch (e) {
             print('Failed to parse message: $e');
+            print('Raw line: $line');
           }
         }
       } else {

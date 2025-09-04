@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:NomAi/app/models/Agent/agent_response.dart' as AgentResponse;
 import 'package:NomAi/app/modules/Chat/controller/chat_controller.dart';
 import 'package:NomAi/app/constants/colors.dart';
@@ -198,30 +199,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
           ),
         ),
         SizedBox(width: 2.w),
-        Obx(() => controller.isDemoMode.value
-            ? Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 2.w,
-                  vertical: 0.8.h,
-                ),
-                decoration: BoxDecoration(
-                  color: MealAIColors.greyLight,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: MealAIColors.grey,
-                    width: 1,
-                  ),
-                ),
-                child: Text(
-                  'Demo',
-                  style: TextStyle(
-                    color: MealAIColors.blackText,
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              )
-            : const SizedBox.shrink()),
       ],
     );
   }
@@ -355,10 +332,48 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
   Widget _buildMessageItem(AgentResponse.AgentResponse message, int index) {
     final isUser = message.role == 'user';
+    final isSystem = message.isSystem == true;
 
     if (message.content?.trim().isEmpty == true &&
         (message.toolReturns == null || message.toolReturns!.isEmpty)) {
       return const SizedBox.shrink();
+    }
+
+    // Handle system messages (like tool indicators) similar to web implementation
+    if (isSystem) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: MealAIColors.greyLight,
+              borderRadius: BorderRadius.circular(50),
+              border: Border.all(color: MealAIColors.grey.withOpacity(0.3)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.auto_awesome,
+                  size: 16,
+                  color: MealAIColors.grey,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  message.content ?? '',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: MealAIColors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
     }
 
     return Container(
@@ -383,7 +398,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                 size: 18,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 2.w),
           ],
           Flexible(
             child: Container(
@@ -409,11 +424,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                       message.toolReturns != null &&
                       message.toolReturns!.isNotEmpty
                   ? _buildNutritionResponse(message)
-                  : _buildMarkdownContent(
-                      message.content?.trim() ?? '',
-                      isUser,
-                      MediaQuery.of(context).size.width * 0.75,
-                    ),
+                  : _buildMessageContent(message, isUser),
             ),
           ),
           if (isUser) ...[
@@ -454,6 +465,82 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
           SizedBox(height: 4.w),
         ],
         if (nutritionResponse != null) _buildNutritionCard(nutritionResponse),
+      ],
+    );
+  }
+
+  Widget _buildMessageContent(
+      AgentResponse.AgentResponse message, bool isUser) {
+    // Debug print to check imageUrl
+    if (message.imageUrl != null) {
+      print('DEBUG: Message has imageUrl: ${message.imageUrl}');
+    }
+
+    // Clean the content - remove any URLs that might be embedded in text
+    String cleanContent = message.content?.trim() ?? '';
+
+    // If content looks like it contains a Firebase Storage URL, remove it
+    if (cleanContent.contains('firebasestorage.googleapis.com') ||
+        cleanContent.startsWith('[User provided an image:') ||
+        cleanContent.startsWith('User provided an image:')) {
+      // If the message has an imageUrl, don't show the URL text
+      if (message.imageUrl != null && message.imageUrl!.isNotEmpty) {
+        // Try to extract any text that's not the URL
+        final lines = cleanContent.split('\n');
+        final nonUrlLines = lines
+            .where((line) =>
+                !line.contains('firebasestorage.googleapis.com') &&
+                !line.contains('[User provided an image:') &&
+                !line.contains('User provided an image:'))
+            .toList();
+        cleanContent = nonUrlLines.join('\n').trim();
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Display image if available
+        if (message.imageUrl != null && message.imageUrl!.isNotEmpty) ...[
+          Container(
+            constraints: const BoxConstraints(
+              maxWidth: 250,
+              maxHeight: 250,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: CachedNetworkImage(
+                imageUrl: message.imageUrl!,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  height: 150,
+                  color: MealAIColors.greyLight,
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                errorWidget: (context, url, error) {
+                  print('DEBUG: Error loading image: $error');
+                  return Container(
+                    height: 150,
+                    color: MealAIColors.greyLight,
+                    child: const Center(
+                      child: Icon(Icons.error),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          if (cleanContent.isNotEmpty) const SizedBox(height: 8),
+        ],
+        // Display text content
+        if (cleanContent.isNotEmpty)
+          _buildMarkdownContent(
+            cleanContent,
+            isUser,
+            MediaQuery.of(context).size.width * 0.75,
+          ),
       ],
     );
   }
@@ -1342,74 +1429,292 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       padding: const EdgeInsets.all(16),
       child: SafeArea(
         top: false,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Container(
-                constraints: const BoxConstraints(
-                  maxHeight: 120,
-                ),
-                decoration: BoxDecoration(
-                  color: MealAIColors.greyLight,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: MealAIColors.grey.withOpacity(0.3),
-                    width: 1,
-                  ),
-                ),
-                child: TextField(
-                  controller: controller.messageController,
-                  maxLines: null,
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: (_) => controller.sendMessage(user!),
-                  decoration: InputDecoration(
-                    hintText: 'Message NomAI...',
-                    hintStyle: TextStyle(
-                      color: MealAIColors.grey,
-                      fontSize: 16,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 14,
-                    ),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                  ),
-                  style: TextStyle(
-                    fontSize: 16,
-                    height: 1.4,
-                    color: MealAIColors.blackText,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Obx(() => GestureDetector(
-                  onTap: () {
-                    if (!controller.isTyping.value) {
-                      controller.sendMessage(user!);
-                    }
-                  },
+            // Image preview section
+            Obx(() => controller.selectedImage.value != null
+                ? _buildImagePreview()
+                : const SizedBox.shrink()),
+
+            // Input row
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                // Camera/Gallery button
+                GestureDetector(
+                  onTap: _showImageSourceBottomSheet,
                   child: Container(
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: controller.isTyping.value
-                          ? MealAIColors.grey
-                          : MealAIColors.blackText,
+                      color: MealAIColors.greyLight,
                       shape: BoxShape.circle,
+                      border: Border.all(
+                        color: MealAIColors.grey.withOpacity(0.3),
+                        width: 1,
+                      ),
                     ),
                     child: Icon(
-                      Icons.send,
-                      color: controller.isTyping.value
-                          ? MealAIColors.greyLight
-                          : MealAIColors.whiteText,
+                      Icons.camera_alt,
+                      color: MealAIColors.blackText,
                       size: 24,
                     ),
                   ),
-                )),
+                ),
+                const SizedBox(width: 12),
+
+                // Text input
+                Expanded(
+                  child: Container(
+                    constraints: const BoxConstraints(
+                      maxHeight: 120,
+                    ),
+                    decoration: BoxDecoration(
+                      color: MealAIColors.greyLight,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: MealAIColors.grey.withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: TextField(
+                      controller: controller.messageController,
+                      maxLines: null,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (_) => _sendMessage(),
+                      decoration: InputDecoration(
+                        hintText: 'Message NomAI...',
+                        hintStyle: TextStyle(
+                          color: MealAIColors.grey,
+                          fontSize: 16,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 14,
+                        ),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                      ),
+                      style: TextStyle(
+                        fontSize: 16,
+                        height: 1.4,
+                        color: MealAIColors.blackText,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // Send button
+                Obx(() => GestureDetector(
+                      onTap: () {
+                        if (!controller.isTyping.value &&
+                            !controller.isUploadingImage.value) {
+                          _sendMessage();
+                        }
+                      },
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: (controller.isTyping.value ||
+                                  controller.isUploadingImage.value)
+                              ? MealAIColors.grey
+                              : MealAIColors.blackText,
+                          shape: BoxShape.circle,
+                        ),
+                        child: controller.isUploadingImage.value
+                            ? Container(
+                                width: 24,
+                                height: 24,
+                                padding: const EdgeInsets.all(12),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    MealAIColors.whiteText,
+                                  ),
+                                ),
+                              )
+                            : Icon(
+                                Icons.send,
+                                color: (controller.isTyping.value ||
+                                        controller.isUploadingImage.value)
+                                    ? MealAIColors.greyLight
+                                    : MealAIColors.whiteText,
+                                size: 24,
+                              ),
+                      ),
+                    )),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImagePreview() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Stack(
+        children: [
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: MealAIColors.grey.withOpacity(0.3),
+                width: 1,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(11),
+              child: Image.file(
+                controller.selectedImage.value!,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () => controller.removeSelectedImage(),
+              child: Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: MealAIColors.blackText.withOpacity(0.7),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.close,
+                  color: MealAIColors.whiteText,
+                  size: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _sendMessage() {
+    controller.sendMessage(user!);
+  }
+
+  void _showImageSourceBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: MealAIColors.whiteText,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: MealAIColors.grey,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Select Image Source',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: MealAIColors.blackText,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      controller.pickImageFromCamera();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: MealAIColors.greyLight,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: MealAIColors.grey.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.camera_alt,
+                            size: 32,
+                            color: MealAIColors.blackText,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Camera',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: MealAIColors.blackText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                      controller.pickImageFromGallery();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: MealAIColors.greyLight,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: MealAIColors.grey.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.photo_library,
+                            size: 32,
+                            color: MealAIColors.blackText,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Gallery',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: MealAIColors.blackText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

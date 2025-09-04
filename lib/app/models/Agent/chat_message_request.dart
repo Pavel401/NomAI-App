@@ -19,13 +19,13 @@ class ChatMessageRequest {
 
   Map<String, dynamic> toJson() {
     return {
-      'prompt': prompt ?? '',
-      'user_id': userId ?? '',
+      'prompt': prompt,
+      'user_id': userId,
       'local_time': localTime,
-      'dietary_preferences': dietaryPreferences ?? [],
-      'allergies': allergies ?? [],
-      'selected_goals': selectedGoals ?? [],
-      'foodImage': foodImage ?? '',
+      'dietary_preferences': dietaryPreferences,
+      'allergies': allergies,
+      'selected_goals': selectedGoals,
+      'foodImage': foodImage,
     };
   }
 
