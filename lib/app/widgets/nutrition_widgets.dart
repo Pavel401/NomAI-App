@@ -6,7 +6,7 @@ import 'package:NomAi/app/constants/colors.dart';
 
 class NutritionWidgetService {
   /// Builds a nutrition card from response data
-  static Widget buildNutritionCard(Response response) {
+  static Widget buildNutritionCard(AgentResponsePayload response) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -52,7 +52,7 @@ class NutritionWidgetService {
     );
   }
 
-  static Widget _buildHeader(Response response) {
+  static Widget _buildHeader(AgentResponsePayload response) {
     final infoChips = [
       InfoChipItem(
         label: 'Portion',
@@ -351,7 +351,7 @@ class NutritionWidgetService {
     );
   }
 
-  static Widget _buildHealthAssessment(Response response) {
+  static Widget _buildHealthAssessment(AgentResponsePayload response) {
     final overallScore = response.overallHealthScore ?? 0;
     final healthLevel = NutritionService.getHealthScoreLevel(overallScore);
     final config = HealthScoreConfig.fromLevel(healthLevel);

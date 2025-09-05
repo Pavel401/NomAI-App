@@ -2,7 +2,8 @@ import 'package:NomAi/app/models/Agent/agent_response.dart';
 
 class NutritionService {
   /// Extracts nutrition data from agent response tool returns
-  static Response? extractNutritionResponse(List<ToolReturn> toolReturns) {
+  static AgentResponsePayload? extractNutritionResponse(
+      List<ToolReturn> toolReturns) {
     for (final toolReturn in toolReturns) {
       if (toolReturn.toolName == 'calculate_nutrition_by_food_description' &&
           toolReturn.content?.response != null) {
@@ -45,12 +46,12 @@ class NutritionService {
   }
 
   /// Checks if a response has valid nutrition data
-  static bool hasNutritionData(Response response) {
+  static bool hasNutritionData(AgentResponsePayload response) {
     return response.ingredients != null && response.ingredients!.isNotEmpty;
   }
 
   /// Gets a display-friendly portion text
-  static String getPortionDisplayText(Response response) {
+  static String getPortionDisplayText(AgentResponsePayload response) {
     final portionSize = response.portionSize ?? 0;
     final portion = response.portion ?? '';
 

@@ -14,6 +14,13 @@ class NutritionRecordRepo {
     try {
       final recordId = getRecordId(record.recordDate);
 
+      print("Saving record for user: $userId on date: ${record.recordDate}");
+
+      print("Record ID: $recordId");
+      print("Record Data: ${record.toJson()}");
+
+      print("Saving to Firestore...");
+
       await usersCollection
           .doc(userId)
           .collection('nutritionRecords')
