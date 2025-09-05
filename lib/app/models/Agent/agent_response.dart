@@ -125,10 +125,10 @@ class ToolReturn {
 }
 
 class Content {
-  final Response? response;
+  final AgentResponsePayload? response;
   final int? status;
   final String? message;
-  final Metadata? metadata;
+  final AgentMetadata? metadata;
 
   Content({
     this.response,
@@ -140,14 +140,14 @@ class Content {
   factory Content.fromJson(Map<String, dynamic> json) => Content(
         response: json["response"] == null
             ? null
-            : Response.fromJson(json["response"]),
+            : AgentResponsePayload.fromJson(json["response"]),
         status: json["status"] is double
             ? (json["status"] as double).toInt()
             : json["status"],
         message: json["message"],
         metadata: json["metadata"] == null
             ? null
-            : Metadata.fromJson(json["metadata"]),
+            : AgentMetadata.fromJson(json["metadata"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -158,14 +158,14 @@ class Content {
       };
 }
 
-class Metadata {
+class AgentMetadata {
   final int? inputTokenCount;
   final int? outputTokenCount;
   final int? totalTokenCount;
   final double? estimatedCost;
   final double? executionTimeSeconds;
 
-  Metadata({
+  AgentMetadata({
     this.inputTokenCount,
     this.outputTokenCount,
     this.totalTokenCount,
@@ -173,7 +173,7 @@ class Metadata {
     this.executionTimeSeconds,
   });
 
-  factory Metadata.fromJson(Map<String, dynamic> json) => Metadata(
+  factory AgentMetadata.fromJson(Map<String, dynamic> json) => AgentMetadata(
         inputTokenCount: json["input_token_count"] is double
             ? (json["input_token_count"] as double).toInt()
             : json["input_token_count"],
@@ -196,7 +196,7 @@ class Metadata {
       };
 }
 
-class Response {
+class AgentResponsePayload {
   final dynamic message;
   final String? foodName;
   final String? portion;
@@ -208,7 +208,7 @@ class Response {
   final int? overallHealthScore;
   final String? overallHealthComments;
 
-  Response({
+  AgentResponsePayload({
     this.message,
     this.foodName,
     this.portion,
@@ -221,7 +221,8 @@ class Response {
     this.overallHealthComments,
   });
 
-  factory Response.fromJson(Map<String, dynamic> json) => Response(
+  factory AgentResponsePayload.fromJson(Map<String, dynamic> json) =>
+      AgentResponsePayload(
         message: json["message"],
         foodName: json["foodName"],
         portion: json["portion"],

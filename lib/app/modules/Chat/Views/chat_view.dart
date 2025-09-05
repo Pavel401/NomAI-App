@@ -1,6 +1,13 @@
+import 'package:NomAi/app/components/buttons.dart';
 import 'package:NomAi/app/models/Auth/user.dart';
 import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_bloc.dart';
 import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_state.dart';
+import 'package:NomAi/app/modules/Scanner/views/scan_view.dart';
+import 'package:NomAi/app/repo/nutrition_record_repo.dart';
+import 'package:NomAi/app/models/AI/nutrition_record.dart';
+import 'package:NomAi/app/models/AI/nutrition_output.dart';
+import 'package:NomAi/app/models/AI/nutrition_input.dart';
+import 'package:NomAi/app/constants/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -110,11 +117,11 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
               ),
             ),
             const Spacer(),
-            if (isNarrow) ...[
-              _buildCompactUserControls(),
-            ] else ...[
-              _buildFullUserControls(),
-            ],
+            // if (isNarrow) ...[
+            //   _buildCompactUserControls(),
+            // ] else ...[
+            //   _buildFullUserControls(),
+            // ],
           ],
         );
       },
@@ -384,6 +391,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         mainAxisAlignment:
             isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
+          //If the message is from the AI agent, show the agent icon
           if (!isUser) ...[
             Container(
               width: 32,
@@ -400,31 +408,37 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             ),
             SizedBox(width: 2.w),
           ],
+          //Now the message bubble ,
           Flexible(
             child: Container(
               constraints: BoxConstraints(
                 maxWidth: MediaQuery.of(context).size.width * 0.75,
               ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-              decoration: BoxDecoration(
-                color: isUser ? MealAIColors.blackText : MealAIColors.greyLight,
-                borderRadius: BorderRadius.circular(20).copyWith(
-                  bottomLeft: !isUser ? const Radius.circular(4) : null,
-                  bottomRight: isUser ? const Radius.circular(4) : null,
-                ),
-                border: !isUser
-                    ? Border.all(
-                        color: MealAIColors.grey.withOpacity(0.2), width: 1)
-                    : null,
-              ),
               child: message.role == 'model' &&
                       message.toolReturns != null &&
                       message.toolReturns!.isNotEmpty
                   ? _buildNutritionResponse(message)
-                  : _buildMessageContent(message, isUser),
+                  : Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isUser
+                            ? MealAIColors.blackText
+                            : MealAIColors.greyLight,
+                        borderRadius: BorderRadius.circular(20).copyWith(
+                          bottomLeft: !isUser ? const Radius.circular(4) : null,
+                          bottomRight: isUser ? const Radius.circular(4) : null,
+                        ),
+                        border: !isUser
+                            ? Border.all(
+                                color: MealAIColors.grey.withOpacity(0.2),
+                                width: 1)
+                            : null,
+                      ),
+                      child: _buildMessageContent(message, isUser),
+                    ),
             ),
           ),
           if (isUser) ...[
@@ -449,24 +463,566 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
   }
 
   Widget _buildNutritionResponse(AgentResponse.AgentResponse message) {
-    final nutritionResponse =
-        NutritionService.extractNutritionResponse(message.toolReturns!);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (message.content?.trim().isNotEmpty == true) ...[
-          MarkdownBody(
-            data: message.content!,
-            styleSheet: _getMarkdownStyleSheet(false, 400),
-            shrinkWrap: true,
-            selectable: true,
-          ),
-          SizedBox(height: 4.w),
+        // Display tool calls if they exist (showing what tools are being used)
+        if (message.toolCalls != null && message.toolCalls!.isNotEmpty) ...[
+          ...message.toolCalls!
+              .map((toolCall) => _buildToolCallIndicator(toolCall)),
+          SizedBox(height: 2.w.clamp(8.0, 12.0)),
         ],
-        if (nutritionResponse != null) _buildNutritionCard(nutritionResponse),
+
+        // Display message content if available
+        if (message.content?.trim().isNotEmpty == true) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: MealAIColors.greyLight,
+              borderRadius: BorderRadius.circular(20).copyWith(
+                bottomLeft: const Radius.circular(4),
+              ),
+              border: Border.all(
+                  color: MealAIColors.grey.withOpacity(0.2), width: 1),
+            ),
+            child: MarkdownBody(
+              data: message.content!,
+              styleSheet: _getMarkdownStyleSheet(false, 400),
+              shrinkWrap: true,
+              selectable: true,
+            ),
+          ),
+          SizedBox(height: 3.w.clamp(12.0, 16.0)),
+        ],
+
+        // Display tool outputs
+        _buildToolOutputResponse(message.toolReturns!),
       ],
     );
+  }
+
+  Widget _buildToolCallIndicator(AgentResponse.ToolCall toolCall) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: MealAIColors.blackText.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: MealAIColors.blackText.withOpacity(0.1)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(MealAIColors.blackText),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Using ${_getToolDisplayName(toolCall.toolName ?? 'tool')}...',
+            style: TextStyle(
+              fontSize: 13.sp.clamp(12.0, 15.0),
+              color: MealAIColors.grey,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToolOutputResponse(List<AgentResponse.ToolReturn> toolReturns) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: toolReturns.map((toolReturn) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          child: _buildToolCard(toolReturn),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildToolCard(AgentResponse.ToolReturn toolReturn) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: MealAIColors.whiteText,
+        border: Border.all(
+            color: MealAIColors.blackText.withOpacity(0.08), width: 1.5),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: MealAIColors.blackText.withOpacity(0.04),
+            offset: const Offset(0, 4),
+            blurRadius: 12,
+            spreadRadius: 0,
+          ),
+          BoxShadow(
+            color: MealAIColors.blackText.withOpacity(0.02),
+            offset: const Offset(0, 1),
+            blurRadius: 3,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Tool header
+          _buildToolHeader(toolReturn),
+
+          // Tool content
+          _buildToolContent(toolReturn),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToolHeader(AgentResponse.ToolReturn toolReturn) {
+    final toolName = toolReturn.toolName ?? 'Tool Output';
+    final status = toolReturn.content?.status ?? 200;
+    final isSuccess = status >= 200 && status < 300;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(4.w.clamp(16.0, 20.0)),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isSuccess
+              ? [
+                  MealAIColors.blackText.withOpacity(0.03),
+                  MealAIColors.blackText.withOpacity(0.08),
+                ]
+              : [
+                  MealAIColors.red.withOpacity(0.03),
+                  MealAIColors.red.withOpacity(0.08),
+                ],
+        ),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        border: Border(
+          bottom: BorderSide(
+            color: MealAIColors.blackText.withOpacity(0.08),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(3.w.clamp(10.0, 12.0)),
+            decoration: BoxDecoration(
+              color: isSuccess
+                  ? MealAIColors.blackText.withOpacity(0.1)
+                  : MealAIColors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: isSuccess
+                      ? MealAIColors.blackText.withOpacity(0.1)
+                      : MealAIColors.red.withOpacity(0.1),
+                  offset: const Offset(0, 2),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+            child: Icon(
+              _getToolIcon(toolName),
+              color: isSuccess ? MealAIColors.blackText : MealAIColors.red,
+              size: 5.w.clamp(20.0, 26.0),
+            ),
+          ),
+          SizedBox(width: 4.w.clamp(12.0, 16.0)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _getToolDisplayName(toolName),
+                  style: TextStyle(
+                    fontSize: 17.sp.clamp(15.0, 19.0),
+                    fontWeight: FontWeight.w700,
+                    color: MealAIColors.blackText,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                SizedBox(height: 1.5.w.clamp(4.0, 6.0)),
+                Wrap(
+                  spacing: 2.w.clamp(8.0, 10.0),
+                  runSpacing: 1.w.clamp(4.0, 6.0),
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 3.w.clamp(10.0, 12.0),
+                        vertical: 1.5.w.clamp(5.0, 7.0),
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSuccess ? Colors.green : MealAIColors.red,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: (isSuccess ? Colors.green : MealAIColors.red)
+                                .withOpacity(0.3),
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isSuccess ? Icons.check_circle : Icons.error,
+                            size: 14,
+                            color: MealAIColors.whiteText,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            isSuccess ? 'Success' : 'Error',
+                            style: TextStyle(
+                              fontSize: 12.sp.clamp(11.0, 14.0),
+                              fontWeight: FontWeight.w700,
+                              color: MealAIColors.whiteText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (toolReturn.content?.metadata != null)
+                      _buildMetadataBadge(toolReturn.content!.metadata!),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetadataBadge(AgentResponse.AgentMetadata metadata) {
+    String displayText = '';
+    IconData icon = Icons.info;
+
+    if (metadata.executionTimeSeconds != null) {
+      displayText = '${metadata.executionTimeSeconds!.toStringAsFixed(2)}s';
+      icon = Icons.timer;
+    } else if (metadata.totalTokenCount != null) {
+      displayText = '${metadata.totalTokenCount} tokens';
+      icon = Icons.token;
+    }
+
+    if (displayText.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: 3.w.clamp(10.0, 12.0),
+        vertical: 1.5.w.clamp(5.0, 7.0),
+      ),
+      decoration: BoxDecoration(
+        color: MealAIColors.greyLight,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: MealAIColors.grey.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: MealAIColors.grey.withOpacity(0.1),
+            offset: const Offset(0, 1),
+            blurRadius: 2,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 12,
+            color: MealAIColors.grey,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            displayText,
+            style: TextStyle(
+              fontSize: 11.sp.clamp(10.0, 13.0),
+              fontWeight: FontWeight.w600,
+              color: MealAIColors.grey,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToolContent(AgentResponse.ToolReturn toolReturn) {
+    final content = toolReturn.content;
+
+    return Padding(
+      padding: EdgeInsets.all(4.w.clamp(16.0, 20.0)),
+      child: Builder(
+        builder: (context) {
+          if (content?.response != null) {
+            // Check if it's a nutrition response
+            final nutritionResponse =
+                NutritionService.extractNutritionResponse([toolReturn]);
+            if (nutritionResponse != null) {
+              return _buildNutritionCard(nutritionResponse);
+            }
+
+            // Handle other structured responses
+            return _buildStructuredResponse(content!.response!);
+          }
+
+          if (content?.message != null) {
+            return _buildMessageResponse(content!.message!);
+          }
+
+          // Fallback to raw content display
+          return _buildRawResponse(toolReturn);
+        },
+      ),
+    );
+  }
+
+  Widget _buildStructuredResponse(AgentResponse.AgentResponsePayload response) {
+    // If this has nutrition data, use the existing nutrition card
+    if (response.ingredients != null && response.ingredients!.isNotEmpty) {
+      return _buildNutritionCard(response);
+    }
+
+    // For other structured responses, create a generic structured view
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (response.message != null)
+          _buildResponseField('Message', response.message.toString()),
+        if (response.foodName != null)
+          _buildResponseField('Food Name', response.foodName!),
+        // Add more fields as needed based on your response structure
+      ],
+    );
+  }
+
+  Widget _buildMessageResponse(String message) {
+    return Container(
+      padding: EdgeInsets.all(4.w.clamp(16.0, 20.0)),
+      decoration: BoxDecoration(
+        color: MealAIColors.greyLight.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: MealAIColors.grey.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: MealAIColors.blackText.withOpacity(0.02),
+            offset: const Offset(0, 1),
+            blurRadius: 3,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.message,
+                size: 16,
+                color: MealAIColors.grey,
+              ),
+              SizedBox(width: 2.w.clamp(8.0, 10.0)),
+              Text(
+                'Response',
+                style: TextStyle(
+                  fontSize: 13.sp.clamp(12.0, 15.0),
+                  fontWeight: FontWeight.w600,
+                  color: MealAIColors.grey,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 3.w.clamp(8.0, 12.0)),
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: 15.sp.clamp(13.0, 17.0),
+              color: MealAIColors.blackText,
+              height: 1.6,
+              letterSpacing: -0.1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRawResponse(AgentResponse.ToolReturn toolReturn) {
+    final rawContent =
+        toolReturn.content?.toJson().toString() ?? 'No content available';
+
+    return Container(
+      padding: EdgeInsets.all(4.w.clamp(16.0, 20.0)),
+      decoration: BoxDecoration(
+        color: MealAIColors.greyLight.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: MealAIColors.grey.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.code,
+                size: 18,
+                color: MealAIColors.grey,
+              ),
+              SizedBox(width: 2.w.clamp(8.0, 10.0)),
+              Text(
+                'Raw Output',
+                style: TextStyle(
+                  fontSize: 13.sp.clamp(12.0, 15.0),
+                  fontWeight: FontWeight.w600,
+                  color: MealAIColors.grey,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: MealAIColors.blackText.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'JSON',
+                  style: TextStyle(
+                    fontSize: 10.sp.clamp(9.0, 12.0),
+                    fontWeight: FontWeight.w600,
+                    color: MealAIColors.grey,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 3.w.clamp(12.0, 16.0)),
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(4.w.clamp(12.0, 16.0)),
+            decoration: BoxDecoration(
+              color: MealAIColors.blackText.withOpacity(0.03),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: MealAIColors.grey.withOpacity(0.15)),
+            ),
+            child: SelectableText(
+              rawContent,
+              style: TextStyle(
+                fontSize: 12.sp.clamp(11.0, 14.0),
+                color: MealAIColors.blackText.withOpacity(0.8),
+                fontFamily: 'monospace',
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResponseField(String label, String value) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 3.w.clamp(8.0, 12.0)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12.sp.clamp(11.0, 14.0),
+              fontWeight: FontWeight.w600,
+              color: MealAIColors.grey,
+            ),
+          ),
+          SizedBox(height: 1.w.clamp(4.0, 6.0)),
+          Container(
+            padding: EdgeInsets.all(3.w.clamp(8.0, 12.0)),
+            decoration: BoxDecoration(
+              color: MealAIColors.greyLight,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: MealAIColors.grey.withOpacity(0.3)),
+            ),
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 13.sp.clamp(12.0, 15.0),
+                color: MealAIColors.blackText,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getToolIcon(String toolName) {
+    switch (toolName.toLowerCase()) {
+      case 'nutrition_analysis':
+      case 'analyze_food':
+        return Icons.analytics;
+      case 'search':
+      case 'web_search':
+        return Icons.search;
+      case 'image_analysis':
+      case 'analyze_image':
+        return Icons.image;
+      case 'recommendation':
+        return Icons.recommend;
+      case 'calculation':
+      case 'calculate':
+        return Icons.calculate;
+      case 'database':
+      case 'query':
+        return Icons.storage;
+      default:
+        return Icons.extension;
+    }
+  }
+
+  String _getToolDisplayName(String toolName) {
+    switch (toolName.toLowerCase()) {
+      case 'nutrition_analysis':
+      case 'analyze_food':
+        return 'Nutrition Analysis';
+      case 'search':
+      case 'web_search':
+        return 'Web Search';
+      case 'image_analysis':
+      case 'analyze_image':
+        return 'Image Analysis';
+      case 'recommendation':
+        return 'Recommendation Engine';
+      case 'calculation':
+      case 'calculate':
+        return 'Calculation';
+      case 'database':
+      case 'query':
+        return 'Database Query';
+      default:
+        return toolName
+            .replaceAll('_', ' ')
+            .split(' ')
+            .map((word) => word.isNotEmpty
+                ? word[0].toUpperCase() + word.substring(1).toLowerCase()
+                : '')
+            .join(' ');
+    }
   }
 
   Widget _buildMessageContent(
@@ -651,7 +1207,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildNutritionCard(AgentResponse.Response response) {
+  Widget _buildNutritionCard(AgentResponse.AgentResponsePayload response) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -674,6 +1230,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                //This is the header section with food name, portion size, confidence score
                 _buildNutritionHeader(response),
                 if (response.ingredients != null &&
                     response.ingredients!.isNotEmpty) ...[
@@ -694,6 +1251,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                   SizedBox(height: 4.w.clamp(12.0, 20.0)),
                   _buildAlternatives(response.suggestAlternatives!),
                 ],
+
+                _buildAddToMealsButton(response),
               ],
             ),
           ),
@@ -702,7 +1261,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildNutritionHeader(AgentResponse.Response response) {
+  Widget _buildNutritionHeader(AgentResponse.AgentResponsePayload response) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -742,7 +1301,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
           children: [
             _buildInfoChip(
                 'Portion', '${response.portionSize} ${response.portion}'),
-            _buildInfoChip('Confidence', '${response.confidenceScore}/10'),
+            // _buildInfoChip('Confidence', '${response.confidenceScore}/10'),
           ],
         ),
       ],
@@ -765,7 +1324,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         style: TextStyle(
           fontSize: 12.sp.clamp(11.0, 14.0),
           fontWeight: FontWeight.w500,
-          color: MealAIColors.grey,
+          color: MealAIColors.blackText,
         ),
         overflow: TextOverflow.ellipsis,
       ),
@@ -1014,7 +1573,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildHealthAssessment(AgentResponse.Response response) {
+  Widget _buildHealthAssessment(AgentResponse.AgentResponsePayload response) {
     final overallScore = response.overallHealthScore ?? 0;
     final color = _getHealthScoreColor(overallScore);
 
@@ -1336,6 +1895,242 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         ],
       ),
     );
+  }
+
+  Future<void> _addToMeals(BuildContext context, StateSetter setState,
+      AgentResponse.AgentResponsePayload response) async {
+    setState(() {});
+
+    try {
+      // Get user ID
+      String userId = user!.userId;
+
+      // Get user model for preferences
+      UserModel? userModel;
+      try {
+        if (context.mounted) {
+          final userBloc = context.read<UserBloc>();
+          final userState = userBloc.state;
+          if (userState is UserLoaded) {
+            userModel = userState.userModel;
+          }
+        }
+      } catch (e) {
+        print("Error getting user preferences: $e");
+      }
+
+      // Convert AgentResponse.Response to NutritionOutput
+      final nutritionOutput = NutritionOutput(
+        status: 200,
+        message: "Added from chat",
+        response: NutritionResponse(
+          message: response.message?.toString() ?? "",
+          foodName: response.foodName,
+          portion: response.portion,
+          portionSize: response.portionSize?.toDouble(),
+          confidenceScore: response.confidenceScore,
+          ingredients: response.ingredients
+              ?.map((ingredient) => Ingredient(
+                    name: ingredient.name,
+                    calories: ingredient.calories,
+                    protein: ingredient.protein,
+                    carbs: ingredient.carbs,
+                    fiber: ingredient.fiber,
+                    fat: ingredient.fat,
+                    healthScore: ingredient.healthScore,
+                    healthComments: ingredient.healthComments,
+                  ))
+              .toList(),
+          primaryConcerns: response.primaryConcerns
+              ?.map((concern) => PrimaryConcern(
+                    issue: concern.issue,
+                    explanation: concern.explanation,
+                    recommendations: concern.recommendations
+                        ?.map((rec) => Recommendation(
+                              food: rec.food,
+                              quantity: rec.quantity,
+                              reasoning: rec.reasoning,
+                            ))
+                        .toList(),
+                  ))
+              .toList(),
+          suggestAlternatives: response.suggestAlternatives
+              ?.map((alt) => Ingredient(
+                    name: alt.name,
+                    calories: alt.calories,
+                    protein: alt.protein,
+                    carbs: alt.carbs,
+                    fiber: alt.fiber,
+                    fat: alt.fat,
+                    healthScore: alt.healthScore,
+                    healthComments: alt.healthComments,
+                  ))
+              .toList(),
+          overallHealthScore: response.overallHealthScore,
+          overallHealthComments: response.overallHealthComments,
+        ),
+      );
+
+      // Create nutrition record similar to ScannerController
+      DateTime time = DateTime.now();
+      NutritionRecord nutritionRecord = NutritionRecord(
+        recordTime: time,
+        nutritionInputQuery: NutritionInputQuery(
+          imageUrl: "",
+          scanMode: ScanMode.food,
+          food_description: response.foodName ?? "Chat analysis",
+          dietaryPreferences: userModel?.userInfo?.selectedDiet != null
+              ? [userModel!.userInfo!.selectedDiet]
+              : [],
+          allergies: userModel?.userInfo?.selectedAllergies != null &&
+                  userModel!.userInfo!.selectedAllergies.isNotEmpty
+              ? userModel.userInfo!.selectedAllergies
+              : [],
+          selectedGoals: userModel?.userInfo?.selectedGoal != null
+              ? [userModel!.userInfo!.selectedGoal.name]
+              : [],
+        ),
+        processingStatus: ProcessingStatus.COMPLETED,
+        nutritionOutput: nutritionOutput,
+      );
+
+      final nutritionRecordRepo = NutritionRecordRepo();
+      String dailyRecordID = nutritionRecordRepo.getRecordId(time);
+
+      // Calculate total nutrition values
+      int totalNutritionValue = 0;
+      int totalProteinValue = 0;
+      int totalFatValue = 0;
+      int totalCarbValue = 0;
+
+      if (response.ingredients != null) {
+        for (final ingredient in response.ingredients!) {
+          totalNutritionValue += ingredient.calories ?? 0;
+          totalProteinValue += ingredient.protein ?? 0;
+          totalFatValue += ingredient.fat ?? 0;
+          totalCarbValue += ingredient.carbs ?? 0;
+        }
+      }
+
+      // Get existing records for today
+      DailyNutritionRecords? existingRecords;
+      try {
+        existingRecords =
+            await nutritionRecordRepo.getNutritionData(userId, time);
+      } catch (e) {
+        // If no existing records, create new empty one
+        existingRecords = DailyNutritionRecords(
+          dailyRecords: [],
+          recordDate: time,
+          recordId: dailyRecordID,
+          dailyConsumedCalories: 0,
+          dailyBurnedCalories: 0,
+          dailyConsumedProtein: 0,
+          dailyConsumedFat: 0,
+          dailyConsumedCarb: 0,
+        );
+      }
+
+      // Calculate updated totals
+      int totalConsumedCalories =
+          existingRecords.dailyConsumedCalories + totalNutritionValue;
+      int totalConsumedFat = existingRecords.dailyConsumedFat + totalFatValue;
+      int totalConsumedProtein =
+          existingRecords.dailyConsumedProtein + totalProteinValue;
+      int totalConsumedCarb =
+          existingRecords.dailyConsumedCarb + totalCarbValue;
+
+      // Add new record to daily records
+      List<NutritionRecord> updatedDailyRecords =
+          List.from(existingRecords.dailyRecords);
+      updatedDailyRecords.add(nutritionRecord);
+
+      // Create updated daily nutrition records
+      DailyNutritionRecords dailyNutritionRecords = DailyNutritionRecords(
+        dailyRecords: updatedDailyRecords,
+        recordDate: time,
+        recordId: dailyRecordID,
+        dailyConsumedCalories: totalConsumedCalories,
+        dailyBurnedCalories: existingRecords.dailyBurnedCalories,
+        dailyConsumedProtein: totalConsumedProtein,
+        dailyConsumedFat: totalConsumedFat,
+        dailyConsumedCarb: totalConsumedCarb,
+      );
+
+      // Save to database
+      print("🚀 About to save nutrition data to database...");
+      final result = await nutritionRecordRepo.saveNutritionData(
+          dailyNutritionRecords, userId);
+      print("📤 Save operation completed with result: $result");
+
+      if (result == QueryStatus.SUCCESS) {
+        print("✅ Save successful, showing success message");
+        Get.snackbar(
+          "Success",
+          "Added to your meals!",
+          backgroundColor: Colors.green.withOpacity(0.7),
+          colorText: Colors.white,
+          duration: Duration(seconds: 2),
+        );
+      } else {
+        print("❌ Save failed, showing error message");
+        Get.snackbar(
+          "Error",
+          "Failed to add to meals. Please try again.",
+          backgroundColor: Colors.red.withOpacity(0.7),
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      print("Error adding to meals: $e");
+      Get.snackbar(
+        "Error",
+        "Failed to add to meals. Please try again.",
+        backgroundColor: Colors.red.withOpacity(0.7),
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  Widget _buildAddToMealsButton(AgentResponse.AgentResponsePayload response) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        bool isAdded = false;
+        bool isLoading = false;
+
+        // Function to update states
+        void updateButtonState({bool? loading, bool? added}) {
+          setState(() {
+            if (loading != null) isLoading = loading;
+            if (added != null) isAdded = added;
+          });
+        }
+
+        return Padding(
+          padding: EdgeInsets.only(top: 4.w.clamp(12.0, 20.0)),
+          child: PrimaryButton(
+            onPressed: () {
+              if (isAdded || isLoading) return;
+
+              updateButtonState(loading: true);
+
+              _addToMeals(context, setState, response).then((_) {
+                updateButtonState(loading: false, added: true);
+              }).catchError((error) {
+                updateButtonState(loading: false);
+              });
+            },
+            tile: _getButtonText(isLoading, isAdded),
+          ),
+        );
+      },
+    );
+  }
+
+  String _getButtonText(bool isLoading, bool isAdded) {
+    if (isLoading) return 'Adding...';
+    if (isAdded) return 'Added to My Meals ✓';
+    return 'Add to My Meals';
   }
 
   Widget _buildTypingIndicator() {
