@@ -15,7 +15,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:NomAi/app/models/Agent/agent_response.dart' as AgentResponse;
+import 'package:NomAi/app/models/Agent/agent_response.dart' as AgentModel;
 import 'package:NomAi/app/modules/Chat/controller/chat_controller.dart';
 import 'package:NomAi/app/constants/colors.dart';
 import 'package:NomAi/app/services/nutrition_service.dart';
@@ -67,12 +67,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
         return Scaffold(
           backgroundColor: MealAIColors.whiteText,
-          appBar: AppBar(
-            backgroundColor: MealAIColors.whiteText,
-            elevation: 0,
-            title: _buildResponsiveAppBarTitle(),
-            systemOverlayStyle: SystemUiOverlayStyle.dark,
-          ),
           body: SafeArea(
             child: Column(
               children: [
@@ -86,159 +80,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildResponsiveAppBarTitle() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final availableWidth = constraints.maxWidth;
-        final bool isNarrow = availableWidth < 350;
-
-        return Row(
-          children: [
-            Container(
-              width: isNarrow ? 32 : 8.w,
-              height: isNarrow ? 32 : 8.w,
-              decoration: BoxDecoration(
-                color: MealAIColors.blackText,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.restaurant_menu,
-                color: MealAIColors.whiteText,
-                size: isNarrow ? 18 : 5.w,
-              ),
-            ),
-            SizedBox(width: isNarrow ? 8 : 3.w),
-            Text(
-              'NomAI',
-              style: TextStyle(
-                color: MealAIColors.blackText,
-                fontSize: isNarrow ? 18 : 18.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const Spacer(),
-            // if (isNarrow) ...[
-            //   _buildCompactUserControls(),
-            // ] else ...[
-            //   _buildFullUserControls(),
-            // ],
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildCompactUserControls() {
-    return PopupMenuButton<String>(
-      icon: Icon(Icons.more_vert, color: MealAIColors.grey),
-      onSelected: (value) {
-        if (value == 'user_id') {
-          _showUserIdDialog(context);
-        }
-      },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: 'user_id',
-          child: GetBuilder<ChatController>(
-            builder: (controller) => Row(
-              children: [
-                const Icon(Icons.person, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  controller.userIdController.text.isEmpty
-                      ? 'Guest'
-                      : controller.userIdController.text,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFullUserControls() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GestureDetector(
-          onTap: () => _showUserIdDialog(context),
-          child: GetBuilder<ChatController>(
-            builder: (controller) => Container(
-              constraints: BoxConstraints(maxWidth: 25.w),
-              padding: EdgeInsets.symmetric(
-                horizontal: 3.w,
-                vertical: 1.h,
-              ),
-              decoration: BoxDecoration(
-                color: MealAIColors.greyLight,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: MealAIColors.grey.withOpacity(0.3),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.person,
-                    size: 16,
-                    color: MealAIColors.blackText,
-                  ),
-                  SizedBox(width: 1.5.w),
-                  Flexible(
-                    child: Text(
-                      controller.userIdController.text.isEmpty
-                          ? 'Guest'
-                          : controller.userIdController.text,
-                      style: TextStyle(
-                        color: MealAIColors.blackText,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        SizedBox(width: 2.w),
-      ],
-    );
-  }
-
-  void _showUserIdDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Change User ID'),
-        content: TextField(
-          controller: controller.userIdController,
-          decoration: const InputDecoration(
-            hintText: 'Enter User ID',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              controller.update();
-              Navigator.pop(context);
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-  }
-
+//This widget handles the list of messages in the chat interface
   Widget _buildMessagesList() {
     return Container(
       color: MealAIColors.whiteText,
@@ -269,7 +111,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
         return ListView.builder(
           controller: controller.scrollController,
-          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+          padding: EdgeInsets.only(top: 2.h, bottom: 2.h),
           itemCount:
               controller.messages.length + (controller.isTyping.value ? 1 : 0),
           itemBuilder: (context, index) {
@@ -337,8 +179,40 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildMessageItem(AgentResponse.AgentResponse message, int index) {
-    final isUser = message.role == 'user';
+  Widget _buildMessageItem(AgentModel.AgentResponse message, int index) {
+    String imageUrl = "";
+
+    if (message.toolReturns != null && message.toolReturns!.isNotEmpty) {
+      // This is a tool return message. Find the imageUrl from previous messages.
+      for (int i = index; i >= 0; i--) {
+        final prevMessage = controller.messages[i];
+        if (prevMessage.toolCalls != null &&
+            prevMessage.toolCalls!.isNotEmpty) {
+          for (var call in prevMessage.toolCalls!) {
+            final url = AgentModel.cleanArgsForImage(call.args);
+            if (url.isNotEmpty) {
+              imageUrl = url;
+              break;
+            }
+          }
+        }
+        if (imageUrl.isNotEmpty) {
+          break;
+        }
+      }
+    } else if (message.toolCalls != null && message.toolCalls!.isNotEmpty) {
+      // This is the message that makes the tool call.
+      for (var call in message.toolCalls!) {
+        final url = AgentModel.cleanArgsForImage(call.args);
+        if (url.isNotEmpty) {
+          imageUrl = url;
+          print("Extracted imageUrl: $imageUrl");
+          break;
+        }
+      }
+    }
+
+    final isUser = message.role == AgentModel.AgentRole.user;
     final isSystem = message.isSystem == true;
 
     if (message.content?.trim().isEmpty == true &&
@@ -346,133 +220,111 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       return const SizedBox.shrink();
     }
 
-    // Handle system messages (like tool indicators) similar to web implementation
-    if (isSystem) {
-      return Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: MealAIColors.greyLight,
-              borderRadius: BorderRadius.circular(50),
-              border: Border.all(color: MealAIColors.grey.withOpacity(0.3)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.auto_awesome,
-                  size: 16,
-                  color: MealAIColors.grey,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  message.content ?? '',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: MealAIColors.grey,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
+    return InkWell(
+      onTap: () {
+        SnackBar snackBar = SnackBar(
+          content: Text(message.content ?? 'No content to copy'),
+          duration: const Duration(seconds: 1),
+          backgroundColor: MealAIColors.whiteText,
+        );
+        Clipboard.setData(
+            ClipboardData(text: message.toJson().toString() ?? ''));
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        children: [
-          //If the message is from the AI agent, show the agent icon
-          if (!isUser) ...[
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: MealAIColors.blackText,
-                shape: BoxShape.circle,
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment:
+              isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+          children: [
+            //If the message is from the AI agent, show the agent icon
+            if (!isUser) ...[
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: MealAIColors.blackText,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.smart_toy,
+                  color: MealAIColors.whiteText,
+                  size: 18,
+                ),
               ),
-              child: Icon(
-                Icons.smart_toy,
-                color: MealAIColors.whiteText,
-                size: 18,
-              ),
-            ),
-            SizedBox(width: 2.w),
-          ],
-          //Now the message bubble ,
-          Flexible(
-            child: Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.75,
-              ),
-              child: message.role == 'model' &&
-                      message.toolReturns != null &&
-                      message.toolReturns!.isNotEmpty
-                  ? _buildNutritionResponse(message)
-                  : Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isUser
-                            ? MealAIColors.blackText
-                            : MealAIColors.greyLight,
-                        borderRadius: BorderRadius.circular(20).copyWith(
-                          bottomLeft: !isUser ? const Radius.circular(4) : null,
-                          bottomRight: isUser ? const Radius.circular(4) : null,
+              SizedBox(width: 2.w),
+            ],
+
+            //Now the message bubble ,
+            Flexible(
+              child: Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.75,
+                ),
+
+                //If the message is from the Agent ( like the response to nutrition analysis tool), show the nutrition card
+                child: message.role == AgentModel.AgentRole.model &&
+                        message.toolReturns != null &&
+                        message.toolReturns!.isNotEmpty
+                    ? _buildNutritionResponse(
+                        message, imageUrl) // Pass imageUrl here
+
+                    //If not an tool response, show regular message bubble from the agent
+                    : Container(
+                        padding: EdgeInsets.only(
+                            left: 4.w, right: 4.w, top: 2.h, bottom: 2.h),
+                        decoration: BoxDecoration(
+                          color: isUser
+                              ? MealAIColors.blackText
+                              : MealAIColors.greyLight,
+                          borderRadius: BorderRadius.circular(20).copyWith(
+                            bottomLeft:
+                                !isUser ? const Radius.circular(4) : null,
+                            bottomRight:
+                                isUser ? const Radius.circular(4) : null,
+                          ),
+                          border: !isUser
+                              ? Border.all(
+                                  color: MealAIColors.grey.withOpacity(0.2),
+                                  width: 1)
+                              : null,
                         ),
-                        border: !isUser
-                            ? Border.all(
-                                color: MealAIColors.grey.withOpacity(0.2),
-                                width: 1)
-                            : null,
+                        child: _buildMessageContent(message, isUser),
                       ),
-                      child: _buildMessageContent(message, isUser),
-                    ),
-            ),
-          ),
-          if (isUser) ...[
-            const SizedBox(width: 12),
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: MealAIColors.grey,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.person,
-                color: MealAIColors.whiteText,
-                size: 18,
               ),
             ),
+            if (isUser) ...[
+              const SizedBox(width: 12),
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: MealAIColors.grey,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.person,
+                  color: MealAIColors.whiteText,
+                  size: 18,
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildNutritionResponse(AgentResponse.AgentResponse message) {
+// Modified _buildNutritionResponse method - accept imageUrl as parameter
+  Widget _buildNutritionResponse(
+      AgentModel.AgentResponse message, String imageUrl) {
+    print("Image Url in _buildNutritionResponse is : $imageUrl");
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Display tool calls if they exist (showing what tools are being used)
-        if (message.toolCalls != null && message.toolCalls!.isNotEmpty) ...[
-          ...message.toolCalls!
-              .map((toolCall) => _buildToolCallIndicator(toolCall)),
-          SizedBox(height: 2.w.clamp(8.0, 12.0)),
-        ],
-
         // Display message content if available
         if (message.content?.trim().isNotEmpty == true) ...[
           Container(
@@ -495,59 +347,29 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
           SizedBox(height: 3.w.clamp(12.0, 16.0)),
         ],
 
-        // Display tool outputs
-        _buildToolOutputResponse(message.toolReturns!),
+        // Display tool outputs - pass imageUrl down
+        _buildToolOutputResponse(message.toolReturns!, message, imageUrl),
       ],
     );
   }
 
-  Widget _buildToolCallIndicator(AgentResponse.ToolCall toolCall) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: MealAIColors.blackText.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: MealAIColors.blackText.withOpacity(0.1)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(MealAIColors.blackText),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            'Using ${_getToolDisplayName(toolCall.toolName ?? 'tool')}...',
-            style: TextStyle(
-              fontSize: 13.sp.clamp(12.0, 15.0),
-              color: MealAIColors.grey,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildToolOutputResponse(List<AgentResponse.ToolReturn> toolReturns) {
+  Widget _buildToolOutputResponse(List<AgentModel.ToolReturn> toolReturns,
+      AgentModel.AgentResponse message, String imageUrl) {
+    print("Image Url in _buildToolOutputResponse is : $imageUrl");
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: toolReturns.map((toolReturn) {
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
-          child: _buildToolCard(toolReturn),
+          child: _buildToolCard(toolReturn, message, imageUrl), // Pass imageUrl
         );
       }).toList(),
     );
   }
 
-  Widget _buildToolCard(AgentResponse.ToolReturn toolReturn) {
+  Widget _buildToolCard(AgentModel.ToolReturn toolReturn,
+      AgentModel.AgentResponse message, String imageUrl) {
+    print("Image Url in _buildToolCard is : $imageUrl");
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -573,197 +395,19 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Tool header
-          _buildToolHeader(toolReturn),
-
-          // Tool content
-          _buildToolContent(toolReturn),
+          // Tool content - pass imageUrl down
+          _buildToolContent(toolReturn, message, imageUrl),
         ],
       ),
     );
   }
 
-  Widget _buildToolHeader(AgentResponse.ToolReturn toolReturn) {
-    final toolName = toolReturn.toolName ?? 'Tool Output';
-    final status = toolReturn.content?.status ?? 200;
-    final isSuccess = status >= 200 && status < 300;
-
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(4.w.clamp(16.0, 20.0)),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isSuccess
-              ? [
-                  MealAIColors.blackText.withOpacity(0.03),
-                  MealAIColors.blackText.withOpacity(0.08),
-                ]
-              : [
-                  MealAIColors.red.withOpacity(0.03),
-                  MealAIColors.red.withOpacity(0.08),
-                ],
-        ),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-        border: Border(
-          bottom: BorderSide(
-            color: MealAIColors.blackText.withOpacity(0.08),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(3.w.clamp(10.0, 12.0)),
-            decoration: BoxDecoration(
-              color: isSuccess
-                  ? MealAIColors.blackText.withOpacity(0.1)
-                  : MealAIColors.red.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: isSuccess
-                      ? MealAIColors.blackText.withOpacity(0.1)
-                      : MealAIColors.red.withOpacity(0.1),
-                  offset: const Offset(0, 2),
-                  blurRadius: 4,
-                ),
-              ],
-            ),
-            child: Icon(
-              _getToolIcon(toolName),
-              color: isSuccess ? MealAIColors.blackText : MealAIColors.red,
-              size: 5.w.clamp(20.0, 26.0),
-            ),
-          ),
-          SizedBox(width: 4.w.clamp(12.0, 16.0)),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _getToolDisplayName(toolName),
-                  style: TextStyle(
-                    fontSize: 17.sp.clamp(15.0, 19.0),
-                    fontWeight: FontWeight.w700,
-                    color: MealAIColors.blackText,
-                    letterSpacing: -0.2,
-                  ),
-                ),
-                SizedBox(height: 1.5.w.clamp(4.0, 6.0)),
-                Wrap(
-                  spacing: 2.w.clamp(8.0, 10.0),
-                  runSpacing: 1.w.clamp(4.0, 6.0),
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 3.w.clamp(10.0, 12.0),
-                        vertical: 1.5.w.clamp(5.0, 7.0),
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSuccess ? Colors.green : MealAIColors.red,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: (isSuccess ? Colors.green : MealAIColors.red)
-                                .withOpacity(0.3),
-                            offset: const Offset(0, 2),
-                            blurRadius: 4,
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            isSuccess ? Icons.check_circle : Icons.error,
-                            size: 14,
-                            color: MealAIColors.whiteText,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            isSuccess ? 'Success' : 'Error',
-                            style: TextStyle(
-                              fontSize: 12.sp.clamp(11.0, 14.0),
-                              fontWeight: FontWeight.w700,
-                              color: MealAIColors.whiteText,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (toolReturn.content?.metadata != null)
-                      _buildMetadataBadge(toolReturn.content!.metadata!),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMetadataBadge(AgentResponse.AgentMetadata metadata) {
-    String displayText = '';
-    IconData icon = Icons.info;
-
-    if (metadata.executionTimeSeconds != null) {
-      displayText = '${metadata.executionTimeSeconds!.toStringAsFixed(2)}s';
-      icon = Icons.timer;
-    } else if (metadata.totalTokenCount != null) {
-      displayText = '${metadata.totalTokenCount} tokens';
-      icon = Icons.token;
-    }
-
-    if (displayText.isEmpty) return const SizedBox.shrink();
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: 3.w.clamp(10.0, 12.0),
-        vertical: 1.5.w.clamp(5.0, 7.0),
-      ),
-      decoration: BoxDecoration(
-        color: MealAIColors.greyLight,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: MealAIColors.grey.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: MealAIColors.grey.withOpacity(0.1),
-            offset: const Offset(0, 1),
-            blurRadius: 2,
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 12,
-            color: MealAIColors.grey,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            displayText,
-            style: TextStyle(
-              fontSize: 11.sp.clamp(10.0, 13.0),
-              fontWeight: FontWeight.w600,
-              color: MealAIColors.grey,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildToolContent(AgentResponse.ToolReturn toolReturn) {
+// Modified _buildToolContent method
+  Widget _buildToolContent(AgentModel.ToolReturn toolReturn,
+      AgentModel.AgentResponse message, String imageUrl) {
     final content = toolReturn.content;
+
+    print("Image Url in _buildToolContent is : $imageUrl");
 
     return Padding(
       padding: EdgeInsets.all(4.w.clamp(16.0, 20.0)),
@@ -774,11 +418,12 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             final nutritionResponse =
                 NutritionService.extractNutritionResponse([toolReturn]);
             if (nutritionResponse != null) {
-              return _buildNutritionCard(nutritionResponse);
+              return _buildNutritionCard(
+                  nutritionResponse, message, imageUrl); // Pass imageUrl
             }
-
             // Handle other structured responses
-            return _buildStructuredResponse(content!.response!);
+            return _buildStructuredResponse(
+                content!.response!, message, imageUrl); // Pass imageUrl
           }
 
           if (content?.message != null) {
@@ -792,10 +437,12 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildStructuredResponse(AgentResponse.AgentResponsePayload response) {
+  Widget _buildStructuredResponse(AgentModel.AgentResponsePayload response,
+      AgentModel.AgentResponse message, String imageUrl) {
+    print("ImageUrl in Structured Response: $imageUrl");
     // If this has nutrition data, use the existing nutrition card
     if (response.ingredients != null && response.ingredients!.isNotEmpty) {
-      return _buildNutritionCard(response);
+      return _buildNutritionCard(response, message, imageUrl); // Pass imageUrl
     }
 
     // For other structured responses, create a generic structured view
@@ -862,7 +509,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildRawResponse(AgentResponse.ToolReturn toolReturn) {
+  Widget _buildRawResponse(AgentModel.ToolReturn toolReturn) {
     final rawContent =
         toolReturn.content?.toJson().toString() ?? 'No content available';
 
@@ -971,62 +618,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  IconData _getToolIcon(String toolName) {
-    switch (toolName.toLowerCase()) {
-      case 'nutrition_analysis':
-      case 'analyze_food':
-        return Icons.analytics;
-      case 'search':
-      case 'web_search':
-        return Icons.search;
-      case 'image_analysis':
-      case 'analyze_image':
-        return Icons.image;
-      case 'recommendation':
-        return Icons.recommend;
-      case 'calculation':
-      case 'calculate':
-        return Icons.calculate;
-      case 'database':
-      case 'query':
-        return Icons.storage;
-      default:
-        return Icons.extension;
-    }
-  }
-
-  String _getToolDisplayName(String toolName) {
-    switch (toolName.toLowerCase()) {
-      case 'nutrition_analysis':
-      case 'analyze_food':
-        return 'Nutrition Analysis';
-      case 'search':
-      case 'web_search':
-        return 'Web Search';
-      case 'image_analysis':
-      case 'analyze_image':
-        return 'Image Analysis';
-      case 'recommendation':
-        return 'Recommendation Engine';
-      case 'calculation':
-      case 'calculate':
-        return 'Calculation';
-      case 'database':
-      case 'query':
-        return 'Database Query';
-      default:
-        return toolName
-            .replaceAll('_', ' ')
-            .split(' ')
-            .map((word) => word.isNotEmpty
-                ? word[0].toUpperCase() + word.substring(1).toLowerCase()
-                : '')
-            .join(' ');
-    }
-  }
-
-  Widget _buildMessageContent(
-      AgentResponse.AgentResponse message, bool isUser) {
+//This widget builds the content inside each chat bubble, handling both text and images
+  Widget _buildMessageContent(AgentModel.AgentResponse message, bool isUser) {
     // Debug print to check imageUrl
     if (message.imageUrl != null) {
       print('DEBUG: Message has imageUrl: ${message.imageUrl}');
@@ -1207,7 +800,9 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildNutritionCard(AgentResponse.AgentResponsePayload response) {
+  Widget _buildNutritionCard(AgentModel.AgentResponsePayload response,
+      AgentModel.AgentResponse message, String imageUrl) {
+    print("ImageUrl in Nutrition Card: $imageUrl");
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -1252,7 +847,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                   _buildAlternatives(response.suggestAlternatives!),
                 ],
 
-                _buildAddToMealsButton(response),
+                // Pass the imageUrl parameter instead of trying to extract from toolCalls
+                _buildAddToMealsButton(response, message, imageUrl),
               ],
             ),
           ),
@@ -1261,7 +857,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildNutritionHeader(AgentResponse.AgentResponsePayload response) {
+  Widget _buildNutritionHeader(AgentModel.AgentResponsePayload response) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1331,7 +927,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildNutritionOverview(List<AgentResponse.Ingredient> ingredients) {
+  Widget _buildNutritionOverview(List<AgentModel.Ingredient> ingredients) {
     final total = NutritionService.calculateTotalNutrition(ingredients);
 
     return Column(
@@ -1448,8 +1044,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildIngredientsBreakdown(
-      List<AgentResponse.Ingredient> ingredients) {
+  Widget _buildIngredientsBreakdown(List<AgentModel.Ingredient> ingredients) {
     if (ingredients.length <= 1) return const SizedBox.shrink();
 
     return Column(
@@ -1489,7 +1084,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildIngredientItem(AgentResponse.Ingredient ingredient) {
+  Widget _buildIngredientItem(AgentModel.Ingredient ingredient) {
     final healthScore = ingredient.healthScore ?? 0;
     final color = _getHealthScoreColor(healthScore);
 
@@ -1573,7 +1168,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildHealthAssessment(AgentResponse.AgentResponsePayload response) {
+  Widget _buildHealthAssessment(AgentModel.AgentResponsePayload response) {
     final overallScore = response.overallHealthScore ?? 0;
     final color = _getHealthScoreColor(overallScore);
 
@@ -1670,7 +1265,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildHealthConcerns(List<AgentResponse.PrimaryConcern> concerns) {
+  Widget _buildHealthConcerns(List<AgentModel.PrimaryConcern> concerns) {
     if (concerns.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -1709,7 +1304,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildConcernItem(AgentResponse.PrimaryConcern concern) {
+  Widget _buildConcernItem(AgentModel.PrimaryConcern concern) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -1788,7 +1383,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildAlternatives(List<AgentResponse.Ingredient> alternatives) {
+  Widget _buildAlternatives(List<AgentModel.Ingredient> alternatives) {
     if (alternatives.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -1827,7 +1422,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Widget _buildAlternativeItem(AgentResponse.Ingredient alternative) {
+  Widget _buildAlternativeItem(AgentModel.Ingredient alternative) {
     final healthScore = alternative.healthScore ?? 0;
     final color = _getHealthScoreColor(healthScore);
 
@@ -1897,8 +1492,11 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
-  Future<void> _addToMeals(BuildContext context, StateSetter setState,
-      AgentResponse.AgentResponsePayload response) async {
+  Future<void> _addToMealsWithImageUrl(
+      BuildContext context,
+      StateSetter setState,
+      AgentModel.AgentResponsePayload response,
+      String? imageUrl) async {
     setState(() {});
 
     try {
@@ -1918,6 +1516,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       } catch (e) {
         print("Error getting user preferences: $e");
       }
+
+      print('DEBUG: Using imageUrl for nutrition record: $imageUrl');
 
       // Convert AgentResponse.Response to NutritionOutput
       final nutritionOutput = NutritionOutput(
@@ -1976,7 +1576,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       NutritionRecord nutritionRecord = NutritionRecord(
         recordTime: time,
         nutritionInputQuery: NutritionInputQuery(
-          imageUrl: "",
+          imageUrl: imageUrl,
           scanMode: ScanMode.food,
           food_description: response.foodName ?? "Chat analysis",
           dietaryPreferences: userModel?.userInfo?.selectedDiet != null
@@ -2092,7 +1692,9 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     }
   }
 
-  Widget _buildAddToMealsButton(AgentResponse.AgentResponsePayload response) {
+// Modified _buildAddToMealsButton method - accept imageUrl as parameter
+  Widget _buildAddToMealsButton(AgentModel.AgentResponsePayload response,
+      AgentModel.AgentResponse message, String imageUrl) {
     return StatefulBuilder(
       builder: (context, setState) {
         bool isAdded = false;
@@ -2114,11 +1716,16 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
               updateButtonState(loading: true);
 
-              _addToMeals(context, setState, response).then((_) {
+              _addToMealsWithImageUrl(context, setState, response,
+                      imageUrl) // Use passed imageUrl
+                  .then((_) {
                 updateButtonState(loading: false, added: true);
               }).catchError((error) {
                 updateButtonState(loading: false);
               });
+
+              print("Image URL from parameter: $imageUrl");
+              print("Tool calls from message: ${message.toolCalls}");
             },
             tile: _getButtonText(isLoading, isAdded),
           ),

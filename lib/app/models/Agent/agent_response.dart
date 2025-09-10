@@ -1,12 +1,44 @@
 import 'dart:convert';
 
+enum AgentRole { user, model, system, tool }
+
+String getAgentRoleString(AgentRole role) {
+  switch (role) {
+    case AgentRole.user:
+      return 'user';
+    case AgentRole.model:
+      return 'model';
+    case AgentRole.system:
+      return 'system';
+    case AgentRole.tool:
+      return 'tool';
+    default:
+      return 'unknown';
+  }
+}
+
+AgentRole getAgentRoleFromString(String role) {
+  switch (role) {
+    case 'user':
+      return AgentRole.user;
+    case 'model':
+      return AgentRole.model;
+    case 'system':
+      return AgentRole.system;
+    case 'tool':
+      return AgentRole.tool;
+    default:
+      throw ArgumentError('Unknown role: $role');
+  }
+}
+
 AgentResponse agentResponseFromJson(String str) =>
     AgentResponse.fromJson(json.decode(str));
 
 String agentResponseToJson(AgentResponse data) => json.encode(data.toJson());
 
 class AgentResponse {
-  final String? role;
+  final AgentRole? role;
   final DateTime? timestamp;
   final String? content;
   final bool? isFinal;
@@ -32,32 +64,51 @@ class AgentResponse {
     this.imageUrl,
   });
 
-  factory AgentResponse.fromJson(Map<String, dynamic> json) => AgentResponse(
-        role: json["role"],
-        timestamp: json["timestamp"] == null
-            ? null
-            : DateTime.parse(json["timestamp"]),
-        content: json["content"],
-        isFinal: json["is_final"] ?? json["isFinal"],
-        isPartial: json["is_partial"],
-        isToolCall: json["is_tool_call"],
-        isToolResult: json["is_tool_result"],
-        isSystem: json["is_system"],
-        toolCalls: json["tool_calls"] == null
-            ? []
-            : List<ToolCall>.from(
-                json["tool_calls"]!.map((x) => ToolCall.fromJson(x))),
-        toolReturns: json["tool_returns"] == null
-            ? []
-            : List<ToolReturn>.from(
-                json["tool_returns"]!.map((x) => ToolReturn.fromJson(x))),
-        imageUrl: (json["imageUrl"] == null || json["imageUrl"] == "null")
-            ? null
-            : json["imageUrl"],
-      );
+  factory AgentResponse.fromJson(Map<String, dynamic> json) {
+    String imageUrl = '';
 
+    if (imageUrl.isEmpty &&
+        json["tool_calls"] != null &&
+        json["tool_calls"].isNotEmpty) {
+      // Extract imageUrl from the first tool call's args
+
+      for (int i = 0; i < json["tool_calls"].length; i++) {
+        if (json["tool_calls"][i]["args"] != null) {
+          imageUrl = cleanArgsForImage(json["tool_calls"][i]["args"]);
+          print('Extracted imageUrl from tool_calls: $imageUrl');
+          if (imageUrl.isNotEmpty) {
+            break; // Exit loop if a valid imageUrl is found
+          }
+        }
+      }
+    } else {
+      imageUrl = (json["imageUrl"] == null || json["imageUrl"] == "null")
+          ? ''
+          : json["imageUrl"];
+    }
+    return AgentResponse(
+      role: json["role"] == null ? null : getAgentRoleFromString(json["role"]),
+      timestamp:
+          json["timestamp"] == null ? null : DateTime.parse(json["timestamp"]),
+      content: json["content"],
+      isFinal: json["is_final"] ?? json["isFinal"],
+      isPartial: json["is_partial"],
+      isToolCall: json["is_tool_call"],
+      isToolResult: json["is_tool_result"],
+      isSystem: json["is_system"],
+      toolCalls: json["tool_calls"] == null
+          ? []
+          : List<ToolCall>.from(
+              json["tool_calls"]!.map((x) => ToolCall.fromJson(x))),
+      toolReturns: json["tool_returns"] == null
+          ? []
+          : List<ToolReturn>.from(
+              json["tool_returns"]!.map((x) => ToolReturn.fromJson(x))),
+      imageUrl: imageUrl,
+    );
+  }
   Map<String, dynamic> toJson() => {
-        "role": role,
+        "role": role == null ? null : getAgentRoleString(role!),
         "timestamp": timestamp?.toIso8601String(),
         "content": content,
         "is_final": isFinal,
@@ -97,6 +148,22 @@ class ToolCall {
         "args": args,
         "tool_call_id": toolCallId,
       };
+}
+
+String cleanArgsForImage(String? args) {
+  print('Cleaning args: $args');
+  if (args == null || args.isEmpty) return '';
+
+  try {
+    // Parse JSON string into a Map
+    final Map<String, dynamic> decoded = jsonDecode(args);
+
+    // Extract imageUrl safely
+    return decoded['imageUrl']?.toString() ?? '';
+  } catch (e) {
+    // Handle invalid JSON gracefully
+    return '';
+  }
 }
 
 class ToolReturn {

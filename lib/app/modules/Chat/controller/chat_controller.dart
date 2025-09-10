@@ -60,7 +60,7 @@ class ChatController extends GetxController {
     _messageSubscription?.cancel();
 
     // Trigger UI update
-    update(); // Trigger GetBuilder update for user ID display
+    update();
 
     // Load chat history for new user
     loadChatHistory();
@@ -69,23 +69,13 @@ class ChatController extends GetxController {
   Future<void> loadChatHistory() async {
     final userId = userIdController.text.trim();
     if (userId.isEmpty) {
-      print('DEBUG: User ID is empty, skipping chat history load');
       return;
     }
 
     try {
       isLoading.value = true;
       errorMessage.value = '';
-
-      print('DEBUG: Loading chat history for user: $userId');
-      final stopwatch = Stopwatch()..start();
-
       final history = await _agentService.getChatHistory(userId);
-
-      stopwatch.stop();
-      print(
-          'DEBUG: Loaded ${history.length} messages in ${stopwatch.elapsedMilliseconds}ms');
-
       messages.value = history;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -105,45 +95,6 @@ class ChatController extends GetxController {
 
   void _handleStreamedResponse(AgentResponse response) {
     if (response.role == 'user') return;
-
-    print('DEBUG: Received response:');
-    print('DEBUG: - role: ${response.role}');
-    print('DEBUG: - content: "${response.content}"');
-    print('DEBUG: - imageUrl: "${response.imageUrl}"');
-    print('DEBUG: - isFinal: ${response.isFinal}');
-    print('DEBUG: - isPartial: ${response.isPartial}');
-    print('DEBUG: - isToolCall: ${response.isToolCall}');
-    print('DEBUG: - isToolResult: ${response.isToolResult}');
-    print('DEBUG: - isSystem: ${response.isSystem}');
-
-    // Handle different message types like the web implementation
-    if (response.isToolCall == true) {
-      // Display tool call indicator
-      final toolCallMessage = AgentResponse(
-        role: 'model',
-        timestamp: response.timestamp ?? DateTime.now(),
-        content: '🔧 Analyzing nutrition data...',
-        isFinal: true,
-        isSystem: true,
-      );
-      messages.add(toolCallMessage);
-      _scrollToBottom();
-      return;
-    }
-
-    if (response.isToolResult == true) {
-      // Display tool result indicator
-      final toolResultMessage = AgentResponse(
-        role: 'model',
-        timestamp: response.timestamp ?? DateTime.now(),
-        content: '✅ Nutrition analysis complete',
-        isFinal: true,
-        isSystem: true,
-      );
-      messages.add(toolResultMessage);
-      _scrollToBottom();
-      return;
-    }
 
     // Handle final messages
     final isActuallyFinal = response.isFinal == true;
@@ -218,7 +169,7 @@ class ChatController extends GetxController {
     }
 
     final errorResponse = AgentResponse(
-      role: 'model',
+      role: AgentRole.model,
       timestamp: DateTime.now(),
       content: errorText,
       isFinal: true,
@@ -279,7 +230,7 @@ class ChatController extends GetxController {
         selectedImage.value = File(image.path);
       }
     } catch (e) {
-      print('Error picking image from gallery: $e');
+      // Handle error silently
     }
   }
 
@@ -296,7 +247,7 @@ class ChatController extends GetxController {
         selectedImage.value = File(image.path);
       }
     } catch (e) {
-      print('Error taking photo: $e');
+      // Handle error silently
     }
   }
 
@@ -315,11 +266,8 @@ class ChatController extends GetxController {
       final uploadTask = ref.putFile(imageFile);
       final snapshot = await uploadTask.whenComplete(() => {});
       final downloadURL = await snapshot.ref.getDownloadURL();
-
-      print('Image uploaded successfully: $downloadURL');
       return downloadURL;
     } catch (e) {
-      print('Error uploading image: $e');
       return null;
     } finally {
       isUploadingImage.value = false;
@@ -354,16 +302,12 @@ class ChatController extends GetxController {
     }
 
     final userMessage = AgentResponse(
-      role: 'user',
+      role: AgentRole.user,
       timestamp: DateTime.now(),
       content: message,
       isFinal: true,
       imageUrl: imageUrl,
     );
-
-    print('DEBUG: Creating user message:');
-    print('DEBUG: - content: "$message"');
-    print('DEBUG: - imageUrl: "$imageUrl"');
 
     messages.add(userMessage);
     messageController.clear();
