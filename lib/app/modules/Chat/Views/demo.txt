@@ -1,0 +1,36 @@
+{role: user, timestamp: 2025-09-08T19:42:52.353736Z, content: What are the nutritional facts for this?
+
+[User provided an image: https://firebasestorage.googleapis.com/v0/b/mealai-f58b5.firebasestorage.app/o/chat_images%2FPavel_1757360566681.jpg?alt=media&token=42ef88d6-6c3c-4559-aa52-7aa0cf17af3b], is_final: null, is_partial: null, is_tool_call: null, is_tool_result: null, is_system: null, tool_calls: [], tool_returns: [], imageUrl: }
+
+
+{role: model, timestamp: 2025-09-08T19:43:00.000Z, content: ### Nutritional Facts for the Apple
+
+- **Food Name**: Apple
+- **Portion Size**: 182 grams
+- **Calories**: 95
+- **Protein**: 0g
+- **Carbohydrates**: 25g
+- **Dietary Fiber**: 4g
+- **Fat**: 0g
+
+### Health Insights
+- **Overall Health Score**: 8/10
+- **Health Comments**: Apples are a great source of fiber and vitamins. They make a healthy addition to a balanced diet!
+
+### Considerations
+- **Natural Sugars**: Apples contain natural sugars, which can influence blood sugar levels, especially for those managing diabetes or insulin resistance. Be mindful of portion sizes if this is a concern.
+
+### Suggestions for a Balanced Snack
+- **Pairing Recommendation**: Consider having **1/4 cup of almonds** with your apple. This combination provides healthy fats and protein to help stabilize blood sugar levels.
+
+### Alternative Options
+- If you're looking for something different, try a **Pear**:
+  - **Calories**: 101
+  - **Carbohydrates**: 27g
+  - **Dietary Fiber**: 6g
+
+### Practical Action
+Enjoy your apple as a nutritious snack, but maybe try adding those almonds to enhance the nutritional value and keep you fuller longer!
+
+#### Safety Note
+Always consult with a healthcare professional if you have specific dietary concerns or conditions., is_final: null, is_partial: null, is_tool_call: null, is_tool_result: null, is_system: null, tool_calls: [], tool_returns: [], imageUrl: }
