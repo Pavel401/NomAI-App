@@ -12,7 +12,7 @@ import 'package:NomAi/app/constants/colors.dart';
 import 'package:NomAi/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
 import 'package:NomAi/app/modules/Scanner/controller/scanner_controller.dart';
 
-enum ScanMode { food, barcode, gallery, description }
+enum ScanMode { food, barcode, gallery }
 
 class MealAiCamera extends StatefulWidget {
   MealAiCamera({super.key});
@@ -116,7 +116,6 @@ class _MealAiCameraState extends State<MealAiCamera> {
           sensor: Sensor.position(SensorPosition.back),
           zoom: 0.0,
         ),
-
         bottomActionsBuilder: (state) {
           return AwesomeBottomActions(
             state: state,
@@ -235,37 +234,6 @@ class _MealAiCameraState extends State<MealAiCamera> {
                                 color: MealAIColors.switchBlackColor, size: 28),
                             Text(
                               'Scan Food',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall!
-                                  .copyWith(
-                                      color: MealAIColors.switchBlackColor),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedscanMode = ScanMode.description;
-                        });
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: _selectedscanMode == ScanMode.description
-                              ? MealAIColors.switchWhiteColor
-                              : MealAIColors.greyLight.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(Symbols.food_bank_rounded,
-                                color: MealAIColors.switchBlackColor, size: 28),
-                            Text(
-                              'Explain Dish',
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall!
