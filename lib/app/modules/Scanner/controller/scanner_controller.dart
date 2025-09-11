@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_bloc.dart';
 import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_state.dart';
 import 'package:NomAi/app/models/Auth/user.dart';
+import 'package:NomAi/app/components/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -162,11 +163,9 @@ class ScannerController extends GetxController {
           nutritionOutput: rawNutritionData, // Include the error response
         ));
 
-        Get.snackbar(
-          "Error",
-          rawNutritionData.message ?? "Failed to analyze the image",
-          backgroundColor: Colors.red.withOpacity(0.7),
-          colorText: Colors.white,
+        AppDialogs.showErrorSnackbar(
+          title: "Error",
+          message: rawNutritionData.message ?? "Failed to analyze the image",
         );
 
         return;
@@ -286,12 +285,9 @@ class ScannerController extends GetxController {
         nutritionOutput: failedRecord.nutritionOutput,
       ));
 
-      Get.snackbar(
-        "Processing Failed",
-        "Unable to analyze the image. Please try again.",
-        backgroundColor: Colors.red.withOpacity(0.7),
-        colorText: Colors.white,
-        duration: Duration(seconds: 3),
+      AppDialogs.showErrorSnackbar(
+        title: "Processing Failed",
+        message: "Unable to analyze the image. Please try again.",
       );
 
       update();
@@ -359,11 +355,9 @@ class ScannerController extends GetxController {
   Future<void> retryNutritionAnalysis(
       String userId, NutritionRecord failedRecord, BuildContext context) async {
     if (failedRecord.nutritionInputQuery?.imageFilePath == null) {
-      Get.snackbar(
-        "Cannot Retry",
-        "Original image file not found",
-        backgroundColor: Colors.orange.withOpacity(0.7),
-        colorText: Colors.white,
+      AppDialogs.showErrorSnackbar(
+        title: "Cannot Retry",
+        message: "Original image file not found",
       );
       return;
     }
@@ -371,11 +365,9 @@ class ScannerController extends GetxController {
     // Check if context is still valid before proceeding
     if (!context.mounted) {
       print("Context not mounted, cannot retry nutrition analysis");
-      Get.snackbar(
-        "Cannot Retry",
-        "Screen context is no longer available",
-        backgroundColor: Colors.orange.withOpacity(0.7),
-        colorText: Colors.white,
+      AppDialogs.showErrorSnackbar(
+        title: "Cannot Retry",
+        message: "Screen context is no longer available",
       );
       return;
     }
@@ -409,11 +401,9 @@ class ScannerController extends GetxController {
         ),
       ));
 
-      Get.snackbar(
-        "Cannot Retry",
-        "Original image file not found",
-        backgroundColor: Colors.orange.withOpacity(0.7),
-        colorText: Colors.white,
+      AppDialogs.showErrorSnackbar(
+        title: "Cannot Retry",
+        message: "Original image file not found",
       );
     }
   }
@@ -421,11 +411,9 @@ class ScannerController extends GetxController {
   void removeFailedRecord(NutritionRecord record) {
     if (record.processingStatus == ProcessingStatus.FAILED) {
       removeRecord(record);
-      Get.snackbar(
-        "Record Removed",
-        "Failed nutrition record has been removed",
-        backgroundColor: Colors.blue.withOpacity(0.7),
-        colorText: Colors.white,
+      AppDialogs.showSuccessSnackbar(
+        title: "Record Removed",
+        message: "Failed nutrition record has been removed",
       );
     }
   }
