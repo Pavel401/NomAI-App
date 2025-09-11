@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:NomAi/app/components/dialogs.dart';
 import 'package:NomAi/app/constants/colors.dart';
 import 'package:NomAi/app/constants/constants.dart';
 import 'package:NomAi/app/models/Auth/user.dart';
@@ -58,7 +59,7 @@ class _SignInScreenState extends State<SignInScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(_errorMsg ?? 'Sign in failed'),
-              backgroundColor: Colors.red.shade700,
+              backgroundColor: MealAIColors.grey,
               behavior: SnackBarBehavior.floating,
               margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               shape: RoundedRectangleBorder(
@@ -90,9 +91,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     color: MealAIColors.blackText,
                   ),
                 ),
-
                 SizedBox(height: 40),
-
                 Text(
                   'Welcome to ${AppInfo.appName}',
                   style: TextStyle(
@@ -101,9 +100,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     color: MealAIColors.blackText,
                   ),
                 ),
-
                 SizedBox(height: 16),
-
                 Text(
                   "${AppInfo.appDescription}",
                   textAlign: TextAlign.center,
@@ -112,9 +109,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     color: Colors.grey.shade600,
                   ),
                 ),
-
                 SizedBox(height: 70),
-
                 !signInRequired
                     ? Container(
                         width: double.infinity,
@@ -157,9 +152,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           color: MealAIColors.blackText,
                         ),
                       ),
-
                 SizedBox(height: 20),
-
                 Text(
                   "By signing in, you agree to our Terms & Privacy Policy",
                   textAlign: TextAlign.center,

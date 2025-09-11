@@ -1,8 +1,10 @@
 import 'package:NomAi/app/components/buttons.dart';
+import 'package:NomAi/app/components/dialogs.dart';
 import 'package:NomAi/app/models/Auth/user.dart';
 import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_bloc.dart';
 import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_state.dart';
 import 'package:NomAi/app/modules/Scanner/views/scan_view.dart';
+import 'package:NomAi/app/modules/Scanner/controller/scanner_controller.dart';
 import 'package:NomAi/app/repo/nutrition_record_repo.dart';
 import 'package:NomAi/app/models/AI/nutrition_record.dart';
 import 'package:NomAi/app/models/AI/nutrition_output.dart';
@@ -30,6 +32,7 @@ class NomAiAgentView extends StatefulWidget {
 class _NomAiAgentViewState extends State<NomAiAgentView>
     with TickerProviderStateMixin {
   ChatController controller = Get.put(ChatController());
+  ScannerController scannerController = Get.put(ScannerController());
   late AnimationController _fadeController;
   late AnimationController _slideController;
 
@@ -182,10 +185,23 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
   Widget _buildMessageItem(AgentModel.AgentResponse message, int index) {
     String imageUrl = "";
 
+    // --- IMAGE URL EXTRACTION LOGIC ---
+    // If this message is a tool return (i.e., a response to a tool call),
+    // we try to find the imageUrl from the most recent previous tool call message.
+    // This is because the tool return itself does not contain the imageUrl,
+    // but the tool call (the request) does. We search backwards from the current index.
+    //
+    // NOTE: If there are multiple tool calls in the message history, this logic will pick
+    // the first imageUrl it finds when searching backwards. If a previous tool call is unrelated
+    // (e.g., a different image or a different tool), it may pick up the wrong imageUrl.
+    // To avoid this, you may want to add more checks (e.g., match toolCall/toolReturn IDs).
     if (message.toolReturns != null && message.toolReturns!.isNotEmpty) {
       // This is a tool return message. Find the imageUrl from previous messages.
-      for (int i = index; i >= 0; i--) {
+      for (int i = index - 1; i >= 0; i--) {
+        // Start from index-1 to skip the current message
         final prevMessage = controller.messages[i];
+
+        // Check if this message has tool calls
         if (prevMessage.toolCalls != null &&
             prevMessage.toolCalls!.isNotEmpty) {
           for (var call in prevMessage.toolCalls!) {
@@ -196,17 +212,20 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
             }
           }
         }
-        if (imageUrl.isNotEmpty) {
+
+        // Stop searching if we found an imageUrl or hit a user message
+        if (imageUrl.isNotEmpty ||
+            prevMessage.role == AgentModel.AgentRole.user) {
           break;
         }
       }
     } else if (message.toolCalls != null && message.toolCalls!.isNotEmpty) {
-      // This is the message that makes the tool call.
+      // This is the message that makes the tool call (i.e., the request for a tool action).
+      // We extract the imageUrl directly from the tool call arguments.
       for (var call in message.toolCalls!) {
         final url = AgentModel.cleanArgsForImage(call.args);
         if (url.isNotEmpty) {
           imageUrl = url;
-          print("Extracted imageUrl: $imageUrl");
           break;
         }
       }
@@ -221,17 +240,17 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     }
 
     return InkWell(
-      onTap: () {
-        SnackBar snackBar = SnackBar(
-          content: Text(message.content ?? 'No content to copy'),
-          duration: const Duration(seconds: 1),
-          backgroundColor: MealAIColors.whiteText,
-        );
-        Clipboard.setData(
-            ClipboardData(text: message.toJson().toString() ?? ''));
+      // onTap: () {
+      //   SnackBar snackBar = SnackBar(
+      //     content: Text(message.content ?? 'No content to copy'),
+      //     duration: const Duration(seconds: 1),
+      //     backgroundColor: MealAIColors.whiteText,
+      //   );
+      //   Clipboard.setData(
+      //       ClipboardData(text: message.toJson().toString() ?? ''));
 
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      },
+      //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      // },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -321,7 +340,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 // Modified _buildNutritionResponse method - accept imageUrl as parameter
   Widget _buildNutritionResponse(
       AgentModel.AgentResponse message, String imageUrl) {
-    print("Image Url in _buildNutritionResponse is : $imageUrl");
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -355,7 +373,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
   Widget _buildToolOutputResponse(List<AgentModel.ToolReturn> toolReturns,
       AgentModel.AgentResponse message, String imageUrl) {
-    print("Image Url in _buildToolOutputResponse is : $imageUrl");
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: toolReturns.map((toolReturn) {
@@ -369,7 +386,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
   Widget _buildToolCard(AgentModel.ToolReturn toolReturn,
       AgentModel.AgentResponse message, String imageUrl) {
-    print("Image Url in _buildToolCard is : $imageUrl");
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -407,8 +423,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       AgentModel.AgentResponse message, String imageUrl) {
     final content = toolReturn.content;
 
-    print("Image Url in _buildToolContent is : $imageUrl");
-
     return Padding(
       padding: EdgeInsets.all(4.w.clamp(16.0, 20.0)),
       child: Builder(
@@ -439,7 +453,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
   Widget _buildStructuredResponse(AgentModel.AgentResponsePayload response,
       AgentModel.AgentResponse message, String imageUrl) {
-    print("ImageUrl in Structured Response: $imageUrl");
     // If this has nutrition data, use the existing nutrition card
     if (response.ingredients != null && response.ingredients!.isNotEmpty) {
       return _buildNutritionCard(response, message, imageUrl); // Pass imageUrl
@@ -620,11 +633,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
 //This widget builds the content inside each chat bubble, handling both text and images
   Widget _buildMessageContent(AgentModel.AgentResponse message, bool isUser) {
-    // Debug print to check imageUrl
-    if (message.imageUrl != null) {
-      print('DEBUG: Message has imageUrl: ${message.imageUrl}');
-    }
-
     // Clean the content - remove any URLs that might be embedded in text
     String cleanContent = message.content?.trim() ?? '';
 
@@ -669,7 +677,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                   ),
                 ),
                 errorWidget: (context, url, error) {
-                  print('DEBUG: Error loading image: $error');
                   return Container(
                     height: 150,
                     color: MealAIColors.greyLight,
@@ -802,7 +809,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
   Widget _buildNutritionCard(AgentModel.AgentResponsePayload response,
       AgentModel.AgentResponse message, String imageUrl) {
-    print("ImageUrl in Nutrition Card: $imageUrl");
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -1499,6 +1505,12 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       String? imageUrl) async {
     setState(() {});
 
+    // Show loading dialog
+    AppDialogs.showLoadingDialog(
+      title: "Adding to Daily Meals",
+      message: "Please wait while we add this meal to your daily nutrition...",
+    );
+
     try {
       // Get user ID
       String userId = user!.userId;
@@ -1665,29 +1677,36 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
       if (result == QueryStatus.SUCCESS) {
         print("✅ Save successful, showing success message");
-        Get.snackbar(
-          "Success",
-          "Added to your meals!",
-          backgroundColor: Colors.green.withOpacity(0.7),
-          colorText: Colors.white,
-          duration: Duration(seconds: 2),
+
+        await scannerController.getRecordByDate(userId, time);
+
+        // Hide loading dialog
+        AppDialogs.hideDialog();
+
+        AppDialogs.showSuccessSnackbar(
+          title: "Success",
+          message: "Added to your meals!",
         );
       } else {
         print("❌ Save failed, showing error message");
-        Get.snackbar(
-          "Error",
-          "Failed to add to meals. Please try again.",
-          backgroundColor: Colors.red.withOpacity(0.7),
-          colorText: Colors.white,
+
+        // Hide loading dialog
+        AppDialogs.hideDialog();
+
+        AppDialogs.showErrorSnackbar(
+          title: "Error",
+          message: "Failed to add to meals. Please try again.",
         );
       }
     } catch (e) {
       print("Error adding to meals: $e");
-      Get.snackbar(
-        "Error",
-        "Failed to add to meals. Please try again.",
-        backgroundColor: Colors.red.withOpacity(0.7),
-        colorText: Colors.white,
+
+      // Hide loading dialog
+      AppDialogs.hideDialog();
+
+      AppDialogs.showErrorSnackbar(
+        title: "Error",
+        message: "Failed to add to meals. Please try again.",
       );
     }
   }
@@ -1697,37 +1716,21 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       AgentModel.AgentResponse message, String imageUrl) {
     return StatefulBuilder(
       builder: (context, setState) {
-        bool isAdded = false;
-        bool isLoading = false;
-
-        // Function to update states
-        void updateButtonState({bool? loading, bool? added}) {
-          setState(() {
-            if (loading != null) isLoading = loading;
-            if (added != null) isAdded = added;
-          });
-        }
-
         return Padding(
           padding: EdgeInsets.only(top: 4.w.clamp(12.0, 20.0)),
           child: PrimaryButton(
             onPressed: () {
-              if (isAdded || isLoading) return;
-
-              updateButtonState(loading: true);
-
-              _addToMealsWithImageUrl(context, setState, response,
-                      imageUrl) // Use passed imageUrl
-                  .then((_) {
-                updateButtonState(loading: false, added: true);
-              }).catchError((error) {
-                updateButtonState(loading: false);
-              });
+              _addToMealsWithImageUrl(context, setState, response, imageUrl)
+                  .then((_) {})
+                  .catchError((error) {});
 
               print("Image URL from parameter: $imageUrl");
               print("Tool calls from message: ${message.toolCalls}");
             },
-            tile: _getButtonText(isLoading, isAdded),
+            tile: _getButtonText(
+              false,
+              false,
+            ),
           ),
         );
       },
