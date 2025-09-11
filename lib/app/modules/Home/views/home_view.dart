@@ -379,6 +379,7 @@ class _HomePageState extends State<HomePage> {
                 NutritionRecord record = controller.dailyRecords[index];
                 return NutritionCard(
                   nutritionRecord: record,
+                  userModel: userModel!,
                 );
               },
             );

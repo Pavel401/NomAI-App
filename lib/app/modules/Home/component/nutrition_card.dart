@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:NomAi/app/models/Auth/user.dart';
 import 'package:NomAi/app/modules/Home/views/nutrition_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -14,11 +15,13 @@ import 'package:NomAi/app/utility/date_utility.dart';
 
 class NutritionCard extends StatelessWidget {
   final NutritionRecord nutritionRecord;
+  final UserModel userModel;
   // final void Function() onTap;
 
   const NutritionCard({
     Key? key,
     required this.nutritionRecord,
+    required this.userModel,
     // required this.onTap,
   }) : super(key: key);
 
@@ -57,7 +60,10 @@ class NutritionCard extends StatelessWidget {
     return Bounceable(
       onTap: () {
         if (isProcessing) return;
-        Get.to(() => NutritionView(nutritionRecord: nutritionRecord));
+        Get.to(() => NutritionView(
+              nutritionRecord: nutritionRecord,
+              userModel: userModel,
+            ));
       },
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),

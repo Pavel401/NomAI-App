@@ -1,3 +1,8 @@
+import 'package:NomAi/app/components/dialogs.dart';
+import 'package:NomAi/app/constants/enums.dart';
+import 'package:NomAi/app/models/Auth/user.dart';
+import 'package:NomAi/app/modules/Scanner/controller/scanner_controller.dart';
+import 'package:NomAi/app/repo/nutrition_record_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_bounceable/flutter_bounceable.dart';
@@ -8,12 +13,15 @@ import 'package:sizer/sizer.dart';
 import 'package:NomAi/app/constants/colors.dart';
 import 'package:NomAi/app/models/AI/nutrition_output.dart';
 import 'package:NomAi/app/models/AI/nutrition_record.dart';
+
 import 'package:NomAi/app/utility/date_utility.dart';
 
 class NutritionView extends StatelessWidget {
   final NutritionRecord nutritionRecord;
+  final UserModel userModel;
 
-  const NutritionView({super.key, required this.nutritionRecord});
+  NutritionView(
+      {super.key, required this.nutritionRecord, required this.userModel});
 
   @override
   Widget build(BuildContext context) {
@@ -24,30 +32,23 @@ class NutritionView extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           _buildSliverAppBar(context),
-
           SliverToBoxAdapter(
             child: Column(
               children: [
                 _buildFoodHeaderCard(context, response),
-
                 _buildNutritionSummaryCard(context, response),
-
                 if (response.overallHealthComments != null &&
                     response.overallHealthComments!.isNotEmpty)
                   _buildHealthInsightsCard(context, response),
-
                 if (response.ingredients != null &&
                     response.ingredients!.isNotEmpty)
                   _buildIngredientsCard(context, response),
-
                 if (response.primaryConcerns != null &&
                     response.primaryConcerns!.isNotEmpty)
                   _buildPrimaryConcernsCard(context, response),
-
                 if (response.suggestAlternatives != null &&
                     response.suggestAlternatives!.isNotEmpty)
                   _buildAlternativesCard(context, response),
-
                 SizedBox(height: 3.h),
               ],
             ),
@@ -55,6 +56,170 @@ class NutritionView extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _handleDeleteMeal(BuildContext context) async {
+    // Show confirmation dialog
+    await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Meal Entry'),
+          content: const Text(
+            'Are you sure you want to delete this meal entry? This action cannot be undone.',
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.black),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Handle delete logic here if needed
+                // For now, just close the dialog since the logic is commented out
+                // Navigator.of(context).pop();
+
+                AppDialogs.showLoadingDialog(
+                  title: "Deleting Meal",
+                  message: "Removing meal from records...",
+                );
+
+                String userId = userModel.userId;
+                final nutritionRecordRepo = NutritionRecordRepo();
+                final recordTime = nutritionRecord.recordTime ?? DateTime.now();
+
+                QueryStatus result =
+                    await nutritionRecordRepo.deleteMealEntryByTime(
+                  userId,
+                  recordTime,
+                  recordTime,
+                );
+
+                if (result == QueryStatus.SUCCESS) {
+                  AppDialogs.hideDialog();
+
+                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop(); // Go back to previous screen
+
+                  AppDialogs.showSuccessSnackbar(
+                    title: "Success",
+                    message: "Meal deleted successfully!",
+                  );
+                  ScannerController scannerController =
+                      Get.put(ScannerController());
+
+                  await scannerController.getRecordByDate(userId, recordTime);
+                } else {
+                  // Show error snackbar if deletion failed
+                  AppDialogs.showErrorSnackbar(
+                    title: "Error",
+                    message: "Failed to add to meals. Please try again.",
+                  );
+                }
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // if (confirm != true) return;
+
+    // try {
+    //   // Show loading dialog with shorter message to prevent overflow
+    //   AppDialogs.showLoadingDialog(
+    //     title: "Deleting Meal",
+    //     message: "Removing meal from records...",
+    //   );
+
+    //   // Get user ID from BLoC
+    //   String? userId;
+    // final userBloc = context.read<UserBloc>();
+    // final userState = userBloc.state;
+    // if (userState is UserLoaded) {
+    //   userId = userState.userModel.userId;
+    // }
+
+    //   if (userId == null) {
+    //     AppDialogs.hideDialog();
+    //     AppDialogs.showErrorSnackbar(
+    //       title: "Error",
+    //       message: "Unable to identify user.",
+    //     );
+    //     return;
+    //   }
+
+    // final nutritionRecordRepo = NutritionRecordRepo();
+    // final recordTime = nutritionRecord.recordTime ?? DateTime.now();
+
+    //   // First try to delete by time
+    // QueryStatus result = await nutritionRecordRepo.deleteMealEntryByTime(
+    //   userId,
+    //   recordTime,
+    //   recordTime,
+    // );
+
+    //   // If deletion by time fails, try to find by matching nutrition data and delete by index
+    //   if (result != QueryStatus.SUCCESS) {
+    //     // Get current daily records
+    //     final dailyRecords =
+    //         await nutritionRecordRepo.getNutritionData(userId, recordTime);
+
+    //     // Find the meal index by comparing nutrition data
+    //     int mealIndex = -1;
+    //     for (int i = 0; i < dailyRecords.dailyRecords.length; i++) {
+    //       final record = dailyRecords.dailyRecords[i];
+    //       if (_areRecordsEqual(record, nutritionRecord)) {
+    //         mealIndex = i;
+    //         break;
+    //       }
+    //     }
+
+    //     if (mealIndex != -1) {
+    //       result = await nutritionRecordRepo.deleteMealEntry(
+    //           userId, recordTime, mealIndex);
+    //     }
+    //   }
+
+    //   // Hide loading dialog
+    //   AppDialogs.hideDialog();
+
+    //   if (result == QueryStatus.SUCCESS) {
+    //     // Update the scanner controller to refresh the data
+    //     final scannerController = Get.find<ScannerController>();
+    //     await scannerController.getRecordByDate(userId, recordTime);
+
+    //     // Show success message
+    //     AppDialogs.showSuccessSnackbar(
+    //       title: "Success",
+    //       message: "Meal deleted successfully!",
+    //     );
+
+    //     // Go back to previous screen
+    //     Navigator.of(context).pop();
+    //   } else {
+    //     AppDialogs.showErrorSnackbar(
+    //       title: "Error",
+    //       message: "Failed to delete meal entry.",
+    //     );
+    //   }
+    // } catch (e) {
+    //   // Hide loading dialog if it's still showing
+    //   AppDialogs.hideDialog();
+
+    //   AppDialogs.showErrorSnackbar(
+    //     title: "Error",
+    //     message: "An unexpected error occurred.",
+    //   );
+    // }
   }
 
   Widget _buildSliverAppBar(BuildContext context) {
@@ -104,7 +269,7 @@ class NutritionView extends StatelessWidget {
           ),
         ),
         Bounceable(
-          onTap: () {},
+          onTap: () => _handleDeleteMeal(context),
           child: Container(
             margin: const EdgeInsets.only(right: 16),
             padding: const EdgeInsets.all(8),
@@ -223,7 +388,6 @@ class NutritionView extends StatelessWidget {
     int totalProtein = 0;
     int totalCarbs = 0;
     int totalFat = 0;
-    int totalFiber = 0;
 
     if (response.ingredients != null) {
       for (var ingredient in response.ingredients!) {
@@ -231,7 +395,6 @@ class NutritionView extends StatelessWidget {
         totalProtein += ingredient.protein ?? 0;
         totalCarbs += ingredient.carbs ?? 0;
         totalFat += ingredient.fat ?? 0;
-        totalFiber += ingredient.fiber ?? 0;
       }
     }
 
@@ -313,7 +476,7 @@ class NutritionView extends StatelessWidget {
                   'Carbs',
                   '$totalCarbs',
                   'g',
-                  MealAIColors.carbsColor ?? Colors.blue.shade300,
+                  MealAIColors.carbsColor,
                   Icons.grain,
                 ),
               ),
@@ -324,7 +487,7 @@ class NutritionView extends StatelessWidget {
                   'Protein',
                   '$totalProtein',
                   'g',
-                  MealAIColors.proteinColor ?? Colors.red.shade300,
+                  MealAIColors.proteinColor,
                   Icons.fitness_center,
                 ),
               ),
@@ -335,7 +498,7 @@ class NutritionView extends StatelessWidget {
                   'Fat',
                   '$totalFat',
                   'g',
-                  MealAIColors.fatColor ?? Colors.yellow.shade300,
+                  MealAIColors.fatColor,
                   Icons.water_drop,
                 ),
               ),
@@ -749,10 +912,7 @@ class NutritionView extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      Colors.green.shade50,
-                      Colors.green.shade100 ?? Colors.green.shade50
-                    ],
+                    colors: [Colors.green.shade50, Colors.green.shade100],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -877,7 +1037,6 @@ class EnhancedHealthScoreWidget extends StatelessWidget {
               ],
             ),
           ),
-
           Column(
             children: [
               CircularPercentIndicator(

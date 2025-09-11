@@ -144,6 +144,7 @@ class AppDialogs {
       duration: duration,
       margin: const EdgeInsets.all(16),
       borderRadius: 12,
+      maxWidth: 300,
       icon: Container(
         width: 24,
         height: 24,
@@ -176,6 +177,7 @@ class AppDialogs {
       duration: duration,
       margin: const EdgeInsets.all(16),
       borderRadius: 12,
+      maxWidth: 300,
       icon: Container(
         width: 24,
         height: 24,
@@ -237,7 +239,11 @@ class AppDialogs {
           borderRadius: BorderRadius.circular(16),
         ),
         child: Container(
-          padding: const EdgeInsets.all(32),
+          constraints: const BoxConstraints(
+            maxWidth: 300,
+            maxHeight: 200,
+          ),
+          padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -251,8 +257,8 @@ class AppDialogs {
             children: [
               // Loading indicator
               SizedBox(
-                width: 40,
-                height: 40,
+                width: 32,
+                height: 32,
                 child: CircularProgressIndicator(
                   strokeWidth: 3,
                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -261,30 +267,36 @@ class AppDialogs {
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
               // Title
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: MealAIColors.blackText,
                 ),
                 textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
 
               const SizedBox(height: 8),
 
               // Message
-              Text(
-                message,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: MealAIColors.grey,
-                  height: 1.4,
+              Flexible(
+                child: Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: MealAIColors.grey,
+                    height: 1.3,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                textAlign: TextAlign.center,
               ),
             ],
           ),
