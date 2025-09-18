@@ -183,54 +183,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
   }
 
   Widget _buildMessageItem(AgentModel.AgentResponse message, int index) {
-    String imageUrl = "";
-
-    // --- IMAGE URL EXTRACTION LOGIC ---
-    // If this message is a tool return (i.e., a response to a tool call),
-    // we try to find the imageUrl from the most recent previous tool call message.
-    // This is because the tool return itself does not contain the imageUrl,
-    // but the tool call (the request) does. We search backwards from the current index.
-    //
-    // NOTE: If there are multiple tool calls in the message history, this logic will pick
-    // the first imageUrl it finds when searching backwards. If a previous tool call is unrelated
-    // (e.g., a different image or a different tool), it may pick up the wrong imageUrl.
-    // To avoid this, you may want to add more checks (e.g., match toolCall/toolReturn IDs).
-    if (message.toolReturns != null && message.toolReturns!.isNotEmpty) {
-      // This is a tool return message. Find the imageUrl from previous messages.
-      for (int i = index - 1; i >= 0; i--) {
-        // Start from index-1 to skip the current message
-        final prevMessage = controller.messages[i];
-
-        // Check if this message has tool calls
-        if (prevMessage.toolCalls != null &&
-            prevMessage.toolCalls!.isNotEmpty) {
-          for (var call in prevMessage.toolCalls!) {
-            final url = AgentModel.cleanArgsForImage(call.args);
-            if (url.isNotEmpty) {
-              imageUrl = url;
-              break;
-            }
-          }
-        }
-
-        // Stop searching if we found an imageUrl or hit a user message
-        if (imageUrl.isNotEmpty ||
-            prevMessage.role == AgentModel.AgentRole.user) {
-          break;
-        }
-      }
-    } else if (message.toolCalls != null && message.toolCalls!.isNotEmpty) {
-      // This is the message that makes the tool call (i.e., the request for a tool action).
-      // We extract the imageUrl directly from the tool call arguments.
-      for (var call in message.toolCalls!) {
-        final url = AgentModel.cleanArgsForImage(call.args);
-        if (url.isNotEmpty) {
-          imageUrl = url;
-          break;
-        }
-      }
-    }
-
     final isUser = message.role == AgentModel.AgentRole.user;
     final isSystem = message.isSystem == true;
 
@@ -288,8 +240,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                 child: message.role == AgentModel.AgentRole.model &&
                         message.toolReturns != null &&
                         message.toolReturns!.isNotEmpty
-                    ? _buildNutritionResponse(
-                        message, imageUrl) // Pass imageUrl here
+                    ? _buildNutritionResponse(message) // Pass imageUrl here
 
                     //If not an tool response, show regular message bubble from the agent
                     : Container(
@@ -338,8 +289,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
   }
 
 // Modified _buildNutritionResponse method - accept imageUrl as parameter
-  Widget _buildNutritionResponse(
-      AgentModel.AgentResponse message, String imageUrl) {
+  Widget _buildNutritionResponse(AgentModel.AgentResponse message) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -366,26 +316,31 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         ],
 
         // Display tool outputs - pass imageUrl down
-        _buildToolOutputResponse(message.toolReturns!, message, imageUrl),
+        _buildToolOutputResponse(message.toolReturns!, message),
       ],
     );
   }
 
   Widget _buildToolOutputResponse(List<AgentModel.ToolReturn> toolReturns,
-      AgentModel.AgentResponse message, String imageUrl) {
+      AgentModel.AgentResponse message) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: toolReturns.map((toolReturn) {
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
-          child: _buildToolCard(toolReturn, message, imageUrl), // Pass imageUrl
+          child: _buildToolCard(
+            toolReturn,
+            message,
+          ), // Pass imageUrl
         );
       }).toList(),
     );
   }
 
-  Widget _buildToolCard(AgentModel.ToolReturn toolReturn,
-      AgentModel.AgentResponse message, String imageUrl) {
+  Widget _buildToolCard(
+    AgentModel.ToolReturn toolReturn,
+    AgentModel.AgentResponse message,
+  ) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -412,15 +367,17 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Tool content - pass imageUrl down
-          _buildToolContent(toolReturn, message, imageUrl),
+          _buildToolContent(toolReturn, message),
         ],
       ),
     );
   }
 
 // Modified _buildToolContent method
-  Widget _buildToolContent(AgentModel.ToolReturn toolReturn,
-      AgentModel.AgentResponse message, String imageUrl) {
+  Widget _buildToolContent(
+    AgentModel.ToolReturn toolReturn,
+    AgentModel.AgentResponse message,
+  ) {
     final content = toolReturn.content;
 
     return Padding(
@@ -433,11 +390,15 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                 NutritionService.extractNutritionResponse([toolReturn]);
             if (nutritionResponse != null) {
               return _buildNutritionCard(
-                  nutritionResponse, message, imageUrl); // Pass imageUrl
+                nutritionResponse,
+                message,
+              ); // Pass imageUrl
             }
             // Handle other structured responses
             return _buildStructuredResponse(
-                content!.response!, message, imageUrl); // Pass imageUrl
+              content!.response!,
+              message,
+            ); // Pass imageUrl
           }
 
           if (content?.message != null) {
@@ -452,10 +413,13 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
   }
 
   Widget _buildStructuredResponse(AgentModel.AgentResponsePayload response,
-      AgentModel.AgentResponse message, String imageUrl) {
+      AgentModel.AgentResponse message) {
     // If this has nutrition data, use the existing nutrition card
     if (response.ingredients != null && response.ingredients!.isNotEmpty) {
-      return _buildNutritionCard(response, message, imageUrl); // Pass imageUrl
+      return _buildNutritionCard(
+        response,
+        message,
+      ); // Pass imageUrl
     }
 
     // For other structured responses, create a generic structured view
@@ -808,7 +772,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
   }
 
   Widget _buildNutritionCard(AgentModel.AgentResponsePayload response,
-      AgentModel.AgentResponse message, String imageUrl) {
+      AgentModel.AgentResponse message) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -854,7 +818,10 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                 ],
 
                 // Pass the imageUrl parameter instead of trying to extract from toolCalls
-                _buildAddToMealsButton(response, message, imageUrl),
+                _buildAddToMealsButton(
+                  response,
+                  message,
+                ),
               ],
             ),
           ),
@@ -1499,10 +1466,10 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
   }
 
   Future<void> _addToMealsWithImageUrl(
-      BuildContext context,
-      StateSetter setState,
-      AgentModel.AgentResponsePayload response,
-      String? imageUrl) async {
+    BuildContext context,
+    StateSetter setState,
+    AgentModel.AgentResponsePayload response,
+  ) async {
     setState(() {});
 
     // Show loading dialog
@@ -1528,8 +1495,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       } catch (e) {
         print("Error getting user preferences: $e");
       }
-
-      print('DEBUG: Using imageUrl for nutrition record: $imageUrl');
 
       // Convert AgentResponse.Response to NutritionOutput
       final nutritionOutput = NutritionOutput(
@@ -1588,7 +1553,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       NutritionRecord nutritionRecord = NutritionRecord(
         recordTime: time,
         nutritionInputQuery: NutritionInputQuery(
-          imageUrl: imageUrl,
+          imageUrl: response.imageUrl ?? "",
           scanMode: ScanMode.food,
           food_description: response.foodName ?? "Chat analysis",
           dietaryPreferences: userModel?.userInfo?.selectedDiet != null
@@ -1712,20 +1677,19 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
   }
 
 // Modified _buildAddToMealsButton method - accept imageUrl as parameter
-  Widget _buildAddToMealsButton(AgentModel.AgentResponsePayload response,
-      AgentModel.AgentResponse message, String imageUrl) {
+  Widget _buildAddToMealsButton(
+    AgentModel.AgentResponsePayload response,
+    AgentModel.AgentResponse message,
+  ) {
     return StatefulBuilder(
       builder: (context, setState) {
         return Padding(
           padding: EdgeInsets.only(top: 4.w.clamp(12.0, 20.0)),
           child: PrimaryButton(
             onPressed: () {
-              _addToMealsWithImageUrl(context, setState, response, imageUrl)
+              _addToMealsWithImageUrl(context, setState, response)
                   .then((_) {})
                   .catchError((error) {});
-
-              print("Image URL from parameter: $imageUrl");
-              print("Tool calls from message: ${message.toolCalls}");
             },
             tile: _getButtonText(
               false,
