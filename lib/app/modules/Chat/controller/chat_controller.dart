@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:NomAi/app/models/Agent/agent_response.dart';
 import 'package:NomAi/app/models/Auth/user.dart';
 import 'package:NomAi/app/repo/agent_service.dart';
+import 'package:NomAi/app/utils/url_parser.dart';
 
 class ChatController extends GetxController {
   final AgentService _agentService = AgentService();
@@ -337,5 +338,34 @@ class ChatController extends GetxController {
     } catch (e) {
       _handleError(e);
     }
+  }
+
+  /// Extract Firebase Storage URL from message content
+  ///
+  /// This method uses regex to find Firebase Storage URLs in the format:
+  /// https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{path}?alt=media&token={token}
+  String? extractImageUrlFromContent(String content) {
+    return UrlParser.extractFirebaseStorageUrl(content);
+  }
+
+  /// Parse Firebase Storage URL to get components like bucket, path, and token
+  ///
+  /// Returns a map with 'bucket', 'path', 'token', and 'fullUrl' keys
+  Map<String, String>? parseImageUrl(String url) {
+    return UrlParser.parseFirebaseStorageUrl(url);
+  }
+
+  /// Check if a message content contains any Firebase Storage URLs
+  bool hasImageUrl(String content) {
+    return UrlParser.containsFirebaseStorageUrl(content);
+  }
+
+  /// Extract all Firebase Storage URLs from message content
+  List<String> extractAllImageUrls(String content) {
+    return UrlParser.extractAllFirebaseStorageUrls(content);
+  }
+
+  String getFormattedUserInput(String input) {
+    return UrlParser.removeUserProvidedImageText(input);
   }
 }
