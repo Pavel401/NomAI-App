@@ -38,41 +38,39 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: MealAIColors.lightBackground,
       extendBody: true,
-
-      floatingActionButton: Container(
-        height: 60,
-        width: 60,
-        decoration: BoxDecoration(
-          color: MealAIColors.blackText,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.25),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: FloatingActionButton(
-          backgroundColor: MealAIColors.blackText,
-          elevation: 0,
-          shape: const CircleBorder(),
-          onPressed: () {
-
-            Get.to(() => MealAiCamera());
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Lottie.asset(
-              'assets/lottie/scan.json',
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-      ),
-
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
+      floatingActionButton: _selectedIndex == 0
+          ? Container(
+              height: 60,
+              width: 60,
+              decoration: BoxDecoration(
+                color: MealAIColors.blackText,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.25),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: FloatingActionButton(
+                backgroundColor: MealAIColors.blackText,
+                elevation: 0,
+                shape: const CircleBorder(),
+                onPressed: () {
+                  Get.to(() => MealAiCamera());
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Lottie.asset(
+                    'assets/lottie/scan.json',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            )
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       bottomNavigationBar: BottomAppBar(
         height: 65,
         color: MealAIColors.switchWhiteColor,
@@ -116,9 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-
             Expanded(child: Container()),
-
             Expanded(
               child: GestureDetector(
                 onTap: () => _onItemTapped(2),
@@ -153,7 +149,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-
       body: IndexedStack(
         index: _selectedIndex,
         children: [
