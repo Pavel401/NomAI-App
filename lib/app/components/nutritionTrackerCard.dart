@@ -111,9 +111,7 @@ class NutritionTrackerCard extends StatelessWidget {
                             ),
                           ],
                         ),
-
                         SizedBox(height: 2.h),
-
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -190,28 +188,27 @@ class NutritionTrackerCard extends StatelessWidget {
                                   ),
                                 ),
 
-                                SizedBox(height: 1.h),
+                                // SizedBox(height: 1.h),
 
-                                Row(
-                                  children: [
-                                    _buildCalorieInfoBox(
-                                      "Consumed",
-                                      consumedCalories,
-                                      Icons.add_circle_outline,
-                                      Colors.blue.shade700,
-                                    ),
-                                    SizedBox(width: 8),
-                                    _buildCalorieInfoBox(
-                                      "Burned",
-                                      burnedCalories,
-                                      Icons.local_fire_department,
-                                      Colors.orange.shade700,
-                                    ),
-                                  ],
-                                ),
+                                // Row(
+                                //   children: [
+                                //     _buildCalorieInfoBox(
+                                //       "Consumed",
+                                //       consumedCalories,
+                                //       Icons.add_circle_outline,
+                                //       Colors.blue.shade700,
+                                //     ),
+                                //     SizedBox(width: 8),
+                                //     _buildCalorieInfoBox(
+                                //       "Burned",
+                                //       burnedCalories,
+                                //       Icons.local_fire_department,
+                                //       Colors.orange.shade700,
+                                //     ),
+                                //   ],
+                                // ),
                               ],
                             ),
-
                             CircularPercentIndicator(
                               radius: 60,
                               lineWidth: 12.0,
@@ -266,7 +263,6 @@ class NutritionTrackerCard extends StatelessWidget {
                 MealAIColors.proteinColor,
                 Icons.fitness_center,
               ),
-
               _buildNutrientBox(
                 "Carbs",
                 consumedCarb,
@@ -274,7 +270,6 @@ class NutritionTrackerCard extends StatelessWidget {
                 MealAIColors.carbsColor,
                 Icons.grain,
               ),
-
               _buildNutrientBox(
                 "Fats",
                 consumedFat,
