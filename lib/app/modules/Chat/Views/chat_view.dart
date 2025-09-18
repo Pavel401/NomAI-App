@@ -16,6 +16,7 @@ import 'package:NomAi/app/repo/nutrition_record_repo.dart';
 import 'package:NomAi/app/services/nutrition_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
@@ -289,7 +290,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                                   width: 1)
                               : null,
                         ),
-                        child: _buildMessageContent(message, isUser),
+                        child: InkWell(
+                            child: _buildMessageContent(message, isUser)),
                       ),
               ),
             ),
@@ -625,19 +627,30 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 //This widget builds the content inside each chat bubble, handling both text and images
   Widget _buildMessageContent(AgentModel.AgentResponse message, bool isUser) {
     final cleanContent = _cleanMessageContent(message);
+    String imageUrl = "";
+    if (controller.hasImageUrl(message.content!)) {
+      imageUrl = controller.extractImageUrlFromContent(message.content!)!;
+      print("Extracted Image URL: $imageUrl");
+    }
+
+    if (_hasImageUrl(message)) {
+      imageUrl = message.imageUrl!;
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Display image if available
-        if (_hasImageUrl(message)) ...[
-          _buildMessageImage(message.imageUrl!),
+        if (_hasImageUrl(message) ||
+            controller.hasImageUrl(message.content!)) ...[
+          _buildMessageImage(imageUrl),
           if (cleanContent.isNotEmpty) const SizedBox(height: 8),
         ],
+
         // Display text content
         if (cleanContent.isNotEmpty)
           _buildMarkdownContent(
-            cleanContent,
+            controller.getFormattedUserInput(cleanContent),
             isUser,
             MediaQuery.of(context).size.width * 0.75,
           ),
@@ -648,31 +661,11 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
   String _cleanMessageContent(AgentModel.AgentResponse message) {
     String cleanContent = message.content?.trim() ?? '';
 
-    // If content contains Firebase Storage URL or image text, clean it
-    if (_containsImageUrl(cleanContent) && _hasImageUrl(message)) {
-      final lines = cleanContent.split('\n');
-      final nonUrlLines =
-          lines.where((line) => !_isImageUrlLine(line)).toList();
-      cleanContent = nonUrlLines.join('\n').trim();
-    }
-
     return cleanContent;
   }
 
   bool _hasImageUrl(AgentModel.AgentResponse message) {
     return message.imageUrl != null && message.imageUrl!.isNotEmpty;
-  }
-
-  bool _containsImageUrl(String content) {
-    return content.contains('firebasestorage.googleapis.com') ||
-        content.startsWith('[User provided an image:') ||
-        content.startsWith('User provided an image:');
-  }
-
-  bool _isImageUrlLine(String line) {
-    return line.contains('firebasestorage.googleapis.com') ||
-        line.contains('[User provided an image:') ||
-        line.contains('User provided an image:');
   }
 
   Widget _buildMessageImage(String imageUrl) {
