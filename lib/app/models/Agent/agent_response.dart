@@ -67,25 +67,6 @@ class AgentResponse {
   factory AgentResponse.fromJson(Map<String, dynamic> json) {
     String imageUrl = '';
 
-    if (imageUrl.isEmpty &&
-        json["tool_calls"] != null &&
-        json["tool_calls"].isNotEmpty) {
-      // Extract imageUrl from the first tool call's args
-
-      for (int i = 0; i < json["tool_calls"].length; i++) {
-        if (json["tool_calls"][i]["args"] != null) {
-          imageUrl = cleanArgsForImage(json["tool_calls"][i]["args"]);
-          print('Extracted imageUrl from tool_calls: $imageUrl');
-          if (imageUrl.isNotEmpty) {
-            break; // Exit loop if a valid imageUrl is found
-          }
-        }
-      }
-    } else {
-      imageUrl = (json["imageUrl"] == null || json["imageUrl"] == "null")
-          ? ''
-          : json["imageUrl"];
-    }
     return AgentResponse(
       role: json["role"] == null ? null : getAgentRoleFromString(json["role"]),
       timestamp:
@@ -148,22 +129,6 @@ class ToolCall {
         "args": args,
         "tool_call_id": toolCallId,
       };
-}
-
-String cleanArgsForImage(String? args) {
-  print('Cleaning args: $args');
-  if (args == null || args.isEmpty) return '';
-
-  try {
-    // Parse JSON string into a Map
-    final Map<String, dynamic> decoded = jsonDecode(args);
-
-    // Extract imageUrl safely
-    return decoded['imageUrl']?.toString() ?? '';
-  } catch (e) {
-    // Handle invalid JSON gracefully
-    return '';
-  }
 }
 
 class ToolReturn {
@@ -267,6 +232,7 @@ class AgentResponsePayload {
   final dynamic message;
   final String? foodName;
   final String? portion;
+  final String? imageUrl;
   final int? portionSize;
   final int? confidenceScore;
   final List<Ingredient>? ingredients;
@@ -286,6 +252,7 @@ class AgentResponsePayload {
     this.suggestAlternatives,
     this.overallHealthScore,
     this.overallHealthComments,
+    this.imageUrl,
   });
 
   factory AgentResponsePayload.fromJson(Map<String, dynamic> json) =>
@@ -315,6 +282,9 @@ class AgentResponsePayload {
             ? (json["overallHealthScore"] as double).toInt()
             : json["overallHealthScore"],
         overallHealthComments: json["overallHealthComments"],
+        imageUrl: json["imageUrl"] == null || json["imageUrl"] == "null"
+            ? ''
+            : json["imageUrl"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -334,6 +304,7 @@ class AgentResponsePayload {
             : List<dynamic>.from(suggestAlternatives!.map((x) => x.toJson())),
         "overallHealthScore": overallHealthScore,
         "overallHealthComments": overallHealthComments,
+        "imageUrl": imageUrl,
       };
 }
 
