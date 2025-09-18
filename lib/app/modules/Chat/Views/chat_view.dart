@@ -1,26 +1,25 @@
 import 'package:NomAi/app/components/buttons.dart';
 import 'package:NomAi/app/components/dialogs.dart';
+import 'package:NomAi/app/constants/colors.dart';
+import 'package:NomAi/app/constants/enums.dart';
+import 'package:NomAi/app/models/AI/nutrition_input.dart';
+import 'package:NomAi/app/models/AI/nutrition_output.dart';
+import 'package:NomAi/app/models/AI/nutrition_record.dart';
+import 'package:NomAi/app/models/Agent/agent_response.dart' as AgentModel;
 import 'package:NomAi/app/models/Auth/user.dart';
 import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_bloc.dart';
 import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_state.dart';
-import 'package:NomAi/app/modules/Scanner/views/scan_view.dart';
+import 'package:NomAi/app/modules/Chat/controller/chat_controller.dart';
 import 'package:NomAi/app/modules/Scanner/controller/scanner_controller.dart';
+import 'package:NomAi/app/modules/Scanner/views/scan_view.dart';
 import 'package:NomAi/app/repo/nutrition_record_repo.dart';
-import 'package:NomAi/app/models/AI/nutrition_record.dart';
-import 'package:NomAi/app/models/AI/nutrition_output.dart';
-import 'package:NomAi/app/models/AI/nutrition_input.dart';
-import 'package:NomAi/app/constants/enums.dart';
+import 'package:NomAi/app/services/nutrition_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:NomAi/app/models/Agent/agent_response.dart' as AgentModel;
-import 'package:NomAi/app/modules/Chat/controller/chat_controller.dart';
-import 'package:NomAi/app/constants/colors.dart';
-import 'package:NomAi/app/services/nutrition_service.dart';
 
 class NomAiAgentView extends StatefulWidget {
   const NomAiAgentView({super.key});
@@ -37,6 +36,9 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
   late AnimationController _slideController;
   // Use RxBool for reactive updates instead of setState
   final RxBool _showScrollToTopButton = false.obs;
+
+  // Map to track expansion state of nutrition cards
+  final Map<String, bool> _cardExpansionStates = {};
 
   @override
   void initState() {
@@ -228,17 +230,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     }
 
     return InkWell(
-      // onTap: () {
-      //   SnackBar snackBar = SnackBar(
-      //     content: Text(message.content ?? 'No content to copy'),
-      //     duration: const Duration(seconds: 1),
-      //     backgroundColor: MealAIColors.whiteText,
-      //   );
-      //   Clipboard.setData(
-      //       ClipboardData(text: message.toJson().toString() ?? ''));
-
-      //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      // },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -633,61 +624,14 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
 //This widget builds the content inside each chat bubble, handling both text and images
   Widget _buildMessageContent(AgentModel.AgentResponse message, bool isUser) {
-    // Clean the content - remove any URLs that might be embedded in text
-    String cleanContent = message.content?.trim() ?? '';
-
-    // If content looks like it contains a Firebase Storage URL, remove it
-    if (cleanContent.contains('firebasestorage.googleapis.com') ||
-        cleanContent.startsWith('[User provided an image:') ||
-        cleanContent.startsWith('User provided an image:')) {
-      // If the message has an imageUrl, don't show the URL text
-      if (message.imageUrl != null && message.imageUrl!.isNotEmpty) {
-        // Try to extract any text that's not the URL
-        final lines = cleanContent.split('\n');
-        final nonUrlLines = lines
-            .where((line) =>
-                !line.contains('firebasestorage.googleapis.com') &&
-                !line.contains('[User provided an image:') &&
-                !line.contains('User provided an image:'))
-            .toList();
-        cleanContent = nonUrlLines.join('\n').trim();
-      }
-    }
+    final cleanContent = _cleanMessageContent(message);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Display image if available
-        if (message.imageUrl != null && message.imageUrl!.isNotEmpty) ...[
-          Container(
-            constraints: const BoxConstraints(
-              maxWidth: 250,
-              maxHeight: 250,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: CachedNetworkImage(
-                imageUrl: message.imageUrl!,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  height: 150,
-                  color: MealAIColors.greyLight,
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-                errorWidget: (context, url, error) {
-                  return Container(
-                    height: 150,
-                    color: MealAIColors.greyLight,
-                    child: const Center(
-                      child: Icon(Icons.error),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
+        if (_hasImageUrl(message)) ...[
+          _buildMessageImage(message.imageUrl!),
           if (cleanContent.isNotEmpty) const SizedBox(height: 8),
         ],
         // Display text content
@@ -701,6 +645,68 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
   }
 
+  String _cleanMessageContent(AgentModel.AgentResponse message) {
+    String cleanContent = message.content?.trim() ?? '';
+
+    // If content contains Firebase Storage URL or image text, clean it
+    if (_containsImageUrl(cleanContent) && _hasImageUrl(message)) {
+      final lines = cleanContent.split('\n');
+      final nonUrlLines =
+          lines.where((line) => !_isImageUrlLine(line)).toList();
+      cleanContent = nonUrlLines.join('\n').trim();
+    }
+
+    return cleanContent;
+  }
+
+  bool _hasImageUrl(AgentModel.AgentResponse message) {
+    return message.imageUrl != null && message.imageUrl!.isNotEmpty;
+  }
+
+  bool _containsImageUrl(String content) {
+    return content.contains('firebasestorage.googleapis.com') ||
+        content.startsWith('[User provided an image:') ||
+        content.startsWith('User provided an image:');
+  }
+
+  bool _isImageUrlLine(String line) {
+    return line.contains('firebasestorage.googleapis.com') ||
+        line.contains('[User provided an image:') ||
+        line.contains('User provided an image:');
+  }
+
+  Widget _buildMessageImage(String imageUrl) {
+    return Container(
+      constraints: const BoxConstraints(
+        maxWidth: 250,
+        maxHeight: 250,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: CachedNetworkImage(
+          imageUrl: imageUrl,
+          fit: BoxFit.cover,
+          placeholder: (context, url) => Container(
+            height: 150,
+            color: MealAIColors.greyLight,
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+          errorWidget: (context, url, error) {
+            return Container(
+              height: 150,
+              color: MealAIColors.greyLight,
+              child: const Center(
+                child: Icon(Icons.error),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   Widget _buildMarkdownContent(String content, bool isUser, double maxWidth) {
     if (content.isEmpty) return const SizedBox.shrink();
 
@@ -710,9 +716,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       shrinkWrap: true,
       selectable: true,
       onTapLink: (text, href, title) {
-        if (href != null) {
-          debugPrint('Link tapped: $href');
-        }
+        // Handle link taps if needed
       },
     );
   }
@@ -809,6 +813,12 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
   Widget _buildNutritionCard(AgentModel.AgentResponsePayload response,
       AgentModel.AgentResponse message) {
+    // Create a stable unique key for this card based on message content
+    final cardKey = '${response.foodName ?? 'unknown'}_${message.hashCode}';
+
+    // Get current expansion state (default to false)
+    final isExpanded = _cardExpansionStates[cardKey] ?? false;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -826,39 +836,109 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: EdgeInsets.all(4.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                //This is the header section with food name, portion size, confidence score
-                _buildNutritionHeader(response),
-                if (response.ingredients != null &&
-                    response.ingredients!.isNotEmpty) ...[
-                  SizedBox(height: 4.w.clamp(12.0, 20.0)),
-                  _buildNutritionOverview(response.ingredients!),
-                  SizedBox(height: 4.w.clamp(12.0, 20.0)),
-                  _buildIngredientsBreakdown(response.ingredients!),
-                ],
-                SizedBox(height: 4.w.clamp(12.0, 20.0)),
-                _buildHealthAssessment(response),
-                if (response.primaryConcerns != null &&
-                    response.primaryConcerns!.isNotEmpty) ...[
-                  SizedBox(height: 4.w.clamp(12.0, 20.0)),
-                  _buildHealthConcerns(response.primaryConcerns!),
-                ],
-                if (response.suggestAlternatives != null &&
-                    response.suggestAlternatives!.isNotEmpty) ...[
-                  SizedBox(height: 4.w.clamp(12.0, 20.0)),
-                  _buildAlternatives(response.suggestAlternatives!),
-                ],
+          // Expandable header that's always visible
+          InkWell(
+            onTap: () {
+              setState(() {
+                _cardExpansionStates[cardKey] = !isExpanded;
+              });
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: EdgeInsets.all(4.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header with expand/collapse button
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildNutritionHeader(response),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: MealAIColors.blackText.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: AnimatedRotation(
+                          duration: const Duration(milliseconds: 200),
+                          turns: isExpanded ? 0.5 : 0.0,
+                          child: Icon(
+                            Icons.keyboard_arrow_down,
+                            color: MealAIColors.blackText,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
 
-                // Pass the imageUrl parameter instead of trying to extract from toolCalls
-                _buildAddToMealsButton(
-                  response,
-                  message,
-                ),
-              ],
+                  // Always show basic nutrition overview when collapsed
+                  if (response.ingredients != null &&
+                      response.ingredients!.isNotEmpty) ...[
+                    SizedBox(height: 3.w.clamp(8.0, 12.0)),
+                    _buildCompactNutritionSummary(response.ingredients!),
+                  ],
+
+                  // Show expand hint when collapsed
+                  if (!isExpanded) ...[
+                    SizedBox(height: 2.w.clamp(6.0, 8.0)),
+                    Center(
+                      child: Text(
+                        'Tap to view detailed analysis',
+                        style: TextStyle(
+                          fontSize: 11.sp.clamp(10.0, 13.0),
+                          color: MealAIColors.grey,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+
+          // Expandable content
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 300),
+            crossFadeState: isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            firstChild: const SizedBox.shrink(),
+            secondChild: Padding(
+              padding: EdgeInsets.fromLTRB(4.w, 0, 4.w, 4.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (response.ingredients != null &&
+                      response.ingredients!.isNotEmpty) ...[
+                    SizedBox(height: 4.w.clamp(12.0, 20.0)),
+                    _buildNutritionOverview(response.ingredients!),
+                    SizedBox(height: 4.w.clamp(12.0, 20.0)),
+                    _buildIngredientsBreakdown(response.ingredients!),
+                  ],
+                  SizedBox(height: 4.w.clamp(12.0, 20.0)),
+                  _buildHealthAssessment(response),
+                  if (response.primaryConcerns != null &&
+                      response.primaryConcerns!.isNotEmpty) ...[
+                    SizedBox(height: 4.w.clamp(12.0, 20.0)),
+                    _buildHealthConcerns(response.primaryConcerns!),
+                  ],
+                  if (response.suggestAlternatives != null &&
+                      response.suggestAlternatives!.isNotEmpty) ...[
+                    SizedBox(height: 4.w.clamp(12.0, 20.0)),
+                    _buildAlternatives(response.suggestAlternatives!),
+                  ],
+
+                  // Pass the imageUrl parameter instead of trying to extract from toolCalls
+                  _buildAddToMealsButton(
+                    response,
+                    message,
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -942,58 +1022,128 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                color: MealAIColors.blackText.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.pie_chart,
-                color: MealAIColors.blackText,
-                size: 5.w.clamp(18.0, 24.0),
-              ),
-            ),
-            SizedBox(width: 3.w.clamp(8.0, 12.0)),
-            Expanded(
-              child: Text(
-                'Nutritional Breakdown',
-                style: TextStyle(
-                  fontSize: 16.sp.clamp(14.0, 18.0),
-                  fontWeight: FontWeight.w600,
-                  color: MealAIColors.blackText,
-                ),
-              ),
-            ),
-          ],
-        ),
+        _buildSectionHeader('Nutritional Breakdown', Icons.pie_chart),
         SizedBox(height: 4.w.clamp(12.0, 16.0)),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final crossAxisCount = width < 250 ? 1 : 2;
-            final childAspectRatio = width < 250 ? 3.5 : 2.5;
+        _buildNutritionGrid(total),
+      ],
+    );
+  }
 
-            return GridView.count(
-              crossAxisCount: crossAxisCount,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: childAspectRatio,
-              crossAxisSpacing: 3.w.clamp(8.0, 12.0),
-              mainAxisSpacing: 3.w.clamp(8.0, 12.0),
-              children: [
-                _buildNutritionValueCard('${total.calories}', 'Calories',
-                    Icons.local_fire_department),
-                _buildNutritionValueCard(
-                    '${total.protein}g', 'Protein', Icons.fitness_center),
-                _buildNutritionValueCard(
-                    '${total.carbs}g', 'Carbs', Icons.grain),
-                _buildNutritionValueCard('${total.fat}g', 'Fat', Icons.opacity),
-              ],
-            );
-          },
+  Widget _buildSectionHeader(String title, IconData icon) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            color: MealAIColors.blackText.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            color: MealAIColors.blackText,
+            size: 5.w.clamp(18.0, 24.0),
+          ),
+        ),
+        SizedBox(width: 3.w.clamp(8.0, 12.0)),
+        Expanded(
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 16.sp.clamp(14.0, 18.0),
+              fontWeight: FontWeight.w600,
+              color: MealAIColors.blackText,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNutritionGrid(total) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final gridConfig = _getNutritionGridConfig(constraints.maxWidth);
+
+        return GridView.count(
+          crossAxisCount: gridConfig['crossAxisCount']!.toInt(),
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          childAspectRatio: gridConfig['childAspectRatio']!,
+          crossAxisSpacing: 3.w.clamp(8.0, 12.0),
+          mainAxisSpacing: 3.w.clamp(8.0, 12.0),
+          children: [
+            _buildNutritionValueCard(
+                '${total.calories}', 'Calories', Icons.local_fire_department),
+            _buildNutritionValueCard(
+                '${total.protein}g', 'Protein', Icons.fitness_center),
+            _buildNutritionValueCard('${total.carbs}g', 'Carbs', Icons.grain),
+            _buildNutritionValueCard('${total.fat}g', 'Fat', Icons.opacity),
+          ],
+        );
+      },
+    );
+  }
+
+  Map<String, double> _getNutritionGridConfig(double width) {
+    final crossAxisCount = width < 250 ? 1.0 : 2.0;
+    final childAspectRatio = width < 250 ? 3.5 : 2.5;
+
+    return {
+      'crossAxisCount': crossAxisCount,
+      'childAspectRatio': childAspectRatio,
+    };
+  }
+
+  Widget _buildCompactNutritionSummary(
+      List<AgentModel.Ingredient> ingredients) {
+    final total = NutritionService.calculateTotalNutrition(ingredients);
+
+    return Container(
+      padding: EdgeInsets.all(3.w.clamp(12.0, 16.0)),
+      decoration: BoxDecoration(
+        color: MealAIColors.greyLight.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: MealAIColors.grey.withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildCompactNutrientInfo(
+              '${total.calories}', 'Cal', Icons.local_fire_department),
+          _buildCompactNutrientInfo(
+              '${total.protein}g', 'Protein', Icons.fitness_center),
+          _buildCompactNutrientInfo('${total.carbs}g', 'Carbs', Icons.grain),
+          _buildCompactNutrientInfo('${total.fat}g', 'Fat', Icons.opacity),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactNutrientInfo(String value, String label, IconData icon) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          color: MealAIColors.blackText,
+          size: 4.w.clamp(16.0, 20.0),
+        ),
+        SizedBox(height: 1.w.clamp(4.0, 6.0)),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 12.sp.clamp(11.0, 14.0),
+            fontWeight: FontWeight.w600,
+            color: MealAIColors.blackText,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10.sp.clamp(9.0, 12.0),
+            fontWeight: FontWeight.w400,
+            color: MealAIColors.grey,
+          ),
         ),
       ],
     );
@@ -1101,80 +1251,105 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
       margin: EdgeInsets.only(bottom: 3.w.clamp(8.0, 12.0)),
       padding: EdgeInsets.all(4.w.clamp(12.0, 16.0)),
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: MealAIColors.greyLight,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
+      decoration: _buildIngredientDecoration(color),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  ingredient.name ?? 'Unknown',
-                  style: TextStyle(
-                    fontSize: 14.sp.clamp(13.0, 16.0),
-                    fontWeight: FontWeight.w600,
-                    color: MealAIColors.blackText,
-                  ),
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 2.w.clamp(6.0, 8.0),
-                  vertical: 1.w.clamp(3.0, 6.0),
-                ),
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      _getHealthScoreIcon(healthScore),
-                      color: Colors.white,
-                      size: 12,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '$healthScore/10',
-                      style: TextStyle(
-                        fontSize: 12.sp.clamp(11.0, 14.0),
-                        fontWeight: FontWeight.w600,
-                        color: MealAIColors.whiteText,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          _buildIngredientHeader(ingredient, healthScore, color),
           SizedBox(height: 2.w.clamp(6.0, 8.0)),
-          Text(
-            'Cal: ${ingredient.calories} | Protein: ${ingredient.protein}g | Carbs: ${ingredient.carbs}g | Fat: ${ingredient.fat}g',
-            style: TextStyle(
-              fontSize: 12.sp.clamp(11.0, 14.0),
-              color: MealAIColors.grey,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-          if (ingredient.healthComments?.isNotEmpty == true) ...[
+          _buildIngredientNutrition(ingredient),
+          if (_hasHealthComments(ingredient)) ...[
             SizedBox(height: 2.w.clamp(6.0, 8.0)),
-            Text(
-              ingredient.healthComments!,
-              style: TextStyle(
-                fontSize: 12.sp.clamp(11.0, 14.0),
-                color: MealAIColors.blackText,
-                height: 1.4,
-              ),
-            ),
+            _buildIngredientHealthComments(ingredient.healthComments!),
           ],
         ],
       ),
     );
+  }
+
+  BoxDecoration _buildIngredientDecoration(Color color) {
+    return BoxDecoration(
+      color: MealAIColors.greyLight,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: color.withOpacity(0.3)),
+    );
+  }
+
+  Widget _buildIngredientHeader(
+      AgentModel.Ingredient ingredient, int healthScore, Color color) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            ingredient.name ?? 'Unknown',
+            style: TextStyle(
+              fontSize: 14.sp.clamp(13.0, 16.0),
+              fontWeight: FontWeight.w600,
+              color: MealAIColors.blackText,
+            ),
+          ),
+        ),
+        _buildHealthScoreBadge(healthScore, color),
+      ],
+    );
+  }
+
+  Widget _buildHealthScoreBadge(int healthScore, Color color) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: 2.w.clamp(6.0, 8.0),
+        vertical: 1.w.clamp(3.0, 6.0),
+      ),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _getHealthScoreIcon(healthScore),
+            color: Colors.white,
+            size: 12,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '$healthScore/10',
+            style: TextStyle(
+              fontSize: 12.sp.clamp(11.0, 14.0),
+              fontWeight: FontWeight.w600,
+              color: MealAIColors.whiteText,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIngredientNutrition(AgentModel.Ingredient ingredient) {
+    return Text(
+      'Cal: ${ingredient.calories} | Protein: ${ingredient.protein}g | Carbs: ${ingredient.carbs}g | Fat: ${ingredient.fat}g',
+      style: TextStyle(
+        fontSize: 12.sp.clamp(11.0, 14.0),
+        color: MealAIColors.grey,
+        fontStyle: FontStyle.italic,
+      ),
+    );
+  }
+
+  Widget _buildIngredientHealthComments(String comments) {
+    return Text(
+      comments,
+      style: TextStyle(
+        fontSize: 12.sp.clamp(11.0, 14.0),
+        color: MealAIColors.blackText,
+        height: 1.4,
+      ),
+    );
+  }
+
+  bool _hasHealthComments(AgentModel.Ingredient ingredient) {
+    return ingredient.healthComments?.isNotEmpty == true;
   }
 
   Widget _buildHealthAssessment(AgentModel.AgentResponsePayload response) {
@@ -1515,201 +1690,221 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
 
     try {
-      // Get user ID
-      String userId = user!.userId;
-
-      // Get user model for preferences
-      UserModel? userModel;
-      try {
-        if (context.mounted) {
-          final userBloc = context.read<UserBloc>();
-          final userState = userBloc.state;
-          if (userState is UserLoaded) {
-            userModel = userState.userModel;
-          }
-        }
-      } catch (e) {
-        print("Error getting user preferences: $e");
-      }
-
-      // Convert AgentResponse.Response to NutritionOutput
-      final nutritionOutput = NutritionOutput(
-        status: 200,
-        message: "Added from chat",
-        response: NutritionResponse(
-          message: response.message?.toString() ?? "",
-          foodName: response.foodName,
-          portion: response.portion,
-          portionSize: response.portionSize?.toDouble(),
-          confidenceScore: response.confidenceScore,
-          ingredients: response.ingredients
-              ?.map((ingredient) => Ingredient(
-                    name: ingredient.name,
-                    calories: ingredient.calories,
-                    protein: ingredient.protein,
-                    carbs: ingredient.carbs,
-                    fiber: ingredient.fiber,
-                    fat: ingredient.fat,
-                    healthScore: ingredient.healthScore,
-                    healthComments: ingredient.healthComments,
-                  ))
-              .toList(),
-          primaryConcerns: response.primaryConcerns
-              ?.map((concern) => PrimaryConcern(
-                    issue: concern.issue,
-                    explanation: concern.explanation,
-                    recommendations: concern.recommendations
-                        ?.map((rec) => Recommendation(
-                              food: rec.food,
-                              quantity: rec.quantity,
-                              reasoning: rec.reasoning,
-                            ))
-                        .toList(),
-                  ))
-              .toList(),
-          suggestAlternatives: response.suggestAlternatives
-              ?.map((alt) => Ingredient(
-                    name: alt.name,
-                    calories: alt.calories,
-                    protein: alt.protein,
-                    carbs: alt.carbs,
-                    fiber: alt.fiber,
-                    fat: alt.fat,
-                    healthScore: alt.healthScore,
-                    healthComments: alt.healthComments,
-                  ))
-              .toList(),
-          overallHealthScore: response.overallHealthScore,
-          overallHealthComments: response.overallHealthComments,
-        ),
-      );
-
-      // Create nutrition record similar to ScannerController
-      DateTime time = DateTime.now();
-      NutritionRecord nutritionRecord = NutritionRecord(
-        recordTime: time,
-        nutritionInputQuery: NutritionInputQuery(
-          imageUrl: response.imageUrl ?? "",
-          scanMode: ScanMode.food,
-          food_description: response.foodName ?? "Chat analysis",
-          dietaryPreferences: userModel?.userInfo?.selectedDiet != null
-              ? [userModel!.userInfo!.selectedDiet]
-              : [],
-          allergies: userModel?.userInfo?.selectedAllergies != null &&
-                  userModel!.userInfo!.selectedAllergies.isNotEmpty
-              ? userModel.userInfo!.selectedAllergies
-              : [],
-          selectedGoals: userModel?.userInfo?.selectedGoal != null
-              ? [userModel!.userInfo!.selectedGoal.name]
-              : [],
-        ),
-        processingStatus: ProcessingStatus.COMPLETED,
-        nutritionOutput: nutritionOutput,
-      );
-
-      final nutritionRecordRepo = NutritionRecordRepo();
-      String dailyRecordID = nutritionRecordRepo.getRecordId(time);
-
-      // Calculate total nutrition values
-      int totalNutritionValue = 0;
-      int totalProteinValue = 0;
-      int totalFatValue = 0;
-      int totalCarbValue = 0;
-
-      if (response.ingredients != null) {
-        for (final ingredient in response.ingredients!) {
-          totalNutritionValue += ingredient.calories ?? 0;
-          totalProteinValue += ingredient.protein ?? 0;
-          totalFatValue += ingredient.fat ?? 0;
-          totalCarbValue += ingredient.carbs ?? 0;
-        }
-      }
-
-      // Get existing records for today
-      DailyNutritionRecords? existingRecords;
-      try {
-        existingRecords =
-            await nutritionRecordRepo.getNutritionData(userId, time);
-      } catch (e) {
-        // If no existing records, create new empty one
-        existingRecords = DailyNutritionRecords(
-          dailyRecords: [],
-          recordDate: time,
-          recordId: dailyRecordID,
-          dailyConsumedCalories: 0,
-          dailyBurnedCalories: 0,
-          dailyConsumedProtein: 0,
-          dailyConsumedFat: 0,
-          dailyConsumedCarb: 0,
-        );
-      }
-
-      // Calculate updated totals
-      int totalConsumedCalories =
-          existingRecords.dailyConsumedCalories + totalNutritionValue;
-      int totalConsumedFat = existingRecords.dailyConsumedFat + totalFatValue;
-      int totalConsumedProtein =
-          existingRecords.dailyConsumedProtein + totalProteinValue;
-      int totalConsumedCarb =
-          existingRecords.dailyConsumedCarb + totalCarbValue;
-
-      // Add new record to daily records
-      List<NutritionRecord> updatedDailyRecords =
-          List.from(existingRecords.dailyRecords);
-      updatedDailyRecords.add(nutritionRecord);
-
-      // Create updated daily nutrition records
-      DailyNutritionRecords dailyNutritionRecords = DailyNutritionRecords(
-        dailyRecords: updatedDailyRecords,
-        recordDate: time,
-        recordId: dailyRecordID,
-        dailyConsumedCalories: totalConsumedCalories,
-        dailyBurnedCalories: existingRecords.dailyBurnedCalories,
-        dailyConsumedProtein: totalConsumedProtein,
-        dailyConsumedFat: totalConsumedFat,
-        dailyConsumedCarb: totalConsumedCarb,
-      );
+      final userId = user!.userId;
+      final userModel = _getUserModel(context);
+      final nutritionOutput = _convertToNutritionOutput(response);
+      final nutritionRecord =
+          _createNutritionRecord(nutritionOutput, response, userModel);
+      final totalNutrition = _calculateTotalNutrition(response);
+      final updatedDailyRecords =
+          await _updateDailyRecords(userId, nutritionRecord, totalNutrition);
 
       // Save to database
-      print("🚀 About to save nutrition data to database...");
+      final nutritionRecordRepo = NutritionRecordRepo();
       final result = await nutritionRecordRepo.saveNutritionData(
-          dailyNutritionRecords, userId);
-      print("📤 Save operation completed with result: $result");
+          updatedDailyRecords, userId);
 
-      if (result == QueryStatus.SUCCESS) {
-        print("✅ Save successful, showing success message");
+      await _handleSaveResult(result, userId, nutritionRecord.recordTime!);
+    } catch (e) {
+      _handleError("Failed to add to meals. Please try again.");
+    }
+  }
 
-        await scannerController.getRecordByDate(userId, time);
-
-        // Hide loading dialog
-        AppDialogs.hideDialog();
-
-        AppDialogs.showSuccessSnackbar(
-          title: "Success",
-          message: "Added to your meals!",
-        );
-      } else {
-        print("❌ Save failed, showing error message");
-
-        // Hide loading dialog
-        AppDialogs.hideDialog();
-
-        AppDialogs.showErrorSnackbar(
-          title: "Error",
-          message: "Failed to add to meals. Please try again.",
-        );
+  UserModel? _getUserModel(BuildContext context) {
+    try {
+      if (context.mounted) {
+        final userBloc = context.read<UserBloc>();
+        final userState = userBloc.state;
+        if (userState is UserLoaded) {
+          return userState.userModel;
+        }
       }
     } catch (e) {
-      print("Error adding to meals: $e");
+      print("Error getting user preferences: $e");
+    }
+    return null;
+  }
 
-      // Hide loading dialog
+  NutritionOutput _convertToNutritionOutput(
+      AgentModel.AgentResponsePayload response) {
+    return NutritionOutput(
+      status: 200,
+      message: "Added from chat",
+      response: NutritionResponse(
+        message: response.message?.toString() ?? "",
+        foodName: response.foodName,
+        portion: response.portion,
+        portionSize: response.portionSize?.toDouble(),
+        confidenceScore: response.confidenceScore,
+        ingredients: response.ingredients
+            ?.map((ingredient) => Ingredient(
+                  name: ingredient.name,
+                  calories: ingredient.calories,
+                  protein: ingredient.protein,
+                  carbs: ingredient.carbs,
+                  fiber: ingredient.fiber,
+                  fat: ingredient.fat,
+                  healthScore: ingredient.healthScore,
+                  healthComments: ingredient.healthComments,
+                ))
+            .toList(),
+        primaryConcerns: response.primaryConcerns
+            ?.map((concern) => PrimaryConcern(
+                  issue: concern.issue,
+                  explanation: concern.explanation,
+                  recommendations: concern.recommendations
+                      ?.map((rec) => Recommendation(
+                            food: rec.food,
+                            quantity: rec.quantity,
+                            reasoning: rec.reasoning,
+                          ))
+                      .toList(),
+                ))
+            .toList(),
+        suggestAlternatives: response.suggestAlternatives
+            ?.map((alt) => Ingredient(
+                  name: alt.name,
+                  calories: alt.calories,
+                  protein: alt.protein,
+                  carbs: alt.carbs,
+                  fiber: alt.fiber,
+                  fat: alt.fat,
+                  healthScore: alt.healthScore,
+                  healthComments: alt.healthComments,
+                ))
+            .toList(),
+        overallHealthScore: response.overallHealthScore,
+        overallHealthComments: response.overallHealthComments,
+      ),
+    );
+  }
+
+  NutritionRecord _createNutritionRecord(NutritionOutput nutritionOutput,
+      AgentModel.AgentResponsePayload response, UserModel? userModel) {
+    final time = DateTime.now();
+    return NutritionRecord(
+      recordTime: time,
+      nutritionInputQuery: NutritionInputQuery(
+        imageUrl: response.imageUrl ?? "",
+        scanMode: ScanMode.food,
+        food_description: response.foodName ?? "Chat analysis",
+        dietaryPreferences: userModel?.userInfo?.selectedDiet != null
+            ? [userModel!.userInfo!.selectedDiet]
+            : [],
+        allergies: userModel?.userInfo?.selectedAllergies != null &&
+                userModel!.userInfo!.selectedAllergies.isNotEmpty
+            ? userModel.userInfo!.selectedAllergies
+            : [],
+        selectedGoals: userModel?.userInfo?.selectedGoal != null
+            ? [userModel!.userInfo!.selectedGoal.name]
+            : [],
+      ),
+      processingStatus: ProcessingStatus.COMPLETED,
+      nutritionOutput: nutritionOutput,
+    );
+  }
+
+  Map<String, int> _calculateTotalNutrition(
+      AgentModel.AgentResponsePayload response) {
+    int totalCalories = 0;
+    int totalProtein = 0;
+    int totalFat = 0;
+    int totalCarbs = 0;
+
+    if (response.ingredients != null) {
+      for (final ingredient in response.ingredients!) {
+        totalCalories += ingredient.calories ?? 0;
+        totalProtein += ingredient.protein ?? 0;
+        totalFat += ingredient.fat ?? 0;
+        totalCarbs += ingredient.carbs ?? 0;
+      }
+    }
+
+    return {
+      'calories': totalCalories,
+      'protein': totalProtein,
+      'fat': totalFat,
+      'carbs': totalCarbs,
+    };
+  }
+
+  Future<DailyNutritionRecords> _updateDailyRecords(String userId,
+      NutritionRecord nutritionRecord, Map<String, int> totalNutrition) async {
+    final nutritionRecordRepo = NutritionRecordRepo();
+    final time = nutritionRecord.recordTime!;
+    final dailyRecordID = nutritionRecordRepo.getRecordId(time);
+
+    // Get existing records for today
+    DailyNutritionRecords? existingRecords;
+    try {
+      existingRecords =
+          await nutritionRecordRepo.getNutritionData(userId, time);
+    } catch (e) {
+      // If no existing records, create new empty one
+      existingRecords = DailyNutritionRecords(
+        dailyRecords: [],
+        recordDate: time,
+        recordId: dailyRecordID,
+        dailyConsumedCalories: 0,
+        dailyBurnedCalories: 0,
+        dailyConsumedProtein: 0,
+        dailyConsumedFat: 0,
+        dailyConsumedCarb: 0,
+      );
+    }
+
+    // Calculate updated totals
+    final totalConsumedCalories =
+        existingRecords.dailyConsumedCalories + totalNutrition['calories']!;
+    final totalConsumedFat =
+        existingRecords.dailyConsumedFat + totalNutrition['fat']!;
+    final totalConsumedProtein =
+        existingRecords.dailyConsumedProtein + totalNutrition['protein']!;
+    final totalConsumedCarb =
+        existingRecords.dailyConsumedCarb + totalNutrition['carbs']!;
+
+    // Add new record to daily records
+    final updatedDailyRecords =
+        List<NutritionRecord>.from(existingRecords.dailyRecords);
+    updatedDailyRecords.add(nutritionRecord);
+
+    // Create updated daily nutrition records
+    return DailyNutritionRecords(
+      dailyRecords: updatedDailyRecords,
+      recordDate: time,
+      recordId: dailyRecordID,
+      dailyConsumedCalories: totalConsumedCalories,
+      dailyBurnedCalories: existingRecords.dailyBurnedCalories,
+      dailyConsumedProtein: totalConsumedProtein,
+      dailyConsumedFat: totalConsumedFat,
+      dailyConsumedCarb: totalConsumedCarb,
+    );
+  }
+
+  Future<void> _handleSaveResult(
+      QueryStatus result, String userId, DateTime time) async {
+    if (result == QueryStatus.SUCCESS) {
+      await scannerController.getRecordByDate(userId, time);
       AppDialogs.hideDialog();
-
+      AppDialogs.showSuccessSnackbar(
+        title: "Success",
+        message: "Added to your meals!",
+      );
+    } else {
+      AppDialogs.hideDialog();
       AppDialogs.showErrorSnackbar(
         title: "Error",
         message: "Failed to add to meals. Please try again.",
       );
     }
+  }
+
+  void _handleError(String message) {
+    AppDialogs.hideDialog();
+    AppDialogs.showErrorSnackbar(
+      title: "Error",
+      message: message,
+    );
   }
 
 // Modified _buildAddToMealsButton method - accept imageUrl as parameter
@@ -2199,26 +2394,4 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     if (score >= 5) return Icons.warning;
     return Icons.error;
   }
-}
-
-class PatternPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withOpacity(0.05)
-      ..style = PaintingStyle.fill;
-
-    const double spacing = 60.0;
-    const double dotSize = 4.0;
-
-    for (double x = 0; x < size.width; x += spacing) {
-      for (double y = 0; y < size.height; y += spacing) {
-        canvas.drawCircle(Offset(x + 20, y + 20), dotSize, paint);
-        canvas.drawCircle(Offset(x + 40, y + 40), dotSize / 2, paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
