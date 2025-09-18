@@ -35,6 +35,8 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
   ScannerController scannerController = Get.put(ScannerController());
   late AnimationController _fadeController;
   late AnimationController _slideController;
+  // Use RxBool for reactive updates instead of setState
+  final RxBool _showScrollToTopButton = false.obs;
 
   @override
   void initState() {
@@ -50,10 +52,26 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     );
     _fadeController.forward();
     _slideController.forward();
+
+    // Add scroll listener for scroll to top button
+    controller.scrollController.addListener(_scrollListener);
+  }
+
+  void _scrollListener() {
+    if (controller.scrollController.hasClients) {
+      // Show button when scrolled down more than 150 pixels
+      final bool shouldShow = controller.scrollController.offset > 150;
+
+      // Only update if the state actually changes to avoid unnecessary rebuilds
+      if (shouldShow != _showScrollToTopButton.value) {
+        _showScrollToTopButton.value = shouldShow;
+      }
+    }
   }
 
   @override
   void dispose() {
+    controller.scrollController.removeListener(_scrollListener);
     _fadeController.dispose();
     _slideController.dispose();
     super.dispose();
@@ -71,10 +89,29 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         return Scaffold(
           backgroundColor: MealAIColors.whiteText,
           body: SafeArea(
-            child: Column(
+            child: Stack(
               children: [
-                Expanded(child: _buildMessagesList()),
-                _buildInputArea(),
+                Column(
+                  children: [
+                    Expanded(child: _buildMessagesList()),
+                    _buildInputArea(),
+                  ],
+                ),
+                // Floating scroll to top button with background and drop shadow
+                Positioned(
+                  bottom: 100, // Position above the input area
+                  right: 16,
+                  child: Obx(() => AnimatedScale(
+                        scale: _showScrollToTopButton.value ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOutBack,
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 150),
+                          opacity: _showScrollToTopButton.value ? 1.0 : 0.0,
+                          child: _buildScrollToTopButton(),
+                        ),
+                      )),
+                ),
               ],
             ),
           ),
@@ -184,7 +221,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
   Widget _buildMessageItem(AgentModel.AgentResponse message, int index) {
     final isUser = message.role == AgentModel.AgentRole.user;
-    final isSystem = message.isSystem == true;
 
     if (message.content?.trim().isEmpty == true &&
         (message.toolReturns == null || message.toolReturns!.isEmpty)) {
@@ -2088,6 +2124,68 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
         ),
       ),
     );
+  }
+
+  Widget _buildScrollToTopButton() {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: MealAIColors.whiteText,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: MealAIColors.blackText.withOpacity(0.15),
+            spreadRadius: 0,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: MealAIColors.blackText.withOpacity(0.1),
+            spreadRadius: 0,
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(
+          color: MealAIColors.blackText.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _scrollToTop,
+          borderRadius: BorderRadius.circular(24),
+          child: Center(
+            child: Icon(
+              Icons.keyboard_arrow_up_rounded,
+              color: MealAIColors.blackText,
+              size: 24,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _scrollToTop() {
+    if (controller.scrollController.hasClients) {
+      // Smooth animation to scroll to top
+      controller.scrollController
+          .animateTo(
+        0.0,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeOutCubic,
+      )
+          .then((_) {
+        // Hide the button after animation completes and we're at the top
+        if (controller.scrollController.hasClients &&
+            controller.scrollController.offset <= 10) {
+          _showScrollToTopButton.value = false;
+        }
+      });
+    }
   }
 
   Color _getHealthScoreColor(int score) {
