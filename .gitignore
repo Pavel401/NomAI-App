@@ -57,3 +57,10 @@ android/local.properties
 android/app/.cxx
 .vscode/ARCHITECTURE.md
 .gitignore
+
+# Android keystore files
+*.jks
+*.keystore
+
+# Keys folder
+keys/
