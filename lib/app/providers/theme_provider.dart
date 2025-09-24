@@ -27,15 +27,10 @@ class ThemeProvider extends ChangeNotifier {
     bool? isDarkMode = prefs.getBool('isDarkMode');
 
     if (isDarkMode == null) {
-      debugPrint('User has not set a theme preference');
-      debugPrint('Falling back to the system theme');
       final Brightness brightness =
           WidgetsBinding.instance.window.platformBrightness;
-      debugPrint('System theme mode: $brightness');
       isDarkMode = brightness == Brightness.dark;
-    } else {
-      debugPrint('User has set a theme preference: $isDarkMode');
-    }
+    } else {}
 
     setDarkMode(isDarkMode);
   }

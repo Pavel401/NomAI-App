@@ -36,7 +36,6 @@ class ScannerController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    print("📌 ScannerController initialized");
   }
 
   void addRecord(NutritionRecord record) {
@@ -70,18 +69,12 @@ class ScannerController extends GetxController {
         if (userState is UserLoaded) {
           userModel = userState.userModel;
         }
-        print("User model obtained: $userModel");
-      } else {
-        print("Context not mounted, proceeding without user preferences");
       }
     } catch (e) {
-      print("Error getting user preferences: $e, proceeding without them");
+      print("Error retrieving user preferences: $e");
     }
 
     try {
-      print(
-          "--- processNutritionQueryRequest --- UserId: $userId --- ScanMode: $scanMode");
-
       final nutritionRecordRepo = serviceLocator<NutritionRecordRepo>();
       final storageService = serviceLocator<StorageService>();
       final aiRepository = serviceLocator<AiRepository>();
@@ -104,30 +97,18 @@ class ScannerController extends GetxController {
           image.path,
           scale: ImageScale.large_2048,
         );
-        print("Successfully created resized image at: ${resizedFile.path}");
       } catch (e) {
         print("Error downscaling image: $e");
-        print("Using original image instead");
         resizedFile = image;
       }
 
-      print("--- Now let's upload the image first to get URL ----");
-
-      print("Resized file path: ${resizedFile.path}");
-      print("Resized file exists: ${resizedFile.existsSync()}");
-
       File fileToUpload = resizedFile.existsSync() ? resizedFile : image;
-      print("Using file for upload: ${fileToUpload.path}");
 
       final imageUrl = await storageService.uploadImage(fileToUpload);
-      print("We got the image URL: $imageUrl");
 
       if (imageUrl == null) {
-        print("Failed to upload image.");
         throw Exception("Failed to upload image");
       }
-
-      print("--- Now lets get the nutrition data from Meal AI backend");
 
       NutritionOutput rawNutritionData = await aiRepository.getNutritionData(
         NutritionInputQuery(
@@ -147,11 +128,7 @@ class ScannerController extends GetxController {
         ),
       );
 
-      print("We got the rawNutritionData: ${rawNutritionData.status}");
-
       if (rawNutritionData.status != 200 || rawNutritionData.response == null) {
-        print("❌ API call failed or returned no data");
-
         updateRecord(NutritionRecord(
           recordTime: time,
           nutritionInputQuery: NutritionInputQuery(
@@ -189,8 +166,6 @@ class ScannerController extends GetxController {
       );
 
       String dailyRecordID = nutritionRecordRepo.getRecordId(time);
-
-      print("The dailyRecordID is $dailyRecordID");
 
       updateRecord(NutritionRecord(
         nutritionOutput: rawNutritionData,
@@ -263,8 +238,6 @@ class ScannerController extends GetxController {
 
       update();
     } catch (e) {
-      print("🔥 [API Error] $e");
-
       final failedRecord = dailyRecords.firstWhere(
         (record) => record.recordTime == time,
         orElse: () => NutritionRecord(
@@ -295,8 +268,6 @@ class ScannerController extends GetxController {
   }
 
   Future<void> getRecordByDate(String userId, DateTime selectedDate) async {
-    print("🔍 Fetching nutrition records for user: $userId on $selectedDate");
-
     try {
       isLoading = true;
       update();
@@ -314,11 +285,7 @@ class ScannerController extends GetxController {
       consumedFat.value = records.dailyConsumedFat;
       consumedProtein.value = records.dailyConsumedProtein;
       consumedCarb.value = records.dailyConsumedCarb;
-
-      print("✅ Successfully retrieved records");
     } catch (e) {
-      print("🔥 [API Error] $e");
-
       dailyRecords.clear();
       existingNutritionRecords = null;
       throw Exception("❌ Something went wrong: $e");
@@ -364,7 +331,6 @@ class ScannerController extends GetxController {
 
     // Check if context is still valid before proceeding
     if (!context.mounted) {
-      print("Context not mounted, cannot retry nutrition analysis");
       AppDialogs.showErrorSnackbar(
         title: "Cannot Retry",
         message: "Screen context is no longer available",

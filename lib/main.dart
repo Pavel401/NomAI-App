@@ -24,10 +24,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-
   var remoteConfigService = await RemoteConfigService.getInstance();
   await remoteConfigService!.initialise();
-  debugPrint("Initialized Remote Config");
   configLoading();
   setupRegistry();
 
@@ -81,9 +79,7 @@ class MyAppView extends StatelessWidget {
       builder: (context, orientation, deviceType) {
         return getx.GetMaterialApp(
           builder: EasyLoading.init(),
-
           title: 'Firebase Auth',
-
           defaultTransition: getx.Transition.fadeIn,
           transitionDuration: const Duration(milliseconds: 300),
           debugShowCheckedModeBanner: false,

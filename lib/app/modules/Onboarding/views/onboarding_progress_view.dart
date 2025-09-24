@@ -333,7 +333,6 @@ class _OnboardingQuestionariesState extends State<OnboardingQuestionaries> {
                   setState(() {
                     currentHeight = height;
                   });
-                  print(currentHeight);
                 },
               )
             ],

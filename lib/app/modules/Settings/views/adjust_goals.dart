@@ -1,8 +1,11 @@
+import 'package:NomAi/app/modules/Scanner/controller/scanner_controller.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:NomAi/app/constants/colors.dart';
 import 'package:NomAi/app/models/Auth/user.dart';
 import 'package:NomAi/app/repo/firebase_user_repo.dart';
+import 'package:NomAi/app/components/buttons.dart';
+import 'package:get/get.dart';
 
 class AdjustGoalsView extends StatefulWidget {
   UserBasicInfo? userBasicInfo;
@@ -29,6 +32,8 @@ class _AdjustGoalsViewState extends State<AdjustGoalsView> {
   double _fat = 65;
   double _water = 8;
   double _fiber = 25;
+
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -269,39 +274,112 @@ class _AdjustGoalsViewState extends State<AdjustGoalsView> {
   }
 
   void _saveGoals() async {
-    final updatedMacros = UserMacros(
-      calories: _calories.toInt(),
-      protein: _protein.toInt(),
-      carbs: _carbs.toInt(),
-      fat: _fat.toInt(),
-      water: _water.toInt(),
-      fiber: _fiber.toInt(),
-    );
+    if (_isLoading) return;
 
-    UserBasicInfo updatedUserBasicInfo = widget.userBasicInfo!.copyWith(
-      userMacros: updatedMacros,
-    );
+    setState(() => _isLoading = true);
 
-    FirebaseUserRepo firebaseUserRepo = FirebaseUserRepo();
+    try {
+      final updatedMacros = UserMacros(
+        calories: _calories.toInt(),
+        protein: _protein.toInt(),
+        carbs: _carbs.toInt(),
+        fat: _fat.toInt(),
+        water: _water.toInt(),
+        fiber: _fiber.toInt(),
+      );
 
-    UserModel updatedUserModel = widget.userModel!.copyWith(
-      userInfo: updatedUserBasicInfo,
-    );
+      UserBasicInfo updatedUserBasicInfo = widget.userBasicInfo!.copyWith(
+        userMacros: updatedMacros,
+      );
 
-    await firebaseUserRepo.updateUserData(
-      updatedUserModel,
-    );
+      FirebaseUserRepo firebaseUserRepo = FirebaseUserRepo();
 
-    Navigator.pop(context, updatedMacros);
+      UserModel updatedUserModel = widget.userModel!.copyWith(
+        userInfo: updatedUserBasicInfo,
+      );
+
+      await firebaseUserRepo.updateUserData(
+        updatedUserModel,
+      );
+
+      ScannerController scannerController = Get.find<ScannerController>();
+
+      scannerController.updateNutritionValues(
+        maxCalories: updatedUserModel.userInfo!.userMacros.calories,
+        maxFat: updatedUserModel.userInfo!.userMacros.fat,
+        maxProtein: updatedUserModel.userInfo!.userMacros.protein,
+        maxCarb: updatedUserModel.userInfo!.userMacros.carbs,
+      );
+
+      if (mounted) {
+        Navigator.pop(context, updatedMacros);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Text(
+                  'Goals updated successfully!',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: MealAIColors.black,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Failed to update goals. Please try again.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: MealAIColors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: MealAIColors.blackText),
           onPressed: () => Navigator.pop(context),
@@ -309,12 +387,13 @@ class _AdjustGoalsViewState extends State<AdjustGoalsView> {
         title: Text(
           'Adjust Goals',
           style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
             color: MealAIColors.blackText,
+            letterSpacing: -0.5,
           ),
         ),
-        actions: [],
+        centerTitle: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -388,30 +467,13 @@ class _AdjustGoalsViewState extends State<AdjustGoalsView> {
               subtitle: 'Digestive health',
               onChanged: (val) => setState(() => _fiber = val),
             ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _saveGoals,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: MealAIColors.selectedTile,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  'Update Goals',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: MealAIColors.whiteText,
-                  ),
-                ),
-              ),
+            const SizedBox(height: 32),
+            SecondaryButton(
+              text: 'Update Goals',
+              onPressed: _saveGoals,
+              isLoading: _isLoading,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 32),
           ],
         ),
       ),
