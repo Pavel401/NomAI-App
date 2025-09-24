@@ -69,13 +69,13 @@ extension WeeklyPaceExtension on WeeklyPace {
   String toSimpleText() {
     switch (this) {
       case WeeklyPace.slow:
-        return 'Slow';
+        return 'Slow & Steady';
       case WeeklyPace.moderate:
-        return 'Moderate';
+        return 'Moderate Progress';
       case WeeklyPace.fast:
-        return 'Fast';
+        return 'Fast Track';
       case WeeklyPace.none:
-        return 'None';
+        return 'Not Specified';
       default:
         return '';
     }
@@ -92,13 +92,13 @@ extension WeeklyPaceExtension on WeeklyPace {
 
   static WeeklyPace fromSimpleText(String text) {
     switch (text) {
-      case 'Slow':
+      case 'Slow & Steady':
         return WeeklyPace.slow;
-      case 'Moderate':
+      case 'Moderate Progress':
         return WeeklyPace.moderate;
-      case 'Fast':
+      case 'Fast Track':
         return WeeklyPace.fast;
-      case 'None':
+      case 'Not Specified':
         return WeeklyPace.none;
       default:
         throw ArgumentError('Invalid pace text: $text');
@@ -110,13 +110,13 @@ extension HealthModeExtension on HealthMode {
   String toSimpleText() {
     switch (this) {
       case HealthMode.weightLoss:
-        return 'Weight Loss';
+        return 'Lose Weight';
       case HealthMode.muscleGain:
-        return 'Muscle Gain';
+        return 'Build Muscle';
       case HealthMode.maintainWeight:
-        return 'Maintain Weight';
+        return 'Maintain Current Weight';
       case HealthMode.none:
-        return 'None';
+        return 'Not Specified';
       default:
         return '';
     }

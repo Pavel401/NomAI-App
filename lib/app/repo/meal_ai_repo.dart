@@ -13,17 +13,12 @@ class AiRepository {
 
     String baseUrl = remoteConfigUrl + ApiPath.getNutritionData;
 
-    print("🌐 [API Request] Base URL: $baseUrl");
-
     try {
       final response = await http.post(
         Uri.parse(baseUrl),
         body: jsonEncode(inputQuery.toJsonForMealAIBackend()),
         headers: {"Content-Type": "application/json"},
       );
-
-      print("📡 [API Response] Status Code: ${response.statusCode}");
-      print("📜 [API Response] Body: ${response.body}");
 
       if (response.statusCode == 200) {
         return NutritionOutput.fromJson(json.decode(response.body));
@@ -36,7 +31,6 @@ class AiRepository {
         );
       }
     } catch (e) {
-      print("🔥 [API Error] $e");
       return NutritionOutput(
         status: 500,
         message: "Network error: ${e.toString()}",

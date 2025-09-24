@@ -36,8 +36,6 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
         EasyLoading.show(status: 'Signing in...');
         UserModel model = await _userRepository.signInWithGoogle();
 
-        print('UserModel: $model');
-
         UserModel nModel = UserModel(
             userId: model.userId,
             email: model.email,
@@ -50,7 +48,6 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
 
         await _userRepository.setUserData(nModel);
 
-        print("Success");
         EasyLoading.dismiss();
 
         emit(SignInSuccess());
@@ -66,5 +63,3 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
     });
   }
 }
-
-

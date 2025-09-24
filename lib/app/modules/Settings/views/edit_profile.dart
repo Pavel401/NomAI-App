@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:NomAi/app/constants/colors.dart';
 import 'package:NomAi/app/models/Auth/user.dart';
 import 'package:NomAi/app/repo/firebase_user_repo.dart';
+import 'package:NomAi/app/components/buttons.dart';
 
 class EditUserBasicInfoView extends StatefulWidget {
   final UserBasicInfo userBasicInfo;
@@ -108,10 +109,18 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
   Widget _buildSection(String title, List<Widget> children) {
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: MealAIColors.lightGreyTile,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: MealAIColors.grey.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,12 +128,13 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
           Text(
             title,
             style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
               color: MealAIColors.blackText,
+              letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           ...children,
         ],
       ),
@@ -144,13 +154,31 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
         controller: controller,
         keyboardType: keyboardType,
         validator: validator,
+        style: TextStyle(color: MealAIColors.blackText),
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: TextStyle(color: MealAIColors.blackText),
           suffixText: suffix,
+          suffixStyle: TextStyle(color: MealAIColors.blackText),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: MealAIColors.black),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: MealAIColors.grey),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: MealAIColors.black, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: MealAIColors.red),
           ),
           contentPadding: const EdgeInsets.all(16),
+          filled: true,
+          fillColor: Colors.white,
         ),
       ),
     );
@@ -169,18 +197,36 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
         value: value,
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: TextStyle(color: MealAIColors.blackText),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: MealAIColors.black),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: MealAIColors.grey),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: MealAIColors.black, width: 2),
           ),
           contentPadding: const EdgeInsets.all(16),
+          filled: true,
+          fillColor: Colors.white,
         ),
+        dropdownColor: Colors.white,
+        style: TextStyle(color: MealAIColors.blackText),
         items: items.map((T item) {
           return DropdownMenuItem<T>(
             value: item,
-            child: Text(itemLabel(item)),
+            child: Text(
+              itemLabel(item),
+              style: TextStyle(color: MealAIColors.blackText),
+            ),
           );
         }).toList(),
         onChanged: onChanged,
+        icon: Icon(Icons.keyboard_arrow_down, color: MealAIColors.blackText),
       ),
     );
   }
@@ -199,6 +245,24 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
             initialDate: selectedDate,
             firstDate: DateTime(1900),
             lastDate: DateTime.now(),
+            builder: (context, child) {
+              return Theme(
+                data: Theme.of(context).copyWith(
+                  colorScheme: ColorScheme.light(
+                    primary: MealAIColors.black,
+                    onPrimary: Colors.white,
+                    onSurface: MealAIColors.blackText,
+                    surface: Colors.white,
+                  ),
+                  textButtonTheme: TextButtonThemeData(
+                    style: TextButton.styleFrom(
+                      foregroundColor: MealAIColors.blackText,
+                    ),
+                  ),
+                ),
+                child: child!,
+              );
+            },
           );
           if (picked != null) {
             onDateSelected(picked);
@@ -207,8 +271,9 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
+            border: Border.all(color: MealAIColors.grey),
             borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -220,12 +285,23 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
                   color: MealAIColors.blackText,
                 ),
               ),
-              Text(
-                "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: MealAIColors.blueGrey,
-                ),
+              Row(
+                children: [
+                  Text(
+                    "${selectedDate.day.toString().padLeft(2, '0')}/${selectedDate.month.toString().padLeft(2, '0')}/${selectedDate.year}",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: MealAIColors.blueGrey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.calendar_today,
+                    color: MealAIColors.blackText,
+                    size: 20,
+                  ),
+                ],
               ),
             ],
           ),
@@ -246,14 +322,33 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
           final TimeOfDay? picked = await showTimePicker(
             context: context,
             initialTime: selectedTime ?? const TimeOfDay(hour: 8, minute: 0),
+            builder: (context, child) {
+              return Theme(
+                data: Theme.of(context).copyWith(
+                  colorScheme: ColorScheme.light(
+                    primary: MealAIColors.black,
+                    onPrimary: Colors.white,
+                    onSurface: MealAIColors.blackText,
+                    surface: Colors.white,
+                  ),
+                  textButtonTheme: TextButtonThemeData(
+                    style: TextButton.styleFrom(
+                      foregroundColor: MealAIColors.blackText,
+                    ),
+                  ),
+                ),
+                child: child!,
+              );
+            },
           );
           onTimeSelected(picked);
         },
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
+            border: Border.all(color: MealAIColors.grey),
             borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -265,12 +360,23 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
                   color: MealAIColors.blackText,
                 ),
               ),
-              Text(
-                selectedTime?.format(context) ?? "Not set",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: MealAIColors.blueGrey,
-                ),
+              Row(
+                children: [
+                  Text(
+                    selectedTime?.format(context) ?? "Not selected",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: MealAIColors.blueGrey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.access_time,
+                    color: MealAIColors.blackText,
+                    size: 20,
+                  ),
+                ],
               ),
             ],
           ),
@@ -294,18 +400,24 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
             label,
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
               color: MealAIColors.blackText,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: options.map((option) {
               final isSelected = selectedValues.contains(option);
               return FilterChip(
-                label: Text(option),
+                label: Text(
+                  option,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : MealAIColors.blackText,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 selected: isSelected,
                 onSelected: (selected) {
                   final newValues = List<String>.from(selectedValues);
@@ -316,11 +428,14 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
                   }
                   onChanged(newValues);
                 },
-                backgroundColor: Colors.grey[200],
-                selectedColor: MealAIColors.selectedTile,
-                labelStyle: TextStyle(
-                  color: isSelected ? Colors.white : MealAIColors.blackText,
+                backgroundColor: Colors.white,
+                selectedColor: MealAIColors.black,
+                checkmarkColor: Colors.white,
+                side: BorderSide(
+                  color: isSelected ? MealAIColors.black : MealAIColors.grey,
                 ),
+                elevation: 0,
+                pressElevation: 1,
               );
             }).toList(),
           ),
@@ -374,9 +489,26 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
       if (mounted) {
         Navigator.pop(context, updatedUserBasicInfo);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('User information updated successfully!'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Text(
+                  'Profile updated successfully!',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: MealAIColors.black,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
           ),
         );
       }
@@ -384,8 +516,27 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error updating user information: $e'),
-            backgroundColor: Colors.red,
+            content: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Failed to update profile. Please try again.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: MealAIColors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
           ),
         );
       }
@@ -399,10 +550,11 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: MealAIColors.blackText),
           onPressed: () => Navigator.pop(context),
@@ -410,11 +562,13 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
         title: Text(
           'Edit Profile',
           style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
             color: MealAIColors.blackText,
+            letterSpacing: -0.5,
           ),
         ),
+        centerTitle: false,
       ),
       body: Form(
         key: _formKey,
@@ -423,17 +577,17 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              _buildSection('Basic Information', [
+              _buildSection('Personal Information', [
                 _buildDropdown<Gender>(
                   label: 'Gender',
                   value: _selectedGender,
                   items: Gender.values,
-                  itemLabel: (gender) => gender.name,
+                  itemLabel: (gender) => gender.toSimpleText(),
                   onChanged: (value) =>
                       setState(() => _selectedGender = value!),
                 ),
                 _buildTextField(
-                  label: 'Age',
+                  label: 'Age (years)',
                   controller: _ageController,
                   keyboardType: TextInputType.number,
                   validator: (value) {
@@ -442,18 +596,18 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
                     }
                     final age = int.tryParse(value);
                     if (age == null || age < 1 || age > 120) {
-                      return 'Please enter a valid age';
+                      return 'Please enter a valid age (1-120)';
                     }
                     return null;
                   },
                 ),
                 _buildDatePicker(
-                  label: 'Birth Date',
+                  label: 'Date of Birth',
                   selectedDate: _birthDate,
                   onDateSelected: (date) => setState(() => _birthDate = date),
                 ),
               ]),
-              _buildSection('Physical Information', [
+              _buildSection('Physical Measurements', [
                 _buildTextField(
                   label: 'Height',
                   controller: _heightController,
@@ -465,7 +619,7 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
                     }
                     final height = double.tryParse(value);
                     if (height == null || height < 100 || height > 250) {
-                      return 'Please enter a valid height';
+                      return 'Please enter a valid height (100-250 cm)';
                     }
                     return null;
                   },
@@ -481,55 +635,55 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
                     }
                     final weight = double.tryParse(value);
                     if (weight == null || weight < 30 || weight > 300) {
-                      return 'Please enter a valid weight';
+                      return 'Please enter a valid weight (30-300 kg)';
                     }
                     return null;
                   },
                 ),
                 _buildTextField(
-                  label: 'Desired Weight',
+                  label: 'Target Weight',
                   controller: _desiredWeightController,
                   keyboardType: TextInputType.number,
                   suffix: 'kg',
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your desired weight';
+                      return 'Please enter your target weight';
                     }
                     final weight = double.tryParse(value);
                     if (weight == null || weight < 30 || weight > 300) {
-                      return 'Please enter a valid weight';
+                      return 'Please enter a valid weight (30-300 kg)';
                     }
                     return null;
                   },
                 ),
               ]),
-              _buildSection('Goals & Preferences', [
+              _buildSection('Health Goals & Lifestyle', [
                 _buildDropdown<HealthMode>(
-                  label: 'Health Goal',
+                  label: 'Primary Health Goal',
                   value: _selectedGoal,
                   items: HealthMode.values,
-                  itemLabel: (goal) => goal.name,
+                  itemLabel: (goal) => goal.toSimpleText(),
                   onChanged: (value) => setState(() => _selectedGoal = value!),
                 ),
                 _buildDropdown<WeeklyPace>(
-                  label: 'Weekly Pace',
+                  label: 'Preferred Progress Pace',
                   value: _selectedPace,
                   items: WeeklyPace.values,
-                  itemLabel: (pace) => pace.name,
+                  itemLabel: (pace) => pace.toSimpleText(),
                   onChanged: (value) => setState(() => _selectedPace = value!),
                 ),
                 _buildDropdown<ActivityLevel>(
                   label: 'Activity Level',
                   value: _selectedActivityLevel,
                   items: ActivityLevel.values,
-                  itemLabel: (level) => level.name,
+                  itemLabel: (level) => level.toSimpleText(),
                   onChanged: (value) =>
                       setState(() => _selectedActivityLevel = value!),
                 ),
               ]),
-              _buildSection('Meal Preferences', [
+              _buildSection('Meal Schedule & Preferences', [
                 _buildMultiSelect(
-                  label: 'Preferred Meals',
+                  label: 'Preferred Daily Meals',
                   options: ['Breakfast', 'Lunch', 'Dinner', 'Snacks'],
                   selectedValues: _selectedMeals,
                   onChanged: (values) =>
@@ -554,32 +708,13 @@ class _EditUserBasicInfoViewState extends State<EditUserBasicInfoView> {
                       setState(() => _thirdMealOfDay = time),
                 ),
               ]),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _saveUserInfo,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: MealAIColors.selectedTile,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : Text(
-                          'Update Profile',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: MealAIColors.whiteText,
-                          ),
-                        ),
-                ),
+              const SizedBox(height: 32),
+              SecondaryButton(
+                text: 'Save Changes',
+                onPressed: _saveUserInfo,
+                isLoading: _isLoading,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 32),
             ],
           ),
         ),

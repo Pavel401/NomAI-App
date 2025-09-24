@@ -131,58 +131,58 @@ class _SettingsViewState extends State<SettingsView> {
 
                       const Divider(thickness: 1),
 
-                      SizedBox(height: 2.h),
-                      const Text(
-                        'Preferences',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      _buildToggleItem(
-                          'Burned Calories',
-                          'Add burned calories to daily goal',
-                          isCaloriesBurnedEnabled, (value) {
-                        setState(() {
-                          isCaloriesBurnedEnabled = value;
-                        });
-                      }),
-                      SizedBox(height: 2.h),
+                      // SizedBox(height: 2.h),
+                      // const Text(
+                      //   'Preferences',
+                      //   style: TextStyle(
+                      //     fontSize: 22,
+                      //     fontWeight: FontWeight.bold,
+                      //     color: Colors.black,
+                      //   ),
+                      // ),
+                      // const SizedBox(height: 24),
+                      // _buildToggleItem(
+                      //     'Burned Calories',
+                      //     'Add burned calories to daily goal',
+                      //     isCaloriesBurnedEnabled, (value) {
+                      //   setState(() {
+                      //     isCaloriesBurnedEnabled = value;
+                      //   });
+                      // }),
+                      // SizedBox(height: 2.h),
 
-                      const Divider(thickness: 1),
-                      SizedBox(height: 2.h),
+                      // const Divider(thickness: 1),
+                      // SizedBox(height: 2.h),
 
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Legal',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      _buildNavigationItem('Terms and Conditions'),
-                      const SizedBox(height: 16),
-                      _buildNavigationItem('Privacy Policy'),
-                      const SizedBox(height: 16),
-                      _buildNavigationItem('Delete Account?'),
-                      const SizedBox(height: 16),
+                      // const SizedBox(height: 16),
+                      // const Text(
+                      //   'Legal',
+                      //   style: TextStyle(
+                      //     fontSize: 22,
+                      //     fontWeight: FontWeight.bold,
+                      //     color: Colors.black,
+                      //   ),
+                      // ),
+                      // const SizedBox(height: 24),
+                      // _buildNavigationItem('Terms and Conditions'),
+                      // const SizedBox(height: 16),
+                      // _buildNavigationItem('Privacy Policy'),
+                      // const SizedBox(height: 16),
+                      // _buildNavigationItem('Delete Account?'),
+                      // const SizedBox(height: 16),
 
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 24.0),
-                        child: Text(
-                          'VERSION 1.0.62',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                      ),
+                      // Padding(
+                      //   padding: const EdgeInsets.symmetric(vertical: 24.0),
+                      //   child: Text(
+                      //     'VERSION 1.0.62',
+                      //     style: TextStyle(
+                      //       fontSize: 12,
+                      //       color: Colors.grey[700],
+                      //     ),
+                      //   ),
+                      // ),
 
-                      const SizedBox(height: 60),
+                      // const SizedBox(height: 60),
                     ],
                   ),
                 ),

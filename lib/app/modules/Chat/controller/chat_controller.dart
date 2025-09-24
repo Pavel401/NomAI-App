@@ -83,7 +83,6 @@ class ChatController extends GetxController {
         _scrollToBottom();
       });
     } catch (e) {
-      print('DEBUG: Failed to load chat history: $e');
       errorMessage.value = 'Failed to load chat history: $e';
     } finally {
       isLoading.value = false;
@@ -139,7 +138,6 @@ class ChatController extends GetxController {
             // Still the same message and not actively receiving new content, finalize it
             currentStreamingMessage = null;
             isTyping.value = false;
-            print('DEBUG: Auto-finalizing message due to completion pattern');
           }
         });
       }
@@ -151,8 +149,6 @@ class ChatController extends GetxController {
   void _handleError(dynamic error) {
     isTyping.value = false;
     currentStreamingMessage = null;
-
-    print('Error sending message: $error');
 
     String errorText;
     if (error.toString().contains('Connection refused') ||

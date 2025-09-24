@@ -1,3 +1,4 @@
+import 'package:NomAi/app/components/empty.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_bounceable/flutter_bounceable.dart';
@@ -239,26 +240,28 @@ class _HomePageState extends State<HomePage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 16),
-          child: CircleAvatar(
-            backgroundColor: const Color(0xFF817C88),
-            child: IconButton(
-              icon: const Icon(Icons.person_outline),
-              color: MealAIColors.whiteText,
-              onPressed: () {},
-            ),
-          ),
-        ),
+        // Padding(
+        //   padding: const EdgeInsets.only(left: 16),
+        //   child: CircleAvatar(
+        //     backgroundColor: const Color(0xFF817C88),
+        //     child: IconButton(
+        //       icon: const Icon(Icons.person_outline),
+        //       color: MealAIColors.whiteText,
+        //       onPressed: () {},
+        //     ),
+        //   ),
+        // ),
+        SizedBox(width: 4.w),
         Text(
-          'Nutrition Scanner',
+          'NomAI',
           style: TextStyle(
               color: MealAIColors.whiteText,
               fontSize: 20,
               fontWeight: FontWeight.bold),
         ),
+
         Padding(
-          padding: const EdgeInsets.only(right: 16),
+          padding: EdgeInsets.only(right: 4.w),
           child: Bounceable(
             onTap: () {
               Get.to(() => SettingsView());
@@ -285,6 +288,7 @@ class _HomePageState extends State<HomePage> {
           setState(() {
             _selectedDate = date;
           });
+
           _scannerController.getRecordByDate(_userId, date);
         },
         showScheduleDots: true,
@@ -357,15 +361,14 @@ class _HomePageState extends State<HomePage> {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Center(
-                    child: Text(
-                      'No nutrition records found',
-                      style: TextStyle(
-                        color: MealAIColors.blackText,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
+                  EmptyIllustrations(
+                    removeHeightValue: true,
+                    title: "No meals recorded",
+                    message: "Start tracking your nutrition",
+                    imagePath: "assets/svg/empty.svg",
+                    width: 50.w,
+                    height: 40.h,
+                  )
                 ],
               );
             }

@@ -630,7 +630,6 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
     String imageUrl = "";
     if (controller.hasImageUrl(message.content!)) {
       imageUrl = controller.extractImageUrlFromContent(message.content!)!;
-      print("Extracted Image URL: $imageUrl");
     }
 
     if (_hasImageUrl(message)) {

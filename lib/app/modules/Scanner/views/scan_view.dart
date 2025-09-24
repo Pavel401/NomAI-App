@@ -59,8 +59,6 @@ class _MealAiCameraState extends State<MealAiCamera> {
     state.when(
       onPhotoMode: (photoState) {
         photoState.takePhoto().then((mediaCapture) async {
-          print(mediaCapture.path);
-
           ScannerController scannerController = Get.put(ScannerController());
           final authBloc = context.read<AuthenticationBloc>();
 

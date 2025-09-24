@@ -14,13 +14,6 @@ class NutritionRecordRepo {
     try {
       final recordId = getRecordId(record.recordDate);
 
-      print("Saving record for user: $userId on date: ${record.recordDate}");
-
-      print("Record ID: $recordId");
-      print("Record Data: ${record.toJson()}");
-
-      print("Saving to Firestore...");
-
       await usersCollection
           .doc(userId)
           .collection('nutritionRecords')
@@ -29,8 +22,6 @@ class NutritionRecordRepo {
 
       return QueryStatus.SUCCESS;
     } catch (e) {
-      print("🔥 [API Error] $e");
-
       return QueryStatus.FAILED;
     }
   }
@@ -57,7 +48,6 @@ class NutritionRecordRepo {
         );
       }
     } catch (e) {
-      print("🔥 [API Error] $e");
       throw Exception("❌ Something went wrong: $e");
     }
   }
@@ -67,15 +57,11 @@ class NutritionRecordRepo {
     try {
       final recordId = getRecordId(date);
 
-      print(
-          "Deleting meal entry for user: $userId on date: $date at index: $mealIndex");
-
       // Get the current nutrition data
       final currentData = await getNutritionData(userId, date);
 
       // Check if the meal index is valid
       if (mealIndex < 0 || mealIndex >= currentData.dailyRecords.length) {
-        print("❌ Invalid meal index: $mealIndex");
         return QueryStatus.FAILED;
       }
 
@@ -127,10 +113,8 @@ class NutritionRecordRepo {
           .doc(recordId)
           .set(currentData.toJson());
 
-      print("✅ Meal entry deleted successfully");
       return QueryStatus.SUCCESS;
     } catch (e) {
-      print("🔥 [API Error] $e");
       return QueryStatus.FAILED;
     }
   }
@@ -138,9 +122,6 @@ class NutritionRecordRepo {
   Future<QueryStatus> deleteMealEntryByTime(
       String userId, DateTime date, DateTime mealTime) async {
     try {
-      print(
-          "Deleting meal entry for user: $userId on date: $date at time: $mealTime");
-
       // Get the current nutrition data
       final currentData = await getNutritionData(userId, date);
 
@@ -157,14 +138,109 @@ class NutritionRecordRepo {
 
       // Check if the meal was found
       if (mealIndex == -1) {
-        print("❌ Meal entry not found for the specified time");
         return QueryStatus.FAILED;
       }
 
       // Use the existing deleteMealEntry method
       return await deleteMealEntry(userId, date, mealIndex);
     } catch (e) {
-      print("🔥 [API Error] $e");
+      print("Error deleting meal entry: $e");
+      return QueryStatus.FAILED;
+    }
+  }
+
+  Future<QueryStatus> updateMealEntry(String userId, NutritionRecord record,
+      DateTime date, DateTime mealTime) async {
+    try {
+      final currentData = await getNutritionData(userId, date);
+      final recordId = getRecordId(date);
+
+      // Find the meal entry with the matching time
+      int mealIndex = -1;
+      for (int i = 0; i < currentData.dailyRecords.length; i++) {
+        if (currentData.dailyRecords[i].recordTime != null &&
+            currentData.dailyRecords[i].recordTime!
+                .isAtSameMomentAs(mealTime)) {
+          mealIndex = i;
+          break;
+        }
+      }
+
+      // Check if the meal was found
+      if (mealIndex == -1) {
+        return QueryStatus.FAILED;
+      }
+
+      // Get the old meal entry for calorie calculation
+      final oldMeal = currentData.dailyRecords[mealIndex];
+
+      // Calculate old meal's nutritional values
+      int oldCalories = 0;
+      int oldProtein = 0;
+      int oldFat = 0;
+      int oldCarbs = 0;
+
+      if (oldMeal.nutritionOutput != null &&
+          oldMeal.nutritionOutput!.response != null &&
+          oldMeal.nutritionOutput!.response!.ingredients != null) {
+        for (var ingredient
+            in oldMeal.nutritionOutput!.response!.ingredients!) {
+          oldCalories += ingredient.calories ?? 0;
+          oldProtein += ingredient.protein ?? 0;
+          oldFat += ingredient.fat ?? 0;
+          oldCarbs += ingredient.carbs ?? 0;
+        }
+      }
+
+      // Calculate new meal's nutritional values
+      int newCalories = 0;
+      int newProtein = 0;
+      int newFat = 0;
+      int newCarbs = 0;
+
+      if (record.nutritionOutput != null &&
+          record.nutritionOutput!.response != null &&
+          record.nutritionOutput!.response!.ingredients != null) {
+        for (var ingredient in record.nutritionOutput!.response!.ingredients!) {
+          newCalories += ingredient.calories ?? 0;
+          newProtein += ingredient.protein ?? 0;
+          newFat += ingredient.fat ?? 0;
+          newCarbs += ingredient.carbs ?? 0;
+        }
+      }
+
+      // Update the meal entry
+      currentData.dailyRecords[mealIndex] = record;
+
+      // Update daily totals by removing old values and adding new values
+      currentData.dailyConsumedCalories =
+          currentData.dailyConsumedCalories - oldCalories + newCalories;
+      currentData.dailyConsumedProtein =
+          currentData.dailyConsumedProtein - oldProtein + newProtein;
+      currentData.dailyConsumedFat =
+          currentData.dailyConsumedFat - oldFat + newFat;
+      currentData.dailyConsumedCarb =
+          currentData.dailyConsumedCarb - oldCarbs + newCarbs;
+
+      // Ensure values don't go below zero
+      currentData.dailyConsumedCalories =
+          currentData.dailyConsumedCalories.clamp(0, double.infinity).toInt();
+      currentData.dailyConsumedProtein =
+          currentData.dailyConsumedProtein.clamp(0, double.infinity).toInt();
+      currentData.dailyConsumedFat =
+          currentData.dailyConsumedFat.clamp(0, double.infinity).toInt();
+      currentData.dailyConsumedCarb =
+          currentData.dailyConsumedCarb.clamp(0, double.infinity).toInt();
+
+      // Save the updated data back to Firestore
+      await usersCollection
+          .doc(userId)
+          .collection('nutritionRecords')
+          .doc(recordId)
+          .set(currentData.toJson());
+
+      return QueryStatus.SUCCESS;
+    } catch (e) {
       return QueryStatus.FAILED;
     }
   }
