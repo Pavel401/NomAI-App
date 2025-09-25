@@ -1,3 +1,4 @@
+import 'package:NomAi/app/modules/Analytics/views/analytics_view.dart';
 import 'package:NomAi/app/modules/Chat/Views/chat_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,6 +27,45 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+// Helper widget to reduce repetition
+  Widget _buildNavItem({
+    required int index,
+    required String label,
+    required IconData selectedIcon,
+    required IconData unselectedIcon,
+  }) {
+    final bool isSelected = _selectedIndex == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _onItemTapped(index),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSelected ? selectedIcon : unselectedIcon,
+              size: 26,
+              color: isSelected
+                  ? MealAIColors.blackText
+                  : MealAIColors.stepperColor,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                color: isSelected
+                    ? MealAIColors.blackText
+                    : MealAIColors.stepperColor,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -81,70 +121,23 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  _onItemTapped(0);
-                },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.home_outlined,
-                      size: 24,
-                      color: _selectedIndex == 0
-                          ? MealAIColors.blackText
-                          : MealAIColors.stepperColor,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Home',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: _selectedIndex == 0
-                            ? MealAIColors.blackText
-                            : MealAIColors.stepperColor,
-                        fontWeight: _selectedIndex == 0
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            _buildNavItem(
+              index: 0,
+              label: 'Home',
+              selectedIcon: Icons.home, // filled
+              unselectedIcon: Icons.home_outlined, // outline
             ),
-            Expanded(child: Container()),
-            Expanded(
-              child: GestureDetector(
-                onTap: () => _onItemTapped(2),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.analytics,
-                      size: 24,
-                      color: _selectedIndex == 2
-                          ? MealAIColors.blackText
-                          : MealAIColors.stepperColor,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Chat',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: _selectedIndex == 2
-                            ? MealAIColors.blackText
-                            : MealAIColors.stepperColor,
-                        fontWeight: _selectedIndex == 2
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            _buildNavItem(
+              index: 1,
+              label: 'Analytics',
+              selectedIcon: Icons.insert_chart, // better filled analytics
+              unselectedIcon: Icons.insert_chart_outlined, // outline
+            ),
+            _buildNavItem(
+              index: 2,
+              label: 'Chat',
+              selectedIcon: Icons.chat, // filled
+              unselectedIcon: Icons.chat_outlined, // outline
             ),
           ],
         ),
@@ -153,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
         index: _selectedIndex,
         children: [
           HomePage(),
-          Center(child: Text('📷 QR Scan Screen')),
+          AnalyticsView(),
           NomAiAgentView(),
         ],
       ),
