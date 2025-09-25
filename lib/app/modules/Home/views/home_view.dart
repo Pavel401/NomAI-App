@@ -138,6 +138,34 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: MealAIColors.blueGrey,
+        elevation: 0,
+        title: Text(
+          'NomAI',
+          style: TextStyle(
+            color: MealAIColors.whiteText,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: 4.w),
+            child: Bounceable(
+              onTap: () {
+                Get.to(() => SettingsView());
+              },
+              child: CircleAvatar(
+                backgroundColor: const Color(0xFF817C88),
+                child: Icon(Icons.settings_outlined,
+                    color: MealAIColors.whiteText),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -226,7 +254,7 @@ class _HomePageState extends State<HomePage> {
     return ListView(
       physics: BouncingScrollPhysics(),
       children: [
-        _buildHeader(),
+        // _buildHeader(),
         SizedBox(height: 2.h),
         _buildDateScroller(),
         _buildNutritionTracker(),
@@ -236,46 +264,36 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Padding(
-        //   padding: const EdgeInsets.only(left: 16),
-        //   child: CircleAvatar(
-        //     backgroundColor: const Color(0xFF817C88),
-        //     child: IconButton(
-        //       icon: const Icon(Icons.person_outline),
-        //       color: MealAIColors.whiteText,
-        //       onPressed: () {},
-        //     ),
-        //   ),
-        // ),
-        SizedBox(width: 4.w),
-        Text(
-          'NomAI',
-          style: TextStyle(
-              color: MealAIColors.whiteText,
-              fontSize: 20,
-              fontWeight: FontWeight.bold),
-        ),
-
-        Padding(
-          padding: EdgeInsets.only(right: 4.w),
-          child: Bounceable(
-            onTap: () {
-              Get.to(() => SettingsView());
-            },
-            child: CircleAvatar(
-              backgroundColor: const Color(0xFF817C88),
-              child:
-                  Icon(Icons.settings_outlined, color: MealAIColors.whiteText),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget _buildHeader() {
+  //   return Row(
+  //     children: [
+  //       Expanded(
+  //         child: Text(
+  //           'NomAI',
+  //           textAlign: TextAlign.center,
+  //           style: TextStyle(
+  //             color: MealAIColors.whiteText,
+  //             fontSize: 20,
+  //             fontWeight: FontWeight.bold,
+  //           ),
+  //         ),
+  //       ),
+  //       Padding(
+  //         padding: EdgeInsets.only(right: 4.w),
+  //         child: Bounceable(
+  //           onTap: () {
+  //             Get.to(() => SettingsView());
+  //           },
+  //           child: CircleAvatar(
+  //             backgroundColor: const Color(0xFF817C88),
+  //             child:
+  //                 Icon(Icons.settings_outlined, color: MealAIColors.whiteText),
+  //           ),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildDateScroller() {
     return Center(
