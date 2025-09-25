@@ -1,3 +1,4 @@
+import 'package:NomAi/app/modules/Analytics/model/analytics.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:NomAi/app/constants/enums.dart';
 import 'package:NomAi/app/models/AI/nutrition_record.dart';
@@ -7,6 +8,74 @@ class NutritionRecordRepo {
 
   String getRecordId(DateTime date) {
     return "${date.year}-${date.month}-${date.day}";
+  }
+
+  String getMonthId(DateTime date) {
+    final m = date.month.toString().padLeft(2, '0');
+    return "${date.year}-$m";
+  }
+
+  Future<void> _updateMonthlyAnalyticsForDate(
+      String userId, DateTime date) async {
+    try {
+      // Get the daily record for the date
+      final daily = await getNutritionData(userId, date);
+
+      // Build DailyAnalytics from the daily record
+      final dailyAnalytics = DailyAnalytics(
+        date: DateTime(date.year, date.month, date.day),
+        totalCalories: daily.dailyConsumedCalories,
+        totalProtein: daily.dailyConsumedProtein,
+        totalFat: daily.dailyConsumedFat,
+        totalCarbs: daily.dailyConsumedCarb,
+        mealCount: daily.dailyRecords.length,
+        totalCaloriesBurned: daily.dailyBurnedCalories,
+        waterIntake: 0,
+      );
+
+      // Fetch existing monthly analytics doc
+      final monthId = getMonthId(date);
+      final analyticsDocRef =
+          usersCollection.doc(userId).collection('analytics').doc(monthId);
+
+      final snap = await analyticsDocRef.get();
+      List<Map<String, dynamic>> dailyList = [];
+
+      if (snap.exists && snap.data() != null) {
+        final data = snap.data()!;
+        final list = (data['dailyAnalytics'] as List?) ?? [];
+        dailyList =
+            list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      }
+
+      final targetDay = DateTime(date.year, date.month, date.day);
+      final targetDayIso = targetDay.toIso8601String();
+
+      int existingIndex = dailyList.indexWhere((e) {
+        final s = e['date'] as String?;
+        if (s == null) return false;
+        // Compare by YYYY-MM-DD portion
+        return s.substring(0, 10) == targetDayIso.substring(0, 10);
+      });
+
+      final newEntry = dailyAnalytics.toJson();
+      if (existingIndex >= 0) {
+        dailyList[existingIndex] = newEntry;
+      } else {
+        dailyList.add(newEntry);
+        // sort by date ascending for consistency
+        dailyList.sort((a, b) {
+          final da = DateTime.parse(a['date'] as String);
+          final db = DateTime.parse(b['date'] as String);
+          return da.compareTo(db);
+        });
+      }
+
+      await analyticsDocRef.set({
+        'dailyAnalytics': dailyList,
+        'lastModified': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {}
   }
 
   Future<QueryStatus> saveNutritionData(
@@ -19,6 +88,8 @@ class NutritionRecordRepo {
           .collection('nutritionRecords')
           .doc(recordId)
           .set(record.toJson());
+
+      await _updateMonthlyAnalyticsForDate(userId, record.recordDate);
 
       return QueryStatus.SUCCESS;
     } catch (e) {
@@ -112,6 +183,9 @@ class NutritionRecordRepo {
           .collection('nutritionRecords')
           .doc(recordId)
           .set(currentData.toJson());
+
+      // Update monthly analytics for this date
+      await _updateMonthlyAnalyticsForDate(userId, date);
 
       return QueryStatus.SUCCESS;
     } catch (e) {
@@ -239,9 +313,74 @@ class NutritionRecordRepo {
           .doc(recordId)
           .set(currentData.toJson());
 
+      // Update monthly analytics for this date
+      await _updateMonthlyAnalyticsForDate(userId, date);
+
       return QueryStatus.SUCCESS;
     } catch (e) {
       return QueryStatus.FAILED;
+    }
+  }
+
+  Future<MonthlyAnalytics?> getMonthlyAnalytics(
+      String userId, DateTime forMonth) async {
+    try {
+      final monthId = getMonthId(forMonth);
+      final doc = await usersCollection
+          .doc(userId)
+          .collection('analytics')
+          .doc(monthId)
+          .get();
+
+      if (doc.exists && doc.data() != null) {
+        return MonthlyAnalytics.fromJson(doc.data()!);
+      }
+
+      // Fallback: compute from nutritionRecords in this month
+      final coll = await usersCollection
+          .doc(userId)
+          .collection('nutritionRecords')
+          .get();
+
+      final year = forMonth.year;
+      final month = forMonth.month;
+      final List<DailyAnalytics> daily = [];
+      for (final d in coll.docs) {
+        final data = d.data();
+        try {
+          final rec = DailyNutritionRecords.fromJson(data);
+          if (rec.recordDate.year == year && rec.recordDate.month == month) {
+            daily.add(DailyAnalytics(
+              date: DateTime(rec.recordDate.year, rec.recordDate.month,
+                  rec.recordDate.day),
+              totalCalories: rec.dailyConsumedCalories,
+              totalProtein: rec.dailyConsumedProtein,
+              totalFat: rec.dailyConsumedFat,
+              totalCarbs: rec.dailyConsumedCarb,
+              mealCount: rec.dailyRecords.length,
+              totalCaloriesBurned: rec.dailyBurnedCalories,
+              waterIntake: 0,
+            ));
+          }
+        } catch (_) {
+          // ignore malformed docs
+        }
+      }
+
+      daily.sort((a, b) => a.date.compareTo(b.date));
+      final monthly = MonthlyAnalytics(
+        dailyAnalytics: daily,
+        lastModified: DateTime.now(),
+      );
+      // Persist computed monthly analytics for future fast access
+      await usersCollection
+          .doc(userId)
+          .collection('analytics')
+          .doc(monthId)
+          .set(monthly.toJson());
+      return monthly;
+    } catch (e) {
+      return null;
     }
   }
 }
