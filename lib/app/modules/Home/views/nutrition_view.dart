@@ -1,6 +1,7 @@
 import 'package:NomAi/app/components/dialogs.dart';
 import 'package:NomAi/app/components/social_media_share_widget.dart';
 import 'package:NomAi/app/constants/enums.dart';
+import 'package:NomAi/app/models/AI/nutrition_input.dart';
 import 'package:NomAi/app/models/Auth/user.dart';
 import 'package:NomAi/app/modules/Scanner/controller/scanner_controller.dart';
 import 'package:NomAi/app/repo/nutrition_record_repo.dart';
@@ -341,408 +342,6 @@ class _NutritionViewState extends State<NutritionView> {
     // }
   }
 
-  Future<void> _handleEditMeal(BuildContext context) async {
-    // Calculate current total nutrition values
-    int currentCalories = 0;
-    int currentProtein = 0;
-    int currentCarbs = 0;
-    int currentFat = 0;
-
-    if (nutritionRecord.nutritionOutput?.response?.ingredients != null) {
-      for (var ingredient
-          in nutritionRecord.nutritionOutput!.response!.ingredients!) {
-        currentCalories += ingredient.calories ?? 0;
-        currentProtein += ingredient.protein ?? 0;
-        currentCarbs += ingredient.carbs ?? 0;
-        currentFat += ingredient.fat ?? 0;
-      }
-    }
-
-    // Initialize controllers with current values
-    final TextEditingController foodNameController = TextEditingController(
-      text: nutritionRecord.nutritionOutput?.response?.foodName ?? '',
-    );
-    final TextEditingController caloriesController = TextEditingController(
-      text: currentCalories.toString(),
-    );
-    final TextEditingController proteinController = TextEditingController(
-      text: currentProtein.toString(),
-    );
-    final TextEditingController carbsController = TextEditingController(
-      text: currentCarbs.toString(),
-    );
-    final TextEditingController fatController = TextEditingController(
-      text: currentFat.toString(),
-    );
-
-    String? selectedImagePath;
-    final ValueNotifier<String?> imagePathNotifier = ValueNotifier<String?>(
-      nutritionRecord.nutritionInputQuery?.imageFilePath,
-    );
-
-    await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: Container(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.8,
-              maxWidth: MediaQuery.of(context).size.width * 0.9,
-            ),
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title
-                    Row(
-                      children: [
-                        const Icon(Icons.edit, color: Colors.blue),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Edit Meal Entry',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Food Name Field
-                    TextField(
-                      controller: foodNameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Food Name *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.restaurant),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Image Section
-                    const Text(
-                      'Food Image',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    ValueListenableBuilder<String?>(
-                      valueListenable: imagePathNotifier,
-                      builder: (context, imagePath, child) {
-                        return Container(
-                          height: 120,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: imagePath != null
-                              ? Stack(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: imagePath.startsWith('/')
-                                          // Local file path
-                                          ? Image.file(
-                                              File(imagePath),
-                                              height: 120,
-                                              width: double.infinity,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                return Container(
-                                                  height: 120,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.grey.shade200,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                  ),
-                                                  child: const Center(
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Icon(Icons.restaurant,
-                                                            size: 32,
-                                                            color: Colors.grey),
-                                                        Text('Image Error',
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .grey)),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            )
-                                          // Network URL
-                                          : Image.network(
-                                              imagePath.startsWith('http')
-                                                  ? imagePath
-                                                  : nutritionRecord
-                                                          .nutritionInputQuery
-                                                          ?.imageUrl ??
-                                                      '',
-                                              height: 120,
-                                              width: double.infinity,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (context, error, stackTrace) {
-                                                return Container(
-                                                  height: 120,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.grey.shade200,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                  ),
-                                                  child: const Center(
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Icon(Icons.restaurant,
-                                                            size: 32,
-                                                            color: Colors.grey),
-                                                        Text('No Image',
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .grey)),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                    ),
-                                    Positioned(
-                                      top: 8,
-                                      right: 8,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Container(
-                                            decoration: const BoxDecoration(
-                                              color: Colors.blue,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: IconButton(
-                                              icon: const Icon(Icons.edit,
-                                                  color: Colors.white,
-                                                  size: 18),
-                                              onPressed: () {
-                                                _showImagePickerOptions(
-                                                    context, imagePathNotifier,
-                                                    (path) {
-                                                  selectedImagePath = path;
-                                                });
-                                              },
-                                            ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Container(
-                                            decoration: const BoxDecoration(
-                                              color: Colors.red,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: IconButton(
-                                              icon: const Icon(Icons.close,
-                                                  color: Colors.white,
-                                                  size: 18),
-                                              onPressed: () {
-                                                imagePathNotifier.value = null;
-                                                selectedImagePath = null;
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : InkWell(
-                                  onTap: () async {
-                                    _showImagePickerOptions(
-                                        context, imagePathNotifier, (path) {
-                                      selectedImagePath = path;
-                                    });
-                                  },
-                                  child: Container(
-                                    height: 120,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade100,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: const Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.add_photo_alternate,
-                                              size: 32, color: Colors.grey),
-                                          SizedBox(height: 8),
-                                          Text('Tap to add image',
-                                              style: TextStyle(
-                                                  color: Colors.grey)),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Nutrition Values Section
-                    const Text(
-                      'Nutrition Values',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Calories Field
-                    TextField(
-                      controller: caloriesController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Calories (kcal) *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.local_fire_department,
-                            color: Colors.orange),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Macronutrients Row
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: proteinController,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: 'Protein (g) *',
-                              border: OutlineInputBorder(),
-                              prefixIcon:
-                                  Icon(Icons.fitness_center, color: Colors.red),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: TextField(
-                            controller: carbsController,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: 'Carbs (g) *',
-                              border: OutlineInputBorder(),
-                              prefixIcon:
-                                  Icon(Icons.grain, color: Colors.green),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Fat Field
-                    TextField(
-                      controller: fatController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Fat (g) *',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.water_drop, color: Colors.blue),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Note
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.blue.shade200),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.info_outline,
-                              color: Colors.blue, size: 20),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Manual edits will update your daily nutrition totals. Make sure values are accurate.',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Action Buttons
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.grey,
-                          ),
-                          child: const Text('Cancel'),
-                        ),
-                        const SizedBox(width: 12),
-                        ElevatedButton(
-                          onPressed: () async {
-                            await _performMealUpdate(
-                              context,
-                              foodNameController,
-                              caloriesController,
-                              proteinController,
-                              carbsController,
-                              fatController,
-                              selectedImagePath,
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
-                          ),
-                          child: const Text('Update Meal'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> _performMealUpdate(
     BuildContext context,
     TextEditingController foodNameController,
@@ -799,8 +398,6 @@ class _NutritionViewState extends State<NutritionView> {
       return;
     }
 
-    Navigator.of(context).pop(); // Close the dialog
-
     AppDialogs.showLoadingDialog(
       title: "Updating Meal",
       message: "Saving your changes...",
@@ -811,51 +408,84 @@ class _NutritionViewState extends State<NutritionView> {
       final nutritionRecordRepo = NutritionRecordRepo();
       final recordTime = nutritionRecord.recordTime ?? DateTime.now();
 
-      // Create updated nutrition record with manual values
-      NutritionRecord updatedRecord = nutritionRecord;
+      // Build a new NutritionRecord with updated values (immutable-style)
+      final old = nutritionRecord;
+      final oldOutput = old.nutritionOutput;
+      final oldResp = oldOutput?.response;
 
-      // Update the food name in the nutrition response
-      if (updatedRecord.nutritionOutput?.response != null) {
-        updatedRecord.nutritionOutput!.response!.foodName =
-            foodNameController.text.trim();
-
-        // Update the ingredients with the new manual values
-        if (updatedRecord.nutritionOutput!.response!.ingredients != null &&
-            updatedRecord.nutritionOutput!.response!.ingredients!.isNotEmpty) {
-          // Update the first (or main) ingredient with the new values
-          var mainIngredient =
-              updatedRecord.nutritionOutput!.response!.ingredients!.first;
-          mainIngredient.calories = calories;
-          mainIngredient.protein = protein;
-          mainIngredient.carbs = carbs;
-          mainIngredient.fat = fat;
-          mainIngredient.name = foodNameController.text.trim();
-        } else {
-          // Create a new ingredient if none exist
-          updatedRecord.nutritionOutput!.response!.ingredients = [
-            Ingredient(
-              name: foodNameController.text.trim(),
-              calories: calories,
-              protein: protein,
-              carbs: carbs,
-              fat: fat,
-              healthScore: 5, // Default health score
-              healthComments: "Manually entered nutrition values",
-            )
-          ];
-        }
+      // Copy ingredients and update the first (main) one
+      List<Ingredient> newIngredients;
+      if (oldResp?.ingredients != null && oldResp!.ingredients!.isNotEmpty) {
+        newIngredients = oldResp.ingredients!
+            .map((i) => Ingredient.fromJson(i.toJson()))
+            .toList();
+        final first = newIngredients.first;
+        first.name = foodNameController.text.trim();
+        first.calories = calories;
+        first.protein = protein;
+        first.carbs = carbs;
+        first.fat = fat;
+        first.healthScore = first.healthScore ?? 5;
+        first.healthComments =
+            first.healthComments ?? 'Manually entered nutrition values';
+      } else {
+        newIngredients = [
+          Ingredient(
+            name: foodNameController.text.trim(),
+            calories: calories,
+            protein: protein,
+            carbs: carbs,
+            fat: fat,
+            healthScore: 5,
+            healthComments: 'Manually entered nutrition values',
+          )
+        ];
       }
 
-      // Update the food description in input query
-      if (updatedRecord.nutritionInputQuery != null) {
-        updatedRecord.nutritionInputQuery!.food_description =
-            foodNameController.text.trim();
+      final newResponse = NutritionResponse(
+        message: oldResp?.message,
+        foodName: foodNameController.text.trim(),
+        portion: oldResp?.portion,
+        portionSize: oldResp?.portionSize,
+        confidenceScore: oldResp?.confidenceScore,
+        ingredients: newIngredients,
+        primaryConcerns: oldResp?.primaryConcerns,
+        suggestAlternatives: oldResp?.suggestAlternatives,
+        overallHealthScore: oldResp?.overallHealthScore,
+        overallHealthComments: oldResp?.overallHealthComments,
+      );
 
-        // Update image path if a new one was selected
-        if (selectedImagePath != null) {
-          updatedRecord.nutritionInputQuery!.imageFilePath = selectedImagePath;
-        }
-      }
+      final newOutput = NutritionOutput(
+        response: newResponse,
+        status: oldOutput?.status,
+        message: oldOutput?.message,
+        metadata: oldOutput?.metadata,
+        inputTokenCount: oldOutput?.inputTokenCount,
+        outputTokenCount: oldOutput?.outputTokenCount,
+        totalTokenCount: oldOutput?.totalTokenCount,
+        estimatedCost: oldOutput?.estimatedCost,
+        executionTimeSeconds: oldOutput?.executionTimeSeconds,
+      );
+
+      final oldQuery = old.nutritionInputQuery;
+      final newQuery = oldQuery == null
+          ? null
+          : NutritionInputQuery(
+              imageUrl: oldQuery.imageUrl,
+              scanMode: oldQuery.scanMode,
+              food_description: foodNameController.text.trim(),
+              imageFilePath: selectedImagePath ?? oldQuery.imageFilePath,
+              dietaryPreferences: oldQuery.dietaryPreferences,
+              allergies: oldQuery.allergies,
+              selectedGoals: oldQuery.selectedGoals,
+            );
+
+      final updatedRecord = NutritionRecord(
+        nutritionOutput: newOutput,
+        recordTime: old.recordTime,
+        nutritionInputQuery: newQuery,
+        processingStatus: old.processingStatus,
+      );
 
       QueryStatus result = await nutritionRecordRepo.updateMealEntry(
         userId,
@@ -891,68 +521,6 @@ class _NutritionViewState extends State<NutritionView> {
         message: "An unexpected error occurred: $e",
       );
     }
-  }
-
-  void _showImagePickerOptions(
-      BuildContext context,
-      ValueNotifier<String?> imagePathNotifier,
-      Function(String) onImageSelected) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Choose from Gallery'),
-                onTap: () async {
-                  Navigator.of(context).pop();
-                  final ImagePicker picker = ImagePicker();
-                  final XFile? image = await picker.pickImage(
-                    source: ImageSource.gallery,
-                    maxWidth: 1024,
-                    maxHeight: 1024,
-                    imageQuality: 85,
-                  );
-
-                  if (image != null) {
-                    onImageSelected(image.path);
-                    imagePathNotifier.value = image.path;
-                  }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: const Text('Take a Photo'),
-                onTap: () async {
-                  Navigator.of(context).pop();
-                  final ImagePicker picker = ImagePicker();
-                  final XFile? image = await picker.pickImage(
-                    source: ImageSource.camera,
-                    maxWidth: 1024,
-                    maxHeight: 1024,
-                    imageQuality: 85,
-                  );
-
-                  if (image != null) {
-                    onImageSelected(image.path);
-                    imagePathNotifier.value = image.path;
-                  }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.cancel),
-                title: const Text('Cancel'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   Widget _buildSliverAppBar(BuildContext context) {
@@ -1013,7 +581,24 @@ class _NutritionViewState extends State<NutritionView> {
           ),
         ),
         Bounceable(
-          onTap: () => _handleEditMeal(context),
+          onTap: () async {
+            if (_isEditing) {
+              await _performMealUpdate(
+                context,
+                _foodNameController,
+                _caloriesController,
+                _proteinController,
+                _carbsController,
+                _fatController,
+                _selectedImagePath,
+              );
+            } else {
+              setState(() {
+                _resetEditingControllers();
+                _isEditing = true;
+              });
+            }
+          },
           child: Container(
             margin: const EdgeInsets.only(right: 8),
             padding: const EdgeInsets.all(8),
@@ -1028,10 +613,42 @@ class _NutritionViewState extends State<NutritionView> {
                 ),
               ],
             ),
-            child:
-                const Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
+            child: Icon(
+              _isEditing ? Icons.check : Icons.edit_outlined,
+              color: _isEditing ? Colors.green : Colors.blue,
+              size: 20,
+            ),
           ),
         ),
+        if (_isEditing)
+          Bounceable(
+            onTap: () {
+              setState(() {
+                _resetEditingControllers();
+                _isEditing = false;
+              });
+            },
+            child: Container(
+              margin: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.9),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.close,
+                color: Colors.red,
+                size: 20,
+              ),
+            ),
+          ),
         Bounceable(
           onTap: () => _handleDeleteMeal(context),
           child: Container(
@@ -1129,17 +746,48 @@ class _NutritionViewState extends State<NutritionView> {
       ),
       child: Column(
         children: [
-          Text(
-            response.foodName ?? 'Unknown Food',
+          // Text(
+          //   response.foodName ?? 'Unknown Food',
+          //   style: context.textTheme.headlineSmall?.copyWith(
+          //     fontWeight: FontWeight.bold,
+          //     color: Colors.black87,
+          //   ),
+          //   textAlign: TextAlign.center,
+          // ),
+
+          TextFormField(
+            controller: _foodNameController,
+            focusNode: _foodNameFocusNode,
+            textAlign: TextAlign.center,
             style: context.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
-            textAlign: TextAlign.center,
+            cursorColor: Colors.black,
+            decoration: _isEditing
+                ? const InputDecoration(
+                    hintText: 'Enter Food Name',
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black, width: 2),
+                    ),
+                  )
+                : const InputDecoration(
+                    hintText: 'Enter Food Name',
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                  ),
+            readOnly: !_isEditing,
+            onTapOutside: (_) => _foodNameFocusNode.unfocus(),
           ),
           if (response.overallHealthScore != null) ...[
             SizedBox(height: 2.h),
-            EnhancedHealthScoreWidget(nutritionRecord: nutritionRecord),
+            HealthScoreWidget(nutritionRecord: nutritionRecord),
           ],
         ],
       ),
@@ -1221,13 +869,41 @@ class _NutritionViewState extends State<NutritionView> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                Text(
-                  '$totalCalories kcal',
-                  style: context.textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                _isEditing
+                    ? SizedBox(
+                        width: 120,
+                        child: TextField(
+                          controller: _caloriesController,
+                          focusNode: _caloriesFocusNode,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.right,
+                          style: context.textTheme.titleLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          cursorColor: Colors.black,
+                          decoration: const InputDecoration(
+                            isDense: true,
+                            hintText: 'kcal',
+                            hintStyle: TextStyle(color: Colors.white70),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.black, width: 2),
+                            ),
+                          ),
+                          onTapOutside: (_) => _caloriesFocusNode.unfocus(),
+                        ),
+                      )
+                    : Text(
+                        '$totalCalories kcal',
+                        style: context.textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ],
             ),
           ),
@@ -1242,6 +918,8 @@ class _NutritionViewState extends State<NutritionView> {
                   'g',
                   MealAIColors.carbsColor,
                   Icons.grain,
+                  controller: _carbsController,
+                  focusNode: _carbsFocusNode,
                 ),
               ),
               SizedBox(width: 3.w),
@@ -1253,6 +931,8 @@ class _NutritionViewState extends State<NutritionView> {
                   'g',
                   MealAIColors.proteinColor,
                   Icons.fitness_center,
+                  controller: _proteinController,
+                  focusNode: _proteinFocusNode,
                 ),
               ),
               SizedBox(width: 3.w),
@@ -1264,6 +944,8 @@ class _NutritionViewState extends State<NutritionView> {
                   'g',
                   MealAIColors.fatColor,
                   Icons.water_drop,
+                  controller: _fatController,
+                  focusNode: _fatFocusNode,
                 ),
               ),
             ],
@@ -1279,8 +961,10 @@ class _NutritionViewState extends State<NutritionView> {
     String value,
     String unit,
     Color backgroundColor,
-    IconData icon,
-  ) {
+    IconData icon, {
+    TextEditingController? controller,
+    FocusNode? focusNode,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       decoration: BoxDecoration(
@@ -1300,27 +984,67 @@ class _NutritionViewState extends State<NutritionView> {
             ),
           ),
           const SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                value,
-                style: context.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: backgroundColor,
+          _isEditing && controller != null
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    SizedBox(
+                      width: 60,
+                      child: TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.right,
+                        style: context.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: backgroundColor,
+                        ),
+                        cursorColor: Colors.black,
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.black),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide:
+                                BorderSide(color: Colors.black, width: 2),
+                          ),
+                        ),
+                        onTapOutside: (_) => focusNode?.unfocus(),
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      unit,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text(
+                      value,
+                      style: context.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: backgroundColor,
+                      ),
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      unit,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 2),
-              Text(
-                unit,
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: Colors.black54,
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -1740,10 +1464,10 @@ class _NutritionViewState extends State<NutritionView> {
   }
 }
 
-class EnhancedHealthScoreWidget extends StatelessWidget {
+class HealthScoreWidget extends StatelessWidget {
   final NutritionRecord nutritionRecord;
 
-  const EnhancedHealthScoreWidget({
+  const HealthScoreWidget({
     super.key,
     required this.nutritionRecord,
   });
