@@ -69,5 +69,9 @@ keys/
 lib/firebase_options.dart
 android/app/google-services.json
 firebase.json
+GoogleService-Info.plist
+
+ios/Runner/GoogleService-Info.plist
 
 .vscode/
+android/app/google-services.json
