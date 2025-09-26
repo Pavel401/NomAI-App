@@ -91,7 +91,40 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 
         return Scaffold(
           backgroundColor: MealAIColors.whiteText,
-          body: SafeArea(
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  MealAIColors.blueGrey,
+                  MealAIColors.blueGrey.withOpacity(0.9),
+                  MealAIColors.blueGrey.withOpacity(0.8),
+                  MealAIColors.blueGrey.withOpacity(0.7),
+                  MealAIColors.blueGrey.withOpacity(0.6),
+                  MealAIColors.blueGrey.withOpacity(0.5),
+                  MealAIColors.blueGrey.withOpacity(0.4),
+                  MealAIColors.blueGrey.withOpacity(0.3),
+                  MealAIColors.blueGrey.withOpacity(0.2),
+                  MealAIColors.blueGrey.withOpacity(0.1),
+                  MealAIColors.whiteText,
+                ],
+                stops: const [
+                  0.0,
+                  0.1,
+                  0.2,
+                  0.3,
+                  0.4,
+                  0.5,
+                  0.6,
+                  0.7,
+                  0.8,
+                  0.9,
+                  1.0,
+                ],
+              ),
+            ),
+            child: SafeArea(
             child: Stack(
               children: [
                 Column(
@@ -117,6 +150,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
                 ),
               ],
             ),
+            ),
           ),
         );
       },
@@ -126,7 +160,7 @@ class _NomAiAgentViewState extends State<NomAiAgentView>
 //This widget handles the list of messages in the chat interface
   Widget _buildMessagesList() {
     return Container(
-      color: MealAIColors.whiteText,
+      color: Colors.transparent,
       child: Obx(() {
         if (controller.isLoading.value) {
           return Center(
