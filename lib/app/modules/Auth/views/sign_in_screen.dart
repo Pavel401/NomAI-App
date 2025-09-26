@@ -31,20 +31,10 @@ class _SignInScreenState extends State<SignInScreen> {
           setState(() {
             signInRequired = false;
           });
-          final FirebaseUserRepo _userRepository = FirebaseUserRepo();
-
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (context) => BlocProvider(
-                create: (context) => SignInBloc(
-                  userRepository: _userRepository,
-                ),
-                child: const HomeScreen(),
-              ),
-            ),
-            (route) =>
-                false, // This predicate ensures all previous routes are removed
-          );
+          // AuthenticationBloc will emit authenticated and MyAppView
+          // will rebuild with HomeScreen and required blocs.
+          // Pop back to the root to reveal the updated home.
+          Navigator.of(context).popUntil((route) => route.isFirst);
         } else if (state is SignInProcess) {
           setState(() {
             signInRequired = true;
