@@ -3,6 +3,8 @@ import 'package:NomAi/app/modules/Chat/Views/chat_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:NomAi/app/modules/Auth/blocs/my_user_bloc/my_user_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:NomAi/app/constants/colors.dart';
 import 'package:NomAi/app/modules/Home/views/home_view.dart';
@@ -98,7 +100,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 elevation: 0,
                 shape: const CircleBorder(),
                 onPressed: () {
-                  Get.to(() => MealAiCamera());
+                  // Preserve existing UserBloc when navigating via GetX
+                  try {
+                    final userBloc = context.read<UserBloc>();
+                    Get.to(() => BlocProvider.value(
+                          value: userBloc,
+                          child: MealAiCamera(),
+                        ));
+                  } catch (_) {
+                    // Fallback if bloc not found; navigate as-is
+                    Get.to(() => MealAiCamera());
+                  }
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(8),
