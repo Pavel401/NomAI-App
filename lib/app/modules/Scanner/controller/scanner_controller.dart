@@ -33,31 +33,75 @@ class ScannerController extends GetxController {
   bool isLoading = false;
   DailyNutritionRecords? existingNutritionRecords;
 
+  // Keep transient (in-memory) records per date so they persist
+  // while the user navigates between dates.
+  final Map<String, List<NutritionRecord>> _transientByDate = {};
+
+  String _dateKey(DateTime d) => "${d.year}-${d.month}-${d.day}";
+
   @override
   void onInit() {
     super.onInit();
   }
 
   void addRecord(NutritionRecord record) {
-    dailyRecords.add(record);
-    update();
+    final key = _dateKey(record.recordTime!);
+    final list = _transientByDate.putIfAbsent(key, () => []);
+    list.add(record);
+
+    if (_dateKey(selectedDate) == key) {
+      dailyRecords.add(record);
+      update();
+    } else {
+      update();
+    }
   }
 
   void removeRecord(NutritionRecord record) {
-    dailyRecords.remove(record);
-    update();
+    final key = _dateKey(record.recordTime!);
+    if (_transientByDate.containsKey(key)) {
+      _transientByDate[key]!.removeWhere(
+        (r) => r.recordTime == record.recordTime,
+      );
+    }
+
+    if (_dateKey(selectedDate) == key) {
+      dailyRecords.removeWhere((r) => r.recordTime == record.recordTime);
+      update();
+    } else {
+      update();
+    }
   }
 
   void updateRecord(NutritionRecord record) {
-    final index =
-        dailyRecords.indexWhere((r) => r.recordTime == record.recordTime);
-    dailyRecords[index] = record;
+    final key = _dateKey(record.recordTime!);
+
+    // Update transient cache
+    final list = _transientByDate.putIfAbsent(key, () => []);
+    final tIndex = list.indexWhere((r) => r.recordTime == record.recordTime);
+    if (tIndex >= 0) {
+      list[tIndex] = record;
+    } else {
+      list.add(record);
+    }
+
+    // Update currently displayed list only if it matches the selected date
+    if (_dateKey(selectedDate) == key) {
+      final index =
+          dailyRecords.indexWhere((r) => r.recordTime == record.recordTime);
+      if (index >= 0) {
+        dailyRecords[index] = record;
+      } else {
+        dailyRecords.add(record);
+      }
+    }
+
     update();
   }
 
   Future<void> processNutritionQueryRequest(String userId, File image,
       ScanMode scanMode, BuildContext context) async {
-    DateTime time = DateTime.now(); // Declare time at method level
+    DateTime time = selectedDate;
 
     // Get user preferences early before any async operations to avoid context issues
     UserModel? userModel;
@@ -174,48 +218,46 @@ class ScannerController extends GetxController {
         processingStatus: ProcessingStatus.COMPLETED,
       ));
 
-      int totalNutritionValue = 0;
-      int totalProteinValue = 0;
-      int totalFatValue = 0;
-      int totalCarbValue = 0;
+      // Build the full list for the target day to persist correctly even if
+      // the user switched the UI to a different day during processing.
+      final key = _dateKey(time);
+      final persistedForDay =
+          await nutritionRecordRepo.getNutritionData(userId, time);
 
-      if (rawNutritionData.response?.ingredients != null) {
-        for (final ingredient in rawNutritionData.response!.ingredients!) {
-          totalNutritionValue += ingredient.calories ?? 0;
-          totalProteinValue += ingredient.protein ?? 0;
-          totalFatValue += ingredient.fat ?? 0;
-          totalCarbValue += ingredient.carbs ?? 0;
+      // Merge: start with persisted, overlay transient by recordTime
+      final mergedForDay = List<NutritionRecord>.from(
+          persistedForDay.dailyRecords);
+      final transient = _transientByDate[key] ?? const <NutritionRecord>[];
+      for (final t in transient) {
+        final i = mergedForDay.indexWhere((r) => r.recordTime == t.recordTime);
+        if (i >= 0) {
+          mergedForDay[i] = t;
+        } else {
+          mergedForDay.add(t);
         }
       }
 
-      if (existingNutritionRecords == null) {
-        existingNutritionRecords = DailyNutritionRecords(
-          dailyRecords: [],
-          recordDate: time,
-          recordId: dailyRecordID,
-          dailyConsumedCalories: 0,
-          dailyBurnedCalories: 0,
-          dailyConsumedProtein: 0,
-          dailyConsumedFat: 0,
-          dailyConsumedCarb: 0,
-        );
+      // Recompute totals from the merged list
+      int totalConsumedCalories = 0;
+      int totalConsumedProtein = 0;
+      int totalConsumedFat = 0;
+      int totalConsumedCarb = 0;
+      int totalBurnedCalories = persistedForDay.dailyBurnedCalories;
+
+      for (final rec in mergedForDay) {
+        final resp = rec.nutritionOutput?.response;
+        if (resp?.ingredients != null) {
+          for (final ing in resp!.ingredients!) {
+            totalConsumedCalories += ing.calories ?? 0;
+            totalConsumedProtein += ing.protein ?? 0;
+            totalConsumedFat += ing.fat ?? 0;
+            totalConsumedCarb += ing.carbs ?? 0;
+          }
+        }
       }
 
-      int totalConsumedCalories =
-          (existingNutritionRecords?.dailyConsumedCalories ?? 0) +
-              totalNutritionValue;
-      int totalConsumedFat =
-          (existingNutritionRecords?.dailyConsumedFat ?? 0) + totalFatValue;
-      int totalConsumedProtein =
-          (existingNutritionRecords?.dailyConsumedProtein ?? 0) +
-              totalProteinValue;
-      int totalConsumedCarb =
-          (existingNutritionRecords?.dailyConsumedCarb ?? 0) + totalCarbValue;
-      int totalBurnedCalories =
-          existingNutritionRecords?.dailyBurnedCalories ?? 0;
-
-      DailyNutritionRecords dailyNutritionRecords = DailyNutritionRecords(
-        dailyRecords: dailyRecords,
+      final dailyNutritionRecords = DailyNutritionRecords(
+        dailyRecords: mergedForDay,
         recordDate: time,
         recordId: dailyRecordID,
         dailyConsumedCalories: totalConsumedCalories,
@@ -228,13 +270,15 @@ class ScannerController extends GetxController {
       await nutritionRecordRepo.saveNutritionData(
           dailyNutritionRecords, userId);
 
-      existingNutritionRecords = dailyNutritionRecords;
-
-      consumedCalories.value = totalConsumedCalories;
-      burnedCalories.value = totalBurnedCalories;
-      consumedFat.value = totalConsumedFat;
-      consumedProtein.value = totalConsumedProtein;
-      consumedCarb.value = totalConsumedCarb;
+      // Update UI totals only if the user is currently viewing this date
+      if (_dateKey(selectedDate) == key) {
+        existingNutritionRecords = dailyNutritionRecords;
+        consumedCalories.value = totalConsumedCalories;
+        burnedCalories.value = totalBurnedCalories;
+        consumedFat.value = totalConsumedFat;
+        consumedProtein.value = totalConsumedProtein;
+        consumedCarb.value = totalConsumedCarb;
+      }
 
       update();
     } catch (e) {
@@ -269,6 +313,8 @@ class ScannerController extends GetxController {
 
   Future<void> getRecordByDate(String userId, DateTime selectedDate) async {
     try {
+      // Keep controller's selectedDate in sync with caller
+      this.selectedDate = selectedDate;
       isLoading = true;
       update();
 
@@ -277,8 +323,23 @@ class ScannerController extends GetxController {
       final records =
           await nutritionRecordRepo.getNutritionData(userId, selectedDate);
 
+      // Merge fetched records with any transient in-memory records
+      final key = _dateKey(selectedDate);
+      final transient = List<NutritionRecord>.from(
+          _transientByDate[key] ?? const <NutritionRecord>[]);
+
+      final merged = List<NutritionRecord>.from(records.dailyRecords);
+      for (final t in transient) {
+        final i = merged.indexWhere((r) => r.recordTime == t.recordTime);
+        if (i >= 0) {
+          merged[i] = t;
+        } else {
+          merged.add(t);
+        }
+      }
+
       existingNutritionRecords = records;
-      dailyRecords = records.dailyRecords;
+      dailyRecords = merged;
 
       consumedCalories.value = records.dailyConsumedCalories;
       burnedCalories.value = records.dailyBurnedCalories;
