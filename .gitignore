@@ -68,5 +68,6 @@ keys/
 # Firebase configuration (contains sensitive data)
 lib/firebase_options.dart
 android/app/google-services.json
+firebase.json
 
 .vscode/
