@@ -87,6 +87,8 @@ class _HomePageState extends State<HomePage> {
           userModel = userState.userModel;
           _isLoading = false;
         });
+        // Sync controller's selected date with current selection
+        _scannerController.selectedDate = _selectedDate;
         _updateNutritionValues(userState.userModel);
         _fetchRecords();
       } else {
@@ -98,6 +100,8 @@ class _HomePageState extends State<HomePage> {
               userModel = state.userModel;
               _isLoading = false;
             });
+            // Sync controller's selected date with current selection
+            _scannerController.selectedDate = _selectedDate;
             _updateNutritionValues(state.userModel);
             _fetchRecords();
             break;
@@ -120,7 +124,8 @@ class _HomePageState extends State<HomePage> {
 
   void _fetchRecords() {
     if (_userId.isNotEmpty) {
-      _scannerController.getRecordByDate(_userId, _selectedDate);
+      _scannerController.getRecordByDate(
+          _userId, _scannerController.selectedDate);
     }
   }
 
@@ -296,16 +301,28 @@ class _HomePageState extends State<HomePage> {
   // }
 
   Widget _buildDateScroller() {
+    // Show a 30-day window for the current month
+    final now = DateTime.now();
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final endOfRange = startOfMonth.add(const Duration(days: 29));
+
+    // Ensure selected date stays within the 30-day window
+    final clampedSelectedDate = _selectedDate.isBefore(startOfMonth)
+        ? startOfMonth
+        : (_selectedDate.isAfter(endOfRange) ? endOfRange : _selectedDate);
+
     return Center(
       child: DateScroller(
-        initialDate: userModel!.createdAt,
-        lastDate: DateTime.now().add(Duration(days: 6)),
-        selectedDate: _selectedDate,
+        initialDate: startOfMonth,
+        lastDate: endOfRange,
+        selectedDate: clampedSelectedDate,
         showMonthName: false,
         onDateSelected: (date) {
           setState(() {
             _selectedDate = date;
           });
+
+          _scannerController.selectedDate = _selectedDate;
 
           _scannerController.getRecordByDate(_userId, date);
         },
