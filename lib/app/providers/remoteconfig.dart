@@ -9,7 +9,8 @@ class RemoteConfigService {
       : _remoteConfig = remoteConfig;
   final FirebaseRemoteConfig _remoteConfig;
 
-  static String _image_processing_url = "";
+  // Base URL loaded from Remote Config
+  static String _baseUrl = "";
   static RemoteConfigService? _instance;
 
   static Future<RemoteConfigService?> getInstance() async {
@@ -21,8 +22,15 @@ class RemoteConfigService {
     return _instance;
   }
 
+  // Preferred getter for backend base URL
+  static String getBaseUrl() {
+    return _baseUrl;
+  }
+
+  // Backwards compatibility (temporary). Prefer getBaseUrl().
+  @deprecated
   static String getImageProcessingBackendURL() {
-    return _image_processing_url;
+    return _baseUrl;
   }
 
   Future initialise() async {
@@ -45,6 +53,9 @@ class RemoteConfigService {
     await _remoteConfig.ensureInitialized();
     await _remoteConfig.fetchAndActivate();
 
-    _image_processing_url = _remoteConfig.getString("image_processing_url");
+    // Try new key first, then fallback to legacy key
+    final rcBase = _remoteConfig.getString("base_url");
+    final legacy = _remoteConfig.getString("image_processing_url");
+    _baseUrl = (rcBase.isNotEmpty ? rcBase : legacy).trim();
   }
 }
