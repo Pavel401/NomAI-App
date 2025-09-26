@@ -9,7 +9,7 @@ import 'package:NomAi/app/providers/remoteconfig.dart';
 class AiRepository {
   Future<NutritionOutput> getNutritionData(
       NutritionInputQuery inputQuery) async {
-    String remoteConfigUrl = RemoteConfigService.getImageProcessingBackendURL();
+    String remoteConfigUrl = RemoteConfigService.getBaseUrl();
 
     String baseUrl = remoteConfigUrl + ApiPath.getNutritionData;
 
