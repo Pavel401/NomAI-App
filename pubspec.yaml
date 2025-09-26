@@ -1,7 +1,7 @@
 name: NomAi
 description: "A new Flutter project."
 publish_to: "none"
-version: 0.1.2+36
+version: 0.1.2+40
 
 environment:
   sdk: ">=3.3.2 <4.0.0"
@@ -34,6 +34,7 @@ dependencies:
   get_it: ^8.0.3
   google_fonts: ^6.2.1
   google_sign_in: ^6.2.2
+  icons_launcher: ^3.0.3
   image_picker: ^1.1.2
   intl: ^0.19.0
   linear_progress_bar: ^1.2.0
@@ -60,4 +61,5 @@ flutter:
   assets:
     - assets/svg/
     - assets/lottie/
+    - assets/png/
     - shorebird.yaml
