@@ -1,3 +1,4 @@
+import 'package:NomAi/app/components/empty.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -79,7 +80,8 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                     monthLabel,
                     style: TextStyle(
                       fontSize: 14,
-                      color: MealAIColors.grey,
+                      color: MealAIColors.whiteText,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -638,55 +640,94 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     return Scaffold(
       backgroundColor: MealAIColors.lightBackground,
       appBar: AppBar(
-        backgroundColor: MealAIColors.lightSurface,
-        elevation: 0.5,
+        backgroundColor: MealAIColors.blueGrey,
+        elevation: 0,
         title: const Text(
           'Analytics',
-          style: TextStyle(color: MealAIColors.blackText),
+          style: TextStyle(
+            color: MealAIColors.whiteText,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        iconTheme: const IconThemeData(color: MealAIColors.blackText),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: MealAIColors.whiteText),
       ),
-      body: BlocBuilder<UserBloc, UserState>(
-        builder: (context, state) {
-          if (state is UserLoading || state is UserInitial) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is UserLoaded) {
-            _userId ??= state.userModel.userId;
-            _future ??= serviceLocator<NutritionRecordRepo>()
-                .getMonthlyAnalytics(state.userModel.userId, _selectedMonth);
-            return FutureBuilder<MonthlyAnalytics?>(
-              future: _future,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'Failed to load analytics',
-                      style: TextStyle(color: MealAIColors.red),
-                    ),
-                  );
-                }
-                final data = snapshot.data;
-                if (data == null || data.dailyAnalytics.isEmpty) {
-                  return _buildEmptyState();
-                }
-                return SingleChildScrollView(child: _buildSummary(data));
-              },
-            );
-          }
-          if (state is UserError) {
-            return Center(
-              child: Text(
-                state.message,
-                style: TextStyle(color: MealAIColors.red),
-              ),
-            );
-          }
-          return const SizedBox.shrink();
-        },
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              MealAIColors.blueGrey,
+              MealAIColors.blueGrey.withOpacity(0.9),
+              MealAIColors.blueGrey.withOpacity(0.8),
+              MealAIColors.blueGrey.withOpacity(0.7),
+              MealAIColors.blueGrey.withOpacity(0.6),
+              MealAIColors.blueGrey.withOpacity(0.5),
+              MealAIColors.blueGrey.withOpacity(0.4),
+              MealAIColors.blueGrey.withOpacity(0.3),
+              MealAIColors.blueGrey.withOpacity(0.2),
+              MealAIColors.blueGrey.withOpacity(0.1),
+              MealAIColors.whiteText,
+            ],
+            stops: const [
+              0.0,
+              0.1,
+              0.2,
+              0.3,
+              0.4,
+              0.5,
+              0.6,
+              0.7,
+              0.8,
+              0.9,
+              1.0,
+            ],
+          ),
+        ),
+        child: BlocBuilder<UserBloc, UserState>(
+          builder: (context, state) {
+            if (state is UserLoading || state is UserInitial) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state is UserLoaded) {
+              _userId ??= state.userModel.userId;
+              _future ??= serviceLocator<NutritionRecordRepo>()
+                  .getMonthlyAnalytics(state.userModel.userId, _selectedMonth);
+              return FutureBuilder<MonthlyAnalytics?>(
+                future: _future,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Failed to load analytics',
+                        style: TextStyle(color: MealAIColors.red),
+                      ),
+                    );
+                  }
+                  final data = snapshot.data;
+                  if (data == null || data.dailyAnalytics.isEmpty) {
+                    return _buildEmptyState();
+                  }
+                  return SingleChildScrollView(child: _buildSummary(data));
+                },
+              );
+            }
+            if (state is UserError) {
+              return Center(
+                child: Text(
+                  state.message,
+                  style: TextStyle(color: MealAIColors.red),
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }
@@ -697,17 +738,6 @@ class _AnalyticsViewState extends State<AnalyticsView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(4.w, 2.h, 4.w, 1.h),
-            child: Text(
-              'Monthly Analytics',
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: MealAIColors.blackText,
-              ),
-            ),
-          ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 4.w),
             child: Row(
@@ -728,33 +758,15 @@ class _AnalyticsViewState extends State<AnalyticsView> {
               ],
             ),
           ),
-          SizedBox(height: 2.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 3.w),
-            child: _metricPicker(),
+          EmptyIllustrations(
+            removeHeightValue: true,
+            title: "No records yet",
+            message: "You haven't logged any meals in $monthLabel.",
+            imagePath: "assets/svg/empty.svg",
+            width: 50.w,
+            height: 40.h,
           ),
-          SizedBox(height: 1.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4.w),
-            child: SizedBox(
-              height: 28.h,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: MealAIColors.lightSurface,
-                  borderRadius: BorderRadius.circular(3.w),
-                  border: Border.all(
-                      color: MealAIColors.blackText.withOpacity(0.08)),
-                ),
-                child: Center(
-                  child: Text(
-                    'No analytics for this month yet',
-                    style: TextStyle(color: MealAIColors.grey),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: 3.h),
+          SizedBox(height: 100.h),
         ],
       ),
     );
