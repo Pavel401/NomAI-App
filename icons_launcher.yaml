@@ -1,0 +1,19 @@
+icons_launcher:
+  # Base icon used when a platform-specific image_path is not provided
+  image_path: "assets/png/logo.png"
+
+  platforms:
+    android:
+      enable: true
+      # Android-specific overrides and assets
+      image_path: "assets/png/logo.png"                # The image file path
+      # notification_image: "assets/png/logo.png"        # Image for the notification icon
+      # adaptive_background_color: "#FFFFFF"             # Color for adaptive icon background
+      # adaptive_foreground_image: "assets/png/logo.png" # Foreground image for adaptive icon
+      # adaptive_round_image: "assets/png/logo.png"      # Round image for adaptive icon
+      # adaptive_monochrome_image: "assets/png/logo.png" # Monochrome image for adaptive icon
+
+    ios:
+      enable: true
+
+    
