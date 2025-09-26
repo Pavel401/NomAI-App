@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:before_after/before_after.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:NomAi/app/constants/colors.dart';
 import 'package:NomAi/app/utility/image_utility.dart';
 
 class ImageDownscaleDemo extends StatefulWidget {
@@ -69,10 +70,18 @@ class _ImageDownscaleDemoState extends State<ImageDownscaleDemo> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Image Downscale Demo'),
+        backgroundColor: MealAIColors.blueGrey,
         elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        title: const Text(
+          'Image Downscale Demo',
+          style: TextStyle(
+            color: MealAIColors.whiteText,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: MealAIColors.whiteText),
       ),
       body: SingleChildScrollView(
         child: Column(
