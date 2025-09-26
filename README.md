@@ -94,6 +94,7 @@ See full app dependencies below and in `pubspec.yaml`.
 ## Packages
 
 Core
+
 - [flutter_bloc](https://pub.dev/packages/flutter_bloc)
 - [bloc](https://pub.dev/packages/bloc)
 - [get](https://pub.dev/packages/get)
@@ -101,6 +102,7 @@ Core
 - [equatable](https://pub.dev/packages/equatable)
 
 UI & UX
+
 - [sizer](https://pub.dev/packages/sizer)
 - [fl_chart](https://pub.dev/packages/fl_chart)
 - [flutter_markdown](https://pub.dev/packages/flutter_markdown)
@@ -115,12 +117,14 @@ UI & UX
 - [material_symbols_icons](https://pub.dev/packages/material_symbols_icons)
 
 Media & Sharing
+
 - [image_picker](https://pub.dev/packages/image_picker)
 - [flutter_image_compress](https://pub.dev/packages/flutter_image_compress)
 - [share_plus](https://pub.dev/packages/share_plus)
 - [davinci](https://pub.dev/packages/davinci)
 
 Firebase
+
 - [firebase_core](https://pub.dev/packages/firebase_core)
 - [firebase_auth](https://pub.dev/packages/firebase_auth)
 - [cloud_firestore](https://pub.dev/packages/cloud_firestore)
@@ -128,6 +132,7 @@ Firebase
 - [firebase_remote_config](https://pub.dev/packages/firebase_remote_config)
 
 Utilities
+
 - [intl](https://pub.dev/packages/intl)
 - [logger](https://pub.dev/packages/logger)
 - [icons_launcher](https://pub.dev/packages/icons_launcher)
@@ -140,6 +145,7 @@ Utilities
 - [camerawesome](https://pub.dev/packages/camerawesome)
 
 Dev (build/test/tools)
+
 - [build_runner](https://pub.dev/packages/build_runner)
 - [custom_lint](https://pub.dev/packages/custom_lint)
 - [flutter_test](https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html)
@@ -170,7 +176,7 @@ Key files:
 1. Clone and fetch packages
 
 ```
-git clone <your-fork-or-repo-url>
+git clone
 cd MealAI
 
 # With FVM (recommended to match exact version)
