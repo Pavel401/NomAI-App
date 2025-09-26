@@ -43,7 +43,8 @@ class _MealAiCameraState extends State<MealAiCamera> {
     if (image != null) {
       File imageFile = File(image.path);
 
-      ScannerController scannerController = Get.put(ScannerController());
+      // Reuse existing controller to keep selectedDate and state
+      final ScannerController scannerController = Get.find<ScannerController>();
       final authBloc = context.read<AuthenticationBloc>();
 
       scannerController.processNutritionQueryRequest(
@@ -59,7 +60,8 @@ class _MealAiCameraState extends State<MealAiCamera> {
     state.when(
       onPhotoMode: (photoState) {
         photoState.takePhoto().then((mediaCapture) async {
-          ScannerController scannerController = Get.put(ScannerController());
+          // Reuse existing controller to keep selectedDate and state
+          final ScannerController scannerController = Get.find<ScannerController>();
           final authBloc = context.read<AuthenticationBloc>();
 
           scannerController.processNutritionQueryRequest(
