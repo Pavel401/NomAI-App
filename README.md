@@ -251,7 +251,3 @@ static/
 ```
 
 
-
-## License
-
-Andi Mandi Sandi Jo project copy karega without forking wow hai ________ ( baki aap samajdar ho) :)
