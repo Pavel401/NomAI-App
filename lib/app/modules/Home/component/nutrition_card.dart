@@ -56,10 +56,12 @@ class NutritionCard extends StatelessWidget {
     final totals = _totalNutrition;
     final isProcessing =
         nutritionRecord.processingStatus == ProcessingStatus.PROCESSING;
+    final isFailed =
+        nutritionRecord.processingStatus == ProcessingStatus.FAILED;
 
     return Bounceable(
       onTap: () {
-        if (isProcessing) return;
+        if (isProcessing || isFailed) return;
         Get.to(() => NutritionView(
               nutritionRecord: nutritionRecord,
               userModel: userModel,
@@ -76,7 +78,9 @@ class NutritionCard extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: isProcessing
               ? _buildProcessingCard(context)
-              : _buildCompletedCard(context, totals),
+              : isFailed
+                  ? _buildFailedCard(context)
+                  : _buildCompletedCard(context, totals),
         ),
       ),
     );
@@ -122,6 +126,56 @@ class NutritionCard extends StatelessWidget {
                     style: context.textTheme.bodySmall?.copyWith(
                       color: Colors.black54,
                     ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFailedCard(BuildContext context) {
+    return Container(
+      height: 12.h,
+      child: Row(
+        children: [
+          _buildFoodImage(context, 25.w, 12.h),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: MealAIColors.red,
+                        size: 18,
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          "Analysis failed",
+                          style: context.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "Unable to analyze this entry. Tap to try again or swipe to delete.",
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: Colors.black54,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

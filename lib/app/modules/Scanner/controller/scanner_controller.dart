@@ -101,28 +101,39 @@ class ScannerController extends GetxController {
 
   Future<void> processNutritionQueryRequest(String userId, File image,
       ScanMode scanMode, BuildContext context) async {
-    DateTime time = selectedDate;
+    DateTime time = DateTime.now();
+    print("🚀 [NUTRITION] Starting nutrition processing for userId: $userId, scanMode: $scanMode, date: $time");
 
     // Get user preferences early before any async operations to avoid context issues
     UserModel? userModel;
     try {
+      print("📋 [NUTRITION] Retrieving user preferences...");
       if (context.mounted) {
         final userBloc = context.read<UserBloc>();
         final userState = userBloc.state;
 
         if (userState is UserLoaded) {
           userModel = userState.userModel;
+          print("✅ [NUTRITION] User preferences loaded successfully");
+          print("   - Diet: ${userModel.userInfo?.selectedDiet}");
+          print("   - Allergies: ${userModel.userInfo?.selectedAllergies}");
+          print("   - Goal: ${userModel.userInfo?.selectedGoal?.name}");
+        } else {
+          print("⚠️ [NUTRITION] User state is not loaded: ${userState.runtimeType}");
         }
       }
     } catch (e) {
-      print("Error retrieving user preferences: $e");
+      print("❌ [NUTRITION] Error retrieving user preferences: $e");
     }
 
     try {
+      print("🔧 [NUTRITION] Initializing services...");
       final nutritionRecordRepo = serviceLocator<NutritionRecordRepo>();
       final storageService = serviceLocator<StorageService>();
       final aiRepository = serviceLocator<AiRepository>();
+      print("✅ [NUTRITION] Services initialized successfully");
 
+      print("📝 [NUTRITION] Creating PROCESSING record...");
       NutritionRecord nutritionRecord = NutritionRecord(
         recordTime: time,
         nutritionInputQuery: NutritionInputQuery(
@@ -134,25 +145,42 @@ class ScannerController extends GetxController {
       );
 
       addRecord(nutritionRecord);
+      print("✅ [NUTRITION] PROCESSING record added to UI");
 
       File resizedFile;
       try {
+        print("🖼️ [NUTRITION] Downscaling image...");
+        print("   - Original path: ${image.path}");
         resizedFile = await ImageUtility.downscaleImage(
           image.path,
           scale: ImageScale.large_2048,
         );
+        print("✅ [NUTRITION] Image downscaled successfully");
+        print("   - Resized path: ${resizedFile.path}");
       } catch (e) {
-        print("Error downscaling image: $e");
+        print("❌ [NUTRITION] Error downscaling image: $e");
+        print("   - Using original image");
         resizedFile = image;
       }
 
       File fileToUpload = resizedFile.existsSync() ? resizedFile : image;
+      print("📤 [NUTRITION] Uploading image to storage...");
+      print("   - File size: ${fileToUpload.lengthSync()} bytes");
 
       final imageUrl = await storageService.uploadImage(fileToUpload);
 
       if (imageUrl == null) {
+        print("❌ [NUTRITION] Image upload failed - null URL returned");
         throw Exception("Failed to upload image");
       }
+      print("✅ [NUTRITION] Image uploaded successfully");
+      print("   - Image URL: $imageUrl");
+
+      print("🤖 [NUTRITION] Sending request to AI for nutrition analysis...");
+      print("   - Scan mode: $scanMode");
+      print("   - Dietary preferences: ${userModel?.userInfo?.selectedDiet}");
+      print("   - Allergies: ${userModel?.userInfo?.selectedAllergies}");
+      print("   - Goals: ${userModel?.userInfo?.selectedGoal?.name}");
 
       NutritionOutput rawNutritionData = await aiRepository.getNutritionData(
         NutritionInputQuery(
@@ -172,7 +200,16 @@ class ScannerController extends GetxController {
         ),
       );
 
+      print("📊 [NUTRITION] AI response received");
+      print("   - Status: ${rawNutritionData.status}");
+      print("   - Message: ${rawNutritionData.message}");
+
       if (rawNutritionData.status != 200 || rawNutritionData.response == null) {
+        print("❌ [NUTRITION] AI analysis failed");
+        print("   - Status code: ${rawNutritionData.status}");
+        print("   - Error message: ${rawNutritionData.message}");
+        print("🔄 [NUTRITION] Updating record status to FAILED");
+
         updateRecord(NutritionRecord(
           recordTime: time,
           nutritionInputQuery: NutritionInputQuery(
@@ -189,8 +226,13 @@ class ScannerController extends GetxController {
           message: rawNutritionData.message ?? "Failed to analyze the image",
         );
 
+        print("⛔ [NUTRITION] Processing aborted due to AI analysis failure");
         return;
       }
+
+      print("✅ [NUTRITION] AI analysis successful");
+      print("   - Food name: ${rawNutritionData.response?.foodName}");
+      print("   - Ingredients count: ${rawNutritionData.response?.ingredients?.length ?? 0}");
 
       final inputData = NutritionInputQuery(
         imageUrl: imageUrl,
@@ -210,6 +252,7 @@ class ScannerController extends GetxController {
       );
 
       String dailyRecordID = nutritionRecordRepo.getRecordId(time);
+      print("🔄 [NUTRITION] Updating record status to COMPLETED");
 
       updateRecord(NutritionRecord(
         nutritionOutput: rawNutritionData,
@@ -217,17 +260,22 @@ class ScannerController extends GetxController {
         nutritionInputQuery: inputData,
         processingStatus: ProcessingStatus.COMPLETED,
       ));
+      print("✅ [NUTRITION] Record updated to COMPLETED in UI");
 
       // Build the full list for the target day to persist correctly even if
       // the user switched the UI to a different day during processing.
+      print("🔗 [NUTRITION] Merging records for database persistence...");
       final key = _dateKey(time);
       final persistedForDay =
           await nutritionRecordRepo.getNutritionData(userId, time);
+      print("   - Existing persisted records: ${persistedForDay.dailyRecords.length}");
 
       // Merge: start with persisted, overlay transient by recordTime
       final mergedForDay = List<NutritionRecord>.from(
           persistedForDay.dailyRecords);
       final transient = _transientByDate[key] ?? const <NutritionRecord>[];
+      print("   - Transient records for date: ${transient.length}");
+
       for (final t in transient) {
         final i = mergedForDay.indexWhere((r) => r.recordTime == t.recordTime);
         if (i >= 0) {
@@ -236,8 +284,10 @@ class ScannerController extends GetxController {
           mergedForDay.add(t);
         }
       }
+      print("   - Total merged records: ${mergedForDay.length}");
 
       // Recompute totals from the merged list
+      print("🧮 [NUTRITION] Calculating daily nutritional totals...");
       int totalConsumedCalories = 0;
       int totalConsumedProtein = 0;
       int totalConsumedFat = 0;
@@ -255,6 +305,10 @@ class ScannerController extends GetxController {
           }
         }
       }
+      print("   - Total calories: $totalConsumedCalories");
+      print("   - Total protein: $totalConsumedProtein g");
+      print("   - Total carbs: $totalConsumedCarb g");
+      print("   - Total fat: $totalConsumedFat g");
 
       final dailyNutritionRecords = DailyNutritionRecords(
         dailyRecords: mergedForDay,
@@ -267,10 +321,15 @@ class ScannerController extends GetxController {
         dailyConsumedCarb: totalConsumedCarb,
       );
 
+      print("💾 [NUTRITION] Saving nutrition data to database...");
+      print("   - Record ID: $dailyRecordID");
+      print("   - Number of meals: ${mergedForDay.length}");
       await nutritionRecordRepo.saveNutritionData(
           dailyNutritionRecords, userId);
+      print("✅ [NUTRITION] Data saved to database successfully");
 
       // Update UI totals only if the user is currently viewing this date
+      print("🎨 [NUTRITION] Updating UI...");
       if (_dateKey(selectedDate) == key) {
         existingNutritionRecords = dailyNutritionRecords;
         consumedCalories.value = totalConsumedCalories;
@@ -278,10 +337,20 @@ class ScannerController extends GetxController {
         consumedFat.value = totalConsumedFat;
         consumedProtein.value = totalConsumedProtein;
         consumedCarb.value = totalConsumedCarb;
+        print("   ✅ UI updated with latest totals (viewing current date)");
+      } else {
+        print("   ⏭️ UI not updated (user switched to different date: ${_dateKey(selectedDate)} != $key)");
       }
 
       update();
-    } catch (e) {
+      print("🎉 [NUTRITION] Processing completed successfully!");
+      print("────────────────────────────────────────");
+    } catch (e, stackTrace) {
+      print("💥 [NUTRITION] EXCEPTION CAUGHT during processing!");
+      print("   - Error: $e");
+      print("   - Stack trace: $stackTrace");
+      print("🔄 [NUTRITION] Marking record as FAILED...");
+
       final failedRecord = dailyRecords.firstWhere(
         (record) => record.recordTime == time,
         orElse: () => NutritionRecord(
@@ -308,6 +377,8 @@ class ScannerController extends GetxController {
       );
 
       update();
+      print("❌ [NUTRITION] Processing failed and record marked as FAILED");
+      print("────────────────────────────────────────");
     }
   }
 
@@ -336,6 +407,44 @@ class ScannerController extends GetxController {
         } else {
           merged.add(t);
         }
+      }
+
+      // Auto-fix stuck PROCESSING records older than 5 minutes
+      final now = DateTime.now();
+      final threshold = Duration(minutes: 5);
+      bool needsUpdate = false;
+
+      for (int i = 0; i < merged.length; i++) {
+        final record = merged[i];
+        if (record.processingStatus == ProcessingStatus.PROCESSING &&
+            record.recordTime != null) {
+          final age = now.difference(record.recordTime!);
+          if (age > threshold) {
+            // Mark as FAILED if stuck in PROCESSING for more than 5 minutes
+            merged[i] = NutritionRecord(
+              recordTime: record.recordTime,
+              nutritionInputQuery: record.nutritionInputQuery,
+              processingStatus: ProcessingStatus.FAILED,
+              nutritionOutput: record.nutritionOutput,
+            );
+            needsUpdate = true;
+          }
+        }
+      }
+
+      // If we fixed any stuck records, update the database
+      if (needsUpdate) {
+        final updatedRecord = DailyNutritionRecords(
+          dailyRecords: merged,
+          recordDate: selectedDate,
+          recordId: records.recordId,
+          dailyConsumedCalories: records.dailyConsumedCalories,
+          dailyBurnedCalories: records.dailyBurnedCalories,
+          dailyConsumedProtein: records.dailyConsumedProtein,
+          dailyConsumedFat: records.dailyConsumedFat,
+          dailyConsumedCarb: records.dailyConsumedCarb,
+        );
+        await nutritionRecordRepo.saveNutritionData(updatedRecord, userId);
       }
 
       existingNutritionRecords = records;

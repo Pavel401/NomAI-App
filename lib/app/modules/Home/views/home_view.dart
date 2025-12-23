@@ -8,6 +8,7 @@ import 'package:timeline_date_picker_plus/timeline_date_picker_plus.dart';
 import 'package:NomAi/app/components/nutritionTrackerCard.dart'
     show NutritionTrackerCard;
 import 'package:NomAi/app/constants/colors.dart';
+import 'package:NomAi/app/constants/enums.dart';
 import 'package:NomAi/app/models/AI/nutrition_record.dart';
 import 'package:NomAi/app/models/Auth/user.dart';
 import 'package:NomAi/app/modules/Auth/blocs/authentication_bloc/authentication_bloc.dart';
@@ -19,6 +20,8 @@ import 'package:NomAi/app/modules/Home/views/nutrition_view.dart';
 import 'package:NomAi/app/modules/Scanner/controller/scanner_controller.dart';
 import 'package:NomAi/app/modules/Settings/views/settings.dart';
 import 'package:NomAi/app/repo/firebase_user_repo.dart';
+import 'package:NomAi/app/repo/nutrition_record_repo.dart';
+import 'package:NomAi/app/utility/registry_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -415,6 +418,45 @@ class _HomePageState extends State<HomePage> {
               padding: EdgeInsets.symmetric(horizontal: 1.w, vertical: 1.h),
               itemBuilder: (context, index) {
                 NutritionRecord record = controller.dailyRecords[index];
+                final isFailed = record.processingStatus == ProcessingStatus.FAILED;
+
+                if (isFailed) {
+                  return Dismissible(
+                    key: Key(record.recordTime.toString()),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: MealAIColors.red,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      alignment: Alignment.centerRight,
+                      padding: EdgeInsets.only(right: 20),
+                      child: Icon(
+                        Icons.delete,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                    onDismissed: (direction) async {
+                      final nutritionRecordRepo = serviceLocator<NutritionRecordRepo>();
+                      final recordTime = record.recordTime ?? DateTime.now();
+
+                      await nutritionRecordRepo.deleteMealEntryByTime(
+                        _userId,
+                        recordTime,
+                        recordTime,
+                      );
+
+                      await _scannerController.getRecordByDate(_userId, _selectedDate);
+                    },
+                    child: NutritionCard(
+                      nutritionRecord: record,
+                      userModel: userModel!,
+                    ),
+                  );
+                }
+
                 return NutritionCard(
                   nutritionRecord: record,
                   userModel: userModel!,

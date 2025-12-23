@@ -25,6 +25,7 @@ class _MealAiCameraState extends State<MealAiCamera> {
   ScanMode _selectedscanMode = ScanMode.food;
   FlashMode _currentFlashMode = FlashMode.auto;
   final ImagePicker _picker = ImagePicker();
+  bool _isPickingImage = false;
 
   void _toggleFlashMode() {
     setState(() {
@@ -39,20 +40,33 @@ class _MealAiCameraState extends State<MealAiCamera> {
   }
 
   Future<void> _openGallery() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      File imageFile = File(image.path);
+    // Prevent concurrent image picker calls
+    if (_isPickingImage) return;
 
-      // Reuse existing controller to keep selectedDate and state
-      final ScannerController scannerController = Get.find<ScannerController>();
-      final authBloc = context.read<AuthenticationBloc>();
+    setState(() {
+      _isPickingImage = true;
+    });
 
-      scannerController.processNutritionQueryRequest(
-          authBloc.state.user!.uid.toString(),
-          imageFile,
-          _selectedscanMode,
-          context);
-      Navigator.pop(context);
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        File imageFile = File(image.path);
+
+        // Reuse existing controller to keep selectedDate and state
+        final ScannerController scannerController = Get.find<ScannerController>();
+        final authBloc = context.read<AuthenticationBloc>();
+
+        scannerController.processNutritionQueryRequest(
+            authBloc.state.user!.uid.toString(),
+            imageFile,
+            _selectedscanMode,
+            context);
+        Navigator.pop(context);
+      }
+    } finally {
+      setState(() {
+        _isPickingImage = false;
+      });
     }
   }
 
