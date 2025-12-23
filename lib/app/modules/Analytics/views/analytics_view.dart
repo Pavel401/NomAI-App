@@ -66,6 +66,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
     final monthLabel = DateFormat('MMMM yyyy').format(_selectedMonth);
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: 2.h),
@@ -157,7 +158,7 @@ class _AnalyticsViewState extends State<AnalyticsView> {
             .entries
             .map((e) => _dailyTile(e.value, e.key, maxDayCalories))
             .toList(),
-        SizedBox(height: 2.h),
+        SizedBox(height: 20.h),
       ],
     );
   }
@@ -713,7 +714,10 @@ class _AnalyticsViewState extends State<AnalyticsView> {
                   if (data == null || data.dailyAnalytics.isEmpty) {
                     return _buildEmptyState();
                   }
-                  return SingleChildScrollView(child: _buildSummary(data));
+                  return SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: _buildSummary(data),
+                  );
                 },
               );
             }
@@ -735,9 +739,12 @@ class _AnalyticsViewState extends State<AnalyticsView> {
   Widget _buildEmptyState() {
     final monthLabel = DateFormat('MMMM yyyy').format(_selectedMonth);
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(height: 2.h),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 4.w),
             child: Row(
