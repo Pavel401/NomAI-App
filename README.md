@@ -250,35 +250,4 @@ static/
   screenshots/          # Add app screenshots for README
 ```
 
-## Environment and Configuration
 
-- Flutter SDK: lock to 3.35.0 for compatibility (`.fvmrc` present)
-- Firebase: set up rules and indexes as needed for your data model
-- Remote Config: optionally used for feature flags/tuning
-
-## Contributing
-
-Contributions are welcome! Please:
-
-- Open an issue for bugs or feature requests
-- Fork the repo and create a feature branch
-- Keep PRs focused and include a clear description and screenshots when applicable
-
-### Development Tips
-
-- Follow existing code style and patterns in `lib/app/modules/*`
-- Prefer small, cohesive changes and clear commit messages
-- Add comments where intent isn’t obvious
-
-## Roadmap (ideas)
-
-- More goals and personalized plans
-- Diet Plans
-- Weekly meal prep suggestions
-- Barcode scanning for packaged foods
-- Expanded integrations (HealthKit/Google Fit)
-- Enhanced AI prompts for meal planning and shopping lists
-
-## License
-
-Choose a license (MIT/Apache-2.0/etc.) and add it to the repository. Update this section once selected.
